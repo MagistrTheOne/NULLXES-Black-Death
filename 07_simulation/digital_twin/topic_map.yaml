@@ -1,0 +1,22 @@
+# Digital twin uses identical names as flight
+source: 01_requirements/interfaces/ALPHA_5x5_ROS_TOPICS.md
+
+topics:
+  setpoint: /bd/l0/setpoint
+  active_channel: /bd/dual/active
+  fm_mode: /bd/fm/mode
+  imu: /bd/l0/imu
+  actuators: /bd/l0/actuators
+  l0_health: /bd/l0/health
+  cam_forward: /bd/cam/forward
+  cam_down: /bd/cam/down
+  cam_left: /bd/cam/left
+  cam_right: /bd/cam/right
+  lidar: /bd/lidar/scan
+  gnss: /bd/gnss/fix
+  nav_state: /bd/nav/state
+  detections: /bd/vision/detections
+  vision_health: /bd/vision/health
+  heartbeat_a: /bd/dual/heartbeat_A
+  heartbeat_b: /bd/dual/heartbeat_B
+  mirror: /bd/dual/mirror

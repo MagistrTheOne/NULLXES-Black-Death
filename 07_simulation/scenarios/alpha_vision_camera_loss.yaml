@@ -1,0 +1,15 @@
+# ALPHA 5x5 — camera-loss scenario template
+# NOT a runtime. Does not invent camera streams.
+# BLOCKED until real drivers/sim plugins exist.
+name: alpha_vision_camera_forward_loss
+platform: prototype_alpha_5x5
+faults:
+  - at_s: 30
+    type: camera_loss
+    target: forward
+dual_compute:
+  start_active: A
+expected:
+  - vision_degraded
+  - mission_continues_or_rtb
+  - no_external_api

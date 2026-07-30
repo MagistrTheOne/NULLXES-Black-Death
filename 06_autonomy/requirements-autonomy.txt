@@ -1,0 +1,16 @@
+# Autonomy runtime — Python 3.11 (полёт / HIL)
+# Без облачных API. Пины уточняются отдельным ADR при freeze.
+
+numpy>=1.26,<3
+scipy>=1.11,<2
+opencv-python-headless>=4.8,<5
+onnxruntime>=1.17,<2
+filterpy>=1.4.5
+PyYAML>=6.0
+msgpack>=1.0
+
+# Dev / export only — не ставить в flight image:
+# torch>=2.1
+# ultralytics>=8.0
+# onnx>=1.15
+# onnxruntime-gpu  # при NVIDIA

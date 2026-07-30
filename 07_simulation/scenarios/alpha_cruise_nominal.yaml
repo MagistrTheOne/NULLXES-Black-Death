@@ -1,0 +1,23 @@
+# ALPHA 5x5 — scenario template (civil)
+# NOT a runtime. Does not invent sensor streams.
+# BLOCKED until Gazebo/AirSim bridges publish real topics.
+name: alpha_cruise_nominal
+platform: prototype_alpha_5x5
+environment:
+  wind_mps: [2.0, 0.0, 0.0]
+  turbulence: light
+spawn:
+  x_m: 0
+  y_m: 0
+  z_m: 50
+  yaw_deg: 0
+mission:
+  class: logistics
+  cruise_kmh: 100
+  duration_s: 600
+faults: []
+dual_compute:
+  start_active: A
+expected:
+  - vision_ok
+  - channel_A_active

@@ -1,0 +1,24 @@
+# detector Alpha — YOLO ONNX (flight)
+# BLOCKED without real trained weights at model_path (export via scripts/export_yolo_onnx.py).
+model_path: 06_autonomy/models/onnx/detector_alpha.onnx
+onnx_layout: yolo_v8_raw
+input_name: images
+output_name: output0
+sha256: ""
+input_size: [640, 640]
+confidence: 0.35
+iou: 0.45
+classes:
+  - person
+  - vehicle
+  - landing_pad
+  - obstacle
+  - cargo
+cameras:
+  - forward
+  - down
+  - left
+  - right
+providers:
+  - CUDAExecutionProvider
+  - CPUExecutionProvider

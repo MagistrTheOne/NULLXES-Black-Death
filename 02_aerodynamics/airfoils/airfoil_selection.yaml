@@ -1,0 +1,26 @@
+# ALPHA 5x5 airfoil lock
+planform_ref: 02_aerodynamics/geometry/PLANFORM.md
+family: Martin_Hepperle_MH
+stations:
+  - name: root
+    y_m_min: 0.0
+    y_m_max: 1.0
+    airfoil: MH61
+    t_c_target: 0.15   # stretch thickness if stock MH61 thinner; keep reflex
+  - name: mid_blend
+    y_m_min: 1.0
+    y_m_max: 1.875
+    airfoil: blend_MH61_MH45
+  - name: tip
+    y_m_min: 1.875
+    y_m_max: 2.5
+    airfoil: MH45
+    t_c_target: 0.098
+elevon:
+  y_m_start: 1.0
+  y_m_end: 2.5
+  chord_fraction: 0.20
+tools:
+  section: XFOIL
+  planform_3d: XFLR5
+  cfd_later: OpenFOAM

@@ -1,0 +1,20 @@
+# ALPHA 5x5 dual-compute channel config
+channel_id: A  # override per machine: A | B
+role_default: primary  # A=primary, B=standby
+
+heartbeat:
+  rate_hz: 50
+  timeout_ms: 150
+  takeover_deadline_ms: 500
+
+state_mirror:
+  rate_hz: 20
+  serialization: msgpack
+
+election:
+  prefer: A
+  sticky_after_failover: true
+
+l0_interface:
+  topic_setpoint: /bd/l0/setpoint
+  topic_active_channel: /bd/dual/active

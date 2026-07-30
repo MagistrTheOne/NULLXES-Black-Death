@@ -1,0 +1,49 @@
+# NULLXES BLACK DEATH — .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ROS 2 / colcon
+build/
+install/
+log/
+*.pcd
+
+# Models / data (крупные артефакты — хранить отдельно или LFS)
+*.onnx
+*.pt
+*.pth
+*.engine
+!06_autonomy/models/**/.gitkeep
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Sim / CFD / FEA dumps
+*.vtk
+*.vtu
+*.msh
+*.cas
+*.dat
+*.rst
+*.frd
+*.odb
+*.log
+!99_tools/**/*.md
+
+# Secrets
+.env
+*.pem
+credentials*

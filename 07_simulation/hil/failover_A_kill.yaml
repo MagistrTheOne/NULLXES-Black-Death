@@ -1,0 +1,16 @@
+# HIL failover template — NOT an automated fake runner
+# Requires real dual-compute processes + L0 on bench.
+name: hil_failover_A_kill
+platform: prototype_alpha_5x5
+dual_compute:
+  start_active: A
+faults:
+  - at_s: 20
+    type: compute_kill
+    target: A
+expected:
+  - within_ms: 500
+    assert: active_channel_B
+  - mode: DEGRADED_COMPUTE
+  - l0_continues: true
+  - no_external_api: true
