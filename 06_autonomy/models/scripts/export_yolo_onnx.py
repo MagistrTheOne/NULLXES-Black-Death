@@ -35,7 +35,7 @@ def main() -> None:
     try:
         from ultralytics import YOLO
     except ImportError:
-        print("pip install ultralytics torch", file=sys.stderr)
+        print("pip install ultralytics (torch from pod image)", file=sys.stderr)
         sys.exit(1)
 
     model = YOLO(args.weights)

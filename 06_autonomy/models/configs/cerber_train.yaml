@@ -1,5 +1,7 @@
-# NULLXES CERBER — offline train recipe (A100 / local GPU)
-# Not loaded by flight VisionPipeline. Used by scripts/train_cerber_detect.py
+# NULLXES CERBER — offline train recipe
+# Target pod: RunPod PyTorch 2.8 + 1× RTX PRO 6000 (96 GB) · 140 GB RAM · 16 vCPU · ~2 TB disk
+# Image example: runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404
+# Not loaded by flight VisionPipeline.
 
 project: cerber-detect
 run_name: v1
@@ -7,10 +9,10 @@ base_weights: yolov8s.pt
 data_yaml: 06_autonomy/models/datasets/cerber_data.yaml
 imgsz: 1280
 epochs: 100
-batch: 16
+# 96 GB VRAM: s/m at 1280 comfortably; raise if using yolov8m/l
+batch: 32
 device: 0
-workers: 8
-# Flight export after train:
+workers: 12
 export_imgsz: 640
 export_opset: 17
 flight_config: 06_autonomy/models/configs/detector_alpha.yaml

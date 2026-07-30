@@ -125,31 +125,33 @@ names:
 
 ---
 
-## 5. Machine bootstrap (HF + Ultralytics)
+## 5. Machine bootstrap (RunPod / HF + Ultralytics)
+
+**Pod (enough):** 1× RTX PRO 6000 **96 GB** · 140 GB RAM · 16 vCPU · **~2 TB** disk · image `runpod/pytorch:*-torch280-*` (Torch **already in image** — do not `pip install torch`).
+
+Disk budget (rough): VisDrone ~4 GB extract · UAVDT+DOTA+UETT4k tens of GB · YOLO caches · runs/checkpoints — **under ~200 GB** typical; **2250 GB is fine**.
 
 ```bash
-# 1) CUDA torch from https://pytorch.org  then:
+git clone https://github.com/MagistrTheOne/NULLXES-Black-Death.git
+cd NULLXES-Black-Death
+
+# extras only (no torch) — see models/requirements-train.txt
 pip install -r 06_autonomy/models/requirements-train.txt
 
-# 2) Hugging Face (UETT4k) — login once
-huggingface-cli login
-# or: export HF_TOKEN=hf_...
+huggingface-cli login   # or export HF_TOKEN=...
 
-# 3) Download + remap VisDrone (Ultralytics) + HF snapshot UETT4k
 python 06_autonomy/models/scripts/prepare_cerber_data.py \
-  --root /data/nullxes/datasets/cerber
+  --root /workspace/datasets/cerber
 
-# UAVDT / DOTA: see sources/MANUAL_DOWNLOADS.md
-#   https://datasetninja.com/uavdt
-#   https://datasetninja.com/dota
+# UAVDT / DOTA manual: sources/MANUAL_DOWNLOADS.md
+# VisDrone: https://docs.ultralytics.com/datasets/detect/visdrone
+# Train mode: https://docs.ultralytics.com/modes/train
 
-# 4) Train CERBER detect
 python 06_autonomy/models/scripts/train_cerber_detect.py \
-  --data /data/nullxes/datasets/cerber/data.yaml
+  --data /workspace/datasets/cerber/data.yaml
 
-# 5) Export flight ONNX + sha256 into detector_alpha.yaml
 python 06_autonomy/models/scripts/train_cerber_detect.py \
-  --data /data/nullxes/datasets/cerber/data.yaml --export
+  --data /workspace/datasets/cerber/data.yaml --export
 ```
 
 | Source | How |

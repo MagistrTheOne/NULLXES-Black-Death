@@ -1,10 +1,12 @@
-# CERBER detect — train host only (not flight image)
-# Install CUDA torch from https://pytorch.org matching the GPU, then:
+# CERBER detect — extras only for train pods (NOT flight image).
+# Do NOT pin torch / torchvision / python here — RunPod PyTorch images ship them
+# (e.g. runpod/pytorch:*-cu128*-torch280-ubuntu2404 → Torch 2.8 + CUDA).
+#
+# On pod after clone:
+#   pip install -r 06_autonomy/models/requirements-train.txt
+
 ultralytics>=8.0
 huggingface_hub>=0.23
 PyYAML>=6.0
-opencv-python-headless>=4.8
-pillow>=10.0
-tqdm>=4.66
-# optional HF datasets API:
+# optional: HF datasets API for some hubs
 datasets>=2.19

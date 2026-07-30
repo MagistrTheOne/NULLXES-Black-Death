@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Train CERBER detect head (Ultralytics) then optional ONNX export for flight.
 
+On RunPod PyTorch images, torch is preinstalled — only:
   pip install -r 06_autonomy/models/requirements-train.txt
-  # + CUDA torch from pytorch.org
 
-  python prepare_cerber_data.py --root /data/nullxes/datasets/cerber
-  python train_cerber_detect.py --data /data/nullxes/datasets/cerber/data.yaml
+  python prepare_cerber_data.py --root /workspace/datasets/cerber
+  python train_cerber_detect.py --data /workspace/datasets/cerber/data.yaml
   python train_cerber_detect.py --data ... --export
 """
 
@@ -45,7 +45,11 @@ def main() -> int:
     try:
         from ultralytics import YOLO
     except ImportError:
-        print("BLOCKED: pip install ultralytics (+ CUDA torch)", file=sys.stderr)
+        print(
+            "BLOCKED: pip install ultralytics "
+            "(torch must already exist — e.g. RunPod pytorch image)",
+            file=sys.stderr,
+        )
         return 1
 
     model = YOLO(str(cfg.get("base_weights", "yolov8s.pt")))
