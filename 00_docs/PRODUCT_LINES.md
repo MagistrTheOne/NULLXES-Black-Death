@@ -24,6 +24,7 @@ BLACK DEATH (civil infrastructure flying platform)
 | Line | Name | Goal | Touches airframe? | Touches autonomy canon? |
 |------|------|------|-------------------|-------------------------|
 | Alpha | **Black Judgment** (5×5) | Prove integrated system + fault behaviour | Frozen | Build / verify |
+| CERBER | perception system | Vision·detect·fusion·… (YOLO is an organ) | Sensors / ONNX | `perception/` |
 | DMI | multi-agent mission layer | Tasks / sectors / world cache; L0 swarm-blind | Practice frames first | Add L6; do not redesign L0 |
 | Product | **BLACK DEATH** (~50×50) | Civil infrastructure platform | After Beta | Port, don't redesign |
 | Beta-Endurance | — | Max endurance / range | Yes (AR, span, energy) | Port, don't redesign |

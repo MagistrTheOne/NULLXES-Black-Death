@@ -1,0 +1,23 @@
+# NULLXES CERBER — offline train recipe (A100 / local GPU)
+# Not loaded by flight VisionPipeline. Used by scripts/train_cerber_detect.py
+
+project: cerber-detect
+run_name: v1
+base_weights: yolov8s.pt
+data_yaml: 06_autonomy/models/datasets/cerber_data.yaml
+imgsz: 1280
+epochs: 100
+batch: 16
+device: 0
+workers: 8
+# Flight export after train:
+export_imgsz: 640
+export_opset: 17
+flight_config: 06_autonomy/models/configs/detector_alpha.yaml
+
+sources:
+  visdrone: ultralytics VisDrone.yaml auto-download
+  uett4k_hf: mugheessarwarawan/UETT4k-Anti-UAV
+  uavdt: https://datasetninja.com/uavdt
+  dota: https://datasetninja.com/dota
+  visdrone_docs: https://docs.ultralytics.com/datasets/detect/visdrone

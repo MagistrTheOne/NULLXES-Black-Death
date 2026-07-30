@@ -21,6 +21,7 @@
 
 
 Автономный ИИ — **полностью onboard**, без внешних API и облака.  
+Восприятие: **NULLXES CERBER** — `[00_docs/architecture/CERBER.md](00_docs/architecture/CERBER.md)`.  
 Как писать код (CV, sim, L0): `[00_docs/conventions/HOW_TO_WRITE.md](00_docs/conventions/HOW_TO_WRITE.md)`.  
 Production-first : `[00_docs/conventions/PRODUCTION_FIRST.md](00_docs/conventions/PRODUCTION_FIRST.md)`.
 

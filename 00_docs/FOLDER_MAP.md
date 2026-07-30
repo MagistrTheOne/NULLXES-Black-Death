@@ -26,9 +26,10 @@
 | `core/state/` | Единое состояние платформы (vehicle + mission + health). |
 | `core/health/` | Health monitoring агрегация для autonomy. |
 | `core/interfaces/` | Контракты между perception / planning / control / fault. |
-| `perception/vision/` | OpenCV + YOLO (Ultralytics) → ONNX Runtime. |
+| `perception/` | **NULLXES CERBER** — perception system (vision, detect, fusion, …). |
+| `perception/vision/` | CERBER Vision + Detection: OpenCV + YOLO→ONNX Runtime. |
 | `perception/sensors/` | Драйверы/адаптеры сенсоров (не realtime HAL — тот в `05_avionics`). |
-| `perception/fusion/` | EKF/UKF (filterpy / custom), мультисенсорная оценка состояния. |
+| `perception/fusion/` | CERBER Multi-Sensor Fusion: EKF/UKF. |
 | `perception/slam/` | OpenVINS / ORB-SLAM3 где применимо. |
 | `planning/missions/` | Миссионные планы civil infrastructure. |
 | `planning/trajectory/` | Траектории, коридоры, ограничения. |

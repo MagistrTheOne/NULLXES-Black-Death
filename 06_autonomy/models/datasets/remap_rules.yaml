@@ -1,0 +1,42 @@
+# Source label → CERBER detect class id (see DATASET_STACK_A100.md)
+
+visdrone:
+  pedestrian: 0
+  people: 0
+  bicycle: 1
+  car: 1
+  van: 1
+  truck: 1
+  tricycle: 1
+  awning-tricycle: 1
+  bus: 1
+  motor: 1
+
+uavdt:
+  car: 1
+  truck: 1
+  bus: 1
+  # extend with exact UAVDT names after download
+
+dota_hints:
+  plane: 2
+  small-vehicle: 1
+  large-vehicle: 1
+  bridge: 11
+  # ship / harbor / storage-tank → 11 if used; else drop
+
+uett4k_anti_uav:
+  uav: 2
+  drone: 2
+  # map all positive UAV boxes to id 2
+
+custom_required:
+  landing_zone: 3
+  obstacle: 4
+  cargo: 12
+  fire: 10
+  forest: 8
+  water: 9
+  power_line: 5
+  road: 6
+  building: 7

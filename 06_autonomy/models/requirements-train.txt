@@ -1,0 +1,10 @@
+# CERBER detect — train host only (not flight image)
+# Install CUDA torch from https://pytorch.org matching the GPU, then:
+ultralytics>=8.0
+huggingface_hub>=0.23
+PyYAML>=6.0
+opencv-python-headless>=4.8
+pillow>=10.0
+tqdm>=4.66
+# optional HF datasets API:
+datasets>=2.19

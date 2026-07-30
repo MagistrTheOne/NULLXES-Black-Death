@@ -7,3 +7,6 @@
 Layout: **yolo_v8_raw** `[1, 4+nc, N]` — `configs/detector_alpha.yaml`.
 
 **BLOCKED** until a real trained `.pt` is exported. No dummy/placeholder weights in this repo.
+
+Perception system: **NULLXES CERBER** (`00_docs/architecture/CERBER.md`).  
+Detect train stack: `../datasets/DATASET_STACK_A100.md` (`cerber-detect` runs).

@@ -8,7 +8,7 @@
 | **Старшая** | **BLACK DEATH** | ~**50 × 50 м** | Целевой продукт инфраструктуры |
 | **Младшая** | **Black Judgment** | **5 × 5 м** (Alpha) | System Architecture Demonstrator |
 
-Канон: [ADR-001](../adr/ADR-001_ALPHA_ARCHITECTURE_DEMONSTRATOR.md) · [ADR-002 DMI](../adr/ADR-002_DMI_V1.md) · [PRODUCT_LINES](../PRODUCT_LINES.md) · [AUTONOMY_ARCHITECTURE](./AUTONOMY_ARCHITECTURE.md) · [BRAIN_SCHEME](./BRAIN_SCHEME.md) · [DMI_V1](./DMI_V1.md)
+Канон: [ADR-001](../adr/ADR-001_ALPHA_ARCHITECTURE_DEMONSTRATOR.md) · [ADR-002 DMI](../adr/ADR-002_DMI_V1.md) · [PRODUCT_LINES](../PRODUCT_LINES.md) · [AUTONOMY_ARCHITECTURE](./AUTONOMY_ARCHITECTURE.md) · [BRAIN_SCHEME](./BRAIN_SCHEME.md) · [CERBER](./CERBER.md) · [DMI_V1](./DMI_V1.md)
 
 ---
 
@@ -263,6 +263,7 @@ flowchart LR
 ## 8. Одной фразой
 
 > **Black Judgment (5×5)** — младшая рама, на которой мы доказываем гражданский автономный мозг.  
+> **NULLXES CERBER** — система восприятия (не «одна нейросеть»).  
 > **DMI** — несколько автономных платформ как одна миссионная система; L0 не знает про рой.  
 > **BLACK DEATH (50×50)** — старшая инфраструктурная платформа, которая наследует этот мозг и наращивает тело под civil-миссии.
 

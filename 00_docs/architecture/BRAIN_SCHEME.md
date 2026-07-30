@@ -23,8 +23,8 @@ flowchart TB
     L3["L3 Decision + State<br/>mission ↔ fault ↔ envelope"]
   end
 
-  subgraph SENSORY["СЕНСОРИКА — восприятие"]
-    L2a["L2a Perception<br/>YOLO/ONNX · EKF · SLAM*"]
+  subgraph SENSORY["NULLXES CERBER — восприятие"]
+    L2a["L2a CERBER<br/>Vision·Detect·Fusion·SLAM*"]
   end
 
   subgraph IMMUNE["ИММУНИТЕТ — отказы"]
@@ -157,8 +157,9 @@ flowchart LR
 
 | Орган | Слой | Путь |
 |-------|------|------|
-| Глаза | L2a vision | `06_autonomy/perception/vision/` |
-| Вестибулярный / nav | L2a fusion | `06_autonomy/perception/fusion/` |
+| **CERBER** (восприятие) | L2a | `06_autonomy/perception/` · [CERBER.md](./CERBER.md) |
+| Глаза / detect | CERBER Vision | `06_autonomy/perception/vision/` |
+| Fusion | CERBER Fusion | `06_autonomy/perception/fusion/` |
 | Иммунитет | L2b | `06_autonomy/fault_management/` |
 | Поведение | L5 | `06_autonomy/planning/behaviour/` |
 | Моторика outer | L1 | `06_autonomy/control/guidance/` |
@@ -171,6 +172,6 @@ flowchart LR
 
 ## 7. Одной фразой
 
-> Сенсоры → восприятие + иммунитет → режим (AlphaBT) → guidance → **C++ L0**.  
+> Сенсоры → **NULLXES CERBER** + иммунитет → режим (AlphaBT) → guidance → **C++ L0**.  
 > Два полушария A/B; ствол мозга (L0) не умирает вместе с Python.  
 > DMI (L6) раздаёт задачи/секторы; **L0 swarm-blind**.
