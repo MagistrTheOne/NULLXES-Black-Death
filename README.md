@@ -12,10 +12,10 @@
 
 | Слой                                  | Технология                                              |
 | ------------------------------------- | ------------------------------------------------------- |
-| Host                                  | Windows 11                                              |
+| Host                                  | **Windows / Linux**                                     |
 | High-level / AI / sim / scripts       | **Python 3.11**                                         |
 | Realtime L0 (flight control, drivers) | **C++17/20**                                            |
-| Middleware                            | ROS 2 (Jazzy+) — binary на Win11, WSL2 для Gazebo       |
+| Middleware                            | ROS 2 (Jazzy+) — Win/Linux; Gazebo на Linux (WSL2@Win)  |
 | Autonomy inference                    | ONNX Runtime (+ TensorRT / OpenVINO при наличии железа) |
 | VCS / CI                              | Git · colcon · GitHub Actions                           |
 
@@ -41,4 +41,6 @@ Production-first : `[00_docs/conventions/PRODUCTION_FIRST.md](00_docs/convention
 99_tools/                CI, скрипты, colcon, lint
 ```
 
-Канон и детали: `[00_docs/](00_docs/)`.
+Канон и детали: `[00_docs/](00_docs/)`.  
+Партнёрам (50×50 + 5×5 + схема ИИ): `[00_docs/architecture/PARTNER_FAMILY_ARCHITECTURE.md](00_docs/architecture/PARTNER_FAMILY_ARCHITECTURE.md)`.  
+Схема мозга: `[00_docs/architecture/BRAIN_SCHEME.md](00_docs/architecture/BRAIN_SCHEME.md)`.

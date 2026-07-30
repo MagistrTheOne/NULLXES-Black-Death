@@ -2,11 +2,12 @@
 
 ## Host / languages
 
-| Слой | Язык | Где |
-|------|------|-----|
+| Слой | Значение | Где |
+|------|----------|-----|
+| Host | **Windows / Linux** | Dev, CI, onboard image (по железу) |
 | High-level | **Python 3.11** | `06_autonomy`, sim orchestration, aero/structure scripts, CI helpers |
 | Realtime L0 | **C++17/20** | `05_avionics` — inner-loop, drivers, buses, timing |
-| Middleware | **ROS 2 Jazzy+** | сообщения между Python↔C++; Win11 binary; Gazebo — WSL2 |
+| Middleware | **ROS 2 Jazzy+** | Python↔C++; Win / Linux native; Gazebo — Linux (WSL2 на Win) |
 
 **Rust на Alpha не используем.** Только Python 3.11 + C++.
 

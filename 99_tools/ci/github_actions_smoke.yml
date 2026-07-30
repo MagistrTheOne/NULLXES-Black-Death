@@ -18,3 +18,5 @@ jobs:
           pip install numpy scipy opencv-python-headless filterpy PyYAML pytest
       - name: Unit tests (algorithms only)
         run: python -m pytest 10_tests/unit -q
+      - name: Practice DMI contracts (no hardware)
+        run: python 10_tests/practice/bench_smoke_contracts.py

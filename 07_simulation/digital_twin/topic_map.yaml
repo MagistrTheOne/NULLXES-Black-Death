@@ -20,3 +20,10 @@ topics:
   heartbeat_a: /bd/dual/heartbeat_A
   heartbeat_b: /bd/dual/heartbeat_B
   mirror: /bd/dual/mirror
+  planning_goal: /bd/planning/goal
+  dmi_intent: /bd/dmi/intent
+  dmi_task_offer: /bd/dmi/task_offer
+  dmi_task_claim: /bd/dmi/task_claim
+  dmi_agent_status: /bd/dmi/agent_status
+  dmi_world_fact: /bd/dmi/world_fact
+  dmi_swarm_health: /bd/dmi/swarm_health
