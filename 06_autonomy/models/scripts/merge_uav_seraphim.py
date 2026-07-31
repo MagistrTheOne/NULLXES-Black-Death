@@ -15,10 +15,24 @@ import os
 import random
 import shutil
 import sys
+import zipfile
 from pathlib import Path
 
 HF_UAV_YOLO = "lgrzybowski/seraphim-drone-detection-dataset"
 CERBER_UAV = 2
+
+
+def _unzip_batches(split_dir: Path) -> None:
+    """Seraphim ships YOLO trees as batch_*.zip under images/ and labels/."""
+    for sub in ("images", "labels"):
+        d = split_dir / sub
+        if not d.is_dir():
+            continue
+        for zpath in sorted(d.glob("*.zip")):
+            print(f"  unzip {zpath}")
+            with zipfile.ZipFile(zpath, "r") as zf:
+                zf.extractall(d)
+            print(f"  extracted → {d}")
 
 
 def _remap_to_uav(src: Path, dst: Path) -> None:
@@ -101,6 +115,11 @@ def merge(
 
     test_dir = src_root / "test"
     train_dir = src_root / "train"
+
+    if test_dir.is_dir():
+        _unzip_batches(test_dir)
+    if full and train_dir.is_dir():
+        _unzip_batches(train_dir)
 
     test_pairs = _iter_yolo_pairs(test_dir) if test_dir.is_dir() else []
     train_pairs = _iter_yolo_pairs(train_dir) if full and train_dir.is_dir() else []
