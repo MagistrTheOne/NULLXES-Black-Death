@@ -1,6 +1,7 @@
 # CERBER Detect — Metrics v2 (UAV fine-tune)
 
-**Hub (planned):** `MagistrTheOne/CERBER-CV-v2`  
+**Hub:** [MagistrTheOne/CERBER-CV-v2](https://huggingface.co/MagistrTheOne/CERBER-CV-v2)  
+**Collection:** [NULLXES BLACK DEATH (UAV)](https://huggingface.co/collections/MagistrTheOne/nullxes-black-death-uav-6a6c066b4f2f23d31e2a7d56)  
 **Run:** `cerber-detect/v1-uav-ft` · **Date:** 2026-07-31  
 **Base:** Stage-1 `best.pt` (VisDrone) + Seraphim test → class `uav=2`
 

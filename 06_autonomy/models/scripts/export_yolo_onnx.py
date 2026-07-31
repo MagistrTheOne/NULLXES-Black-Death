@@ -39,17 +39,30 @@ def main() -> None:
         sys.exit(1)
 
     model = YOLO(args.weights)
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    exported = model.export(format="onnx", imgsz=args.imgsz, opset=args.opset, simplify=True)
-    exported_path = Path(str(exported))
-    if exported_path.resolve() != args.out.resolve():
-        args.out.write_bytes(exported_path.read_bytes())
+    out = args.out.expanduser()
+    if not out.is_absolute():
+        out = (Path.cwd() / out).resolve()
+    else:
+        out = out.resolve()
+    out.parent.mkdir(parents=True, exist_ok=True)
 
-    digest = sha256_file(args.out)
+    exported = model.export(format="onnx", imgsz=args.imgsz, opset=args.opset, simplify=True)
+    exported_path = Path(str(exported)).resolve()
+    if exported_path != out:
+        out.write_bytes(exported_path.read_bytes())
+
+    digest = sha256_file(out)
     cfg = {}
-    if args.config.exists():
-        cfg = yaml.safe_load(args.config.read_text(encoding="utf-8")) or {}
-    cfg["model_path"] = str(args.out.relative_to(ROOT)).replace("\\", "/")
+    cfg_path = args.config.expanduser()
+    if not cfg_path.is_absolute():
+        cfg_path = (Path.cwd() / cfg_path).resolve()
+    if cfg_path.exists():
+        cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+    try:
+        model_path = str(out.relative_to(ROOT.resolve())).replace("\\", "/")
+    except ValueError:
+        model_path = str(out)
+    cfg["model_path"] = model_path
     cfg["sha256"] = digest
     cfg["onnx_layout"] = "yolo_v8_raw"
     cfg["input_name"] = "images"
@@ -61,8 +74,9 @@ def main() -> None:
             cfg["classes"] = [names[i] for i in sorted(names.keys())]
         elif isinstance(names, (list, tuple)):
             cfg["classes"] = list(names)
-    args.config.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")
-    print(f"onnx={args.out}")
+    cfg_path.parent.mkdir(parents=True, exist_ok=True)
+    cfg_path.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")
+    print(f"onnx={out}")
     print(f"sha256={digest}")
     print(f"num_classes={len(cfg.get('classes') or [])}")
 

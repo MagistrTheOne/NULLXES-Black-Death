@@ -66,7 +66,8 @@ BLACK DEATH / Black Judgment
 | [CERBER_DETECT_METRICS_v2.md](./CERBER_DETECT_METRICS_v2.md) | +UAV FT · Hub CERBER-CV-v2 |
 | [CERBER_DATASETS.md](./CERBER_DATASETS.md) | VisDrone + Seraphim + planned |
 | Hub v1 | [MagistrTheOne/CERBER-CV](https://huggingface.co/MagistrTheOne/CERBER-CV) |
-| Hub v2 | `MagistrTheOne/CERBER-CV-v2` |
+| Hub v2 | [MagistrTheOne/CERBER-CV-v2](https://huggingface.co/MagistrTheOne/CERBER-CV-v2) |
+| Collection | [nullxes-black-death-uav](https://huggingface.co/collections/MagistrTheOne/nullxes-black-death-uav-6a6c066b4f2f23d31e2a7d56) |
 
 ## Civil constraint
 

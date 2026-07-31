@@ -17,8 +17,9 @@
 - [ ] Sync `detector_alpha.onnx` + sha256 into local/git flight tree
 - [ ] HF Collection **NULLXES BLACK DEATH (UAV)** + add CERBER-CV
 - [x] Optional leftover-pod: Seraphim `test/` → class `uav` + short FT (`v1-uav-ft`)
-- [ ] Export + publish **CERBER-CV-v2** (separate Hub repo, same Collection)
-- [ ] See [CERBER_DETECT_METRICS_v2.md](./CERBER_DETECT_METRICS_v2.md)
+- [x] Publish **CERBER-CV-v2** + Collection item ([Hub](https://huggingface.co/MagistrTheOne/CERBER-CV-v2))
+- [ ] Confirm ONNX `detector_alpha_v2.onnx` on Hub (export path fix)
+- [x] Metrics: [CERBER_DETECT_METRICS_v2.md](./CERBER_DETECT_METRICS_v2.md)
 
 ### Stage 2 — Onboard / airframe — START **2026-08-02**
 
