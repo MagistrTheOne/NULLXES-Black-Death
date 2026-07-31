@@ -1,35 +1,32 @@
-# NULLXES CERBER — detect head (flight ONNX)
-# Perception system: 00_docs/architecture/CERBER.md
-# BLOCKED without real weights (export via models/scripts/export_yolo_onnx.py).
 model_path: 06_autonomy/models/onnx/detector_alpha.onnx
 onnx_layout: yolo_v8_raw
 input_name: images
 output_name: output0
-# CERBER-CV v1 export 2026-07-31 — sync binary from Hub or pod before flight
-sha256: "40151159e7bf59fcfc24b591124ff7aeec88ff4365619ee701fc186efdce199a"
-input_size: [640, 640]
+sha256: 19d491f8add4c8f0377831b71f951a2ea8f7b30099de5d8b1895352de0f42de0
+input_size:
+- 640
+- 640
 confidence: 0.35
 iou: 0.45
-# CERBER detect class order — must match train data.yaml / cerber_data.yaml
 classes:
-  - human
-  - vehicle
-  - uav
-  - landing_zone
-  - obstacle
-  - power_line
-  - road
-  - building
-  - forest
-  - water
-  - fire
-  - infrastructure
-  - cargo
+- human
+- vehicle
+- uav
+- landing_zone
+- obstacle
+- power_line
+- road
+- building
+- forest
+- water
+- fire
+- infrastructure
+- cargo
 cameras:
-  - forward
-  - down
-  - left
-  - right
+- forward
+- down
+- left
+- right
 providers:
-  - CUDAExecutionProvider
-  - CPUExecutionProvider
+- CUDAExecutionProvider
+- CPUExecutionProvider

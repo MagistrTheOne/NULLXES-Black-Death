@@ -35,7 +35,7 @@ Speed (train GPU, imgsz 1280 val pass): ~1.1 ms inference / image (Ultralytics r
 | Layout | `yolo_v8_raw` |
 | I/O | `images` → `output0` shape `(1, 17, 8400)` |
 | Flight file | `06_autonomy/models/onnx/detector_alpha.onnx` |
-| sha256 | `40151159e7bf59fcfc24b591124ff7aeec88ff4365619ee701fc186efdce199a` |
+| sha256 | `19d491f8add4c8f0377831b71f951a2ea8f7b30099de5d8b1895352de0f42de0` (local export 2026-07-31) |
 
 Smoke: same val frame — PT ~9 human / 39 vehicle; ONNX ~10 / 35 (letterbox 384×640 vs 640×640). Acceptable for v1.
 

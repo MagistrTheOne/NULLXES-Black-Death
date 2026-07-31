@@ -1,0 +1,32 @@
+# NULLXES CERBER — detect head v2 (+UAV FT)
+# Prefer for UAV class; v1 (detector_alpha.yaml) better for human/vehicle scene.
+model_path: 06_autonomy/models/onnx/detector_alpha_v2.onnx
+onnx_layout: yolo_v8_raw
+input_name: images
+output_name: output0
+sha256: "702796ce6296d8ccb86f32f0c1b28bcc2074eb8a90f02108ab405db0dd7684c3"
+input_size: [640, 640]
+confidence: 0.35
+iou: 0.45
+classes:
+  - human
+  - vehicle
+  - uav
+  - landing_zone
+  - obstacle
+  - power_line
+  - road
+  - building
+  - forest
+  - water
+  - fire
+  - infrastructure
+  - cargo
+cameras:
+  - forward
+  - down
+  - left
+  - right
+providers:
+  - CUDAExecutionProvider
+  - CPUExecutionProvider
