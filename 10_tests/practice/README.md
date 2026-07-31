@@ -8,3 +8,8 @@
 | Hardware SOP | `08_prototypes/practice_airframes/TEST_PLAN_EDU_AUG.md` · `TEST_PLAN_AR_WING_PRO_SEP.md` |
 
 Do not add fake IMU/GNSS publishers here.
+
+## CERBER Stage 2 (from **2026-08-02**)
+
+Onboard path: Camera → CERBER ONNX (`detector_alpha`) → boxes → DMI/practice.  
+Status + metrics: `00_docs/architecture/CERBER_STATUS.md`. Hub: [CERBER-CV](https://huggingface.co/MagistrTheOne/CERBER-CV).

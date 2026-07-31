@@ -49,7 +49,7 @@
 
 | Подпапка | Назначение |
 |----------|------------|
-| `architecture/` | Системная и autonomy-архитектура. |
+| `architecture/` | Системная и autonomy-архитектура. CERBER: `CERBER.md` + `CERBER_STATUS.md` / metrics / datasets. |
 | `stack/` | Зафиксированный стек и зависимости. |
 | `conventions/` | Именование, git, code style. |
 | `adr/` | Architecture Decision Records. |

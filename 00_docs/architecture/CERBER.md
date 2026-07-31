@@ -57,6 +57,15 @@ BLACK DEATH / Black Judgment
 | Detect weights / runs | `cerber-detect` (Ultralytics project); ONNX `detector_alpha.onnx` until ADR renames |
 | Draft name BLACKIRIS | superseded — do not use in new docs |
 
+## Status / metrics / data
+
+| Doc | Content |
+|-----|---------|
+| [CERBER_STATUS.md](./CERBER_STATUS.md) | Checklists · Stage 1 done · **Stage 2 from 2026-08-02** |
+| [CERBER_DETECT_METRICS_v1.md](./CERBER_DETECT_METRICS_v1.md) | Val table · ONNX sha256 · Hub link |
+| [CERBER_DATASETS.md](./CERBER_DATASETS.md) | VisDrone + planned stacks |
+| Hub | [MagistrTheOne/CERBER-CV](https://huggingface.co/MagistrTheOne/CERBER-CV) |
+
 ## Civil constraint
 
 Obstacle / UAV class = traffic & safety awareness. No combat / weapons framing.

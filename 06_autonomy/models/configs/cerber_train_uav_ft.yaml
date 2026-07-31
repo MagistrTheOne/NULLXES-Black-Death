@@ -1,0 +1,15 @@
+# CERBER detect — short UAV fine-tune (~2h leftover pod window)
+# Resume from Stage-1 best.pt; keep VisDrone human/vehicle + Seraphim uav=2
+
+project: cerber-detect
+run_name: v1-uav-ft
+base_weights: runs/detect/cerber-detect/v1/weights/best.pt
+data_yaml: /workspace/datasets/cerber/data.yaml
+imgsz: 640
+epochs: 40
+batch: 64
+device: 0
+workers: 12
+export_imgsz: 640
+export_opset: 17
+flight_config: 06_autonomy/models/configs/detector_alpha.yaml

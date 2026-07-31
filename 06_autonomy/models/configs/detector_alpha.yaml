@@ -5,7 +5,8 @@ model_path: 06_autonomy/models/onnx/detector_alpha.onnx
 onnx_layout: yolo_v8_raw
 input_name: images
 output_name: output0
-sha256: ""
+# CERBER-CV v1 export 2026-07-31 — sync binary from Hub or pod before flight
+sha256: "40151159e7bf59fcfc24b591124ff7aeec88ff4365619ee701fc186efdce199a"
 input_size: [640, 640]
 confidence: 0.35
 iou: 0.45
