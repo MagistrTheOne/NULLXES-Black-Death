@@ -62,9 +62,11 @@ BLACK DEATH / Black Judgment
 | Doc | Content |
 |-----|---------|
 | [CERBER_STATUS.md](./CERBER_STATUS.md) | Checklists · Stage 1 done · **Stage 2 from 2026-08-02** |
-| [CERBER_DETECT_METRICS_v1.md](./CERBER_DETECT_METRICS_v1.md) | Val table · ONNX sha256 · Hub link |
-| [CERBER_DATASETS.md](./CERBER_DATASETS.md) | VisDrone + planned stacks |
-| Hub | [MagistrTheOne/CERBER-CV](https://huggingface.co/MagistrTheOne/CERBER-CV) |
+| [CERBER_DETECT_METRICS_v1.md](./CERBER_DETECT_METRICS_v1.md) | VisDrone scene · Hub CERBER-CV |
+| [CERBER_DETECT_METRICS_v2.md](./CERBER_DETECT_METRICS_v2.md) | +UAV FT · Hub CERBER-CV-v2 |
+| [CERBER_DATASETS.md](./CERBER_DATASETS.md) | VisDrone + Seraphim + planned |
+| Hub v1 | [MagistrTheOne/CERBER-CV](https://huggingface.co/MagistrTheOne/CERBER-CV) |
+| Hub v2 | `MagistrTheOne/CERBER-CV-v2` |
 
 ## Civil constraint
 
