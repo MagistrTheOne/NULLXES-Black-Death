@@ -25,19 +25,32 @@ BLACK DEATH / Black Judgment
  Obstacle / scene recognition → DMI world facts / FM / guidance
 ```
 
-\*Segmentation — capability lane; Alpha Flight-1 may ship detect-only.
+\*Segmentation — separate service (`perception/segmentation/`); Alpha may ship detect-only.
+
+## Vision stack (LOCKED)
+
+Full layer map · August plan · YOLO26 gate: **[CERBER_VISION_STACK.md](./CERBER_VISION_STACK.md)**
+
+```
+Detect → Track ─┐
+Segment ────────┼─► Fusion → DMI / guidance
+                │
+         Navigation (decision)
+```
+
+Detect class ids: **do not reorder** — see `detector_alpha.yaml` (0 human … 12 cargo).
 
 ## Subsystems
 
 | CERBER lane | Repo | Alpha status |
 |-------------|------|--------------|
 | Vision (ingest / preprocess) | `06_autonomy/perception/vision/` | letterbox + NCHW |
-| Detection | same + `models/onnx/` | YOLO → ONNX; **BLOCKED** without weights |
-| Tracking | perception (future module) | not shipped |
-| Classification | via detect classes / later head | detect classes first |
-| Segmentation | future | not Alpha-critical |
-| Multi-Sensor Fusion | `perception/fusion/` | Nav EKF |
-| Obstacle / scene recognition | detect + facts → DMI cache | DMI WorldFact bridge |
+| Detection (L1) | vision + `models/onnx/` | CERBER-CV v1/v2 ONNX **shipped** |
+| Tracking (L3) | `perception/tracking/` | TODO BoT-SORT |
+| Segmentation (L2) | `perception/segmentation/` | TODO SegFormer |
+| Navigation (L4) | `perception/navigation/` | TODO OpenLander → custom |
+| Multi-Sensor / CV Fusion (L5) | `perception/fusion/` + `dmi/` | EKF partial; CV fusion TODO |
+| Obstacle / scene recognition | detect + fused facts → DMI | WorldFact bridge |
 
 ## Runtime stack (flight)
 
@@ -61,6 +74,7 @@ BLACK DEATH / Black Judgment
 
 | Doc | Content |
 |-----|---------|
+| [CERBER_VISION_STACK.md](./CERBER_VISION_STACK.md) | **Canon layers** · August roadmap · YOLO26 gate |
 | [CERBER_STATUS.md](./CERBER_STATUS.md) | Checklists · Stage 1 done · **Stage 2 from 2026-08-02** |
 | [CERBER_DETECT_METRICS_v1.md](./CERBER_DETECT_METRICS_v1.md) | VisDrone scene · Hub CERBER-CV |
 | [CERBER_DETECT_METRICS_v2.md](./CERBER_DETECT_METRICS_v2.md) | +UAV FT · Hub CERBER-CV-v2 |
@@ -68,6 +82,7 @@ BLACK DEATH / Black Judgment
 | Hub v1 | [MagistrTheOne/CERBER-CV](https://huggingface.co/MagistrTheOne/CERBER-CV) |
 | Hub v2 | [MagistrTheOne/CERBER-CV-v2](https://huggingface.co/MagistrTheOne/CERBER-CV-v2) |
 | Collection | [nullxes-black-death-uav](https://huggingface.co/collections/MagistrTheOne/nullxes-black-death-uav-6a6c066b4f2f23d31e2a7d56) |
+| Model sources (2026-07-31) | [CERBER_MODEL_SOURCES_2026-07-31.md](./CERBER_MODEL_SOURCES_2026-07-31.md) |
 
 ## Civil constraint
 

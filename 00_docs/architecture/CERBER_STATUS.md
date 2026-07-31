@@ -24,25 +24,33 @@
 
 - [ ] Copter arrives / bench power-on
 - [ ] Camera → preprocess → CERBER ONNX → postprocess path on host (Windows/Linux)
-- [ ] Load `detector_alpha.yaml` with verified sha256 (fail-closed)
-- [ ] Live camera smoke: human/vehicle boxes at conf 0.35
+- [ ] Load `detector_alpha.yaml` / `_v2` with verified sha256 (fail-closed)
+- [ ] Live camera smoke: human/vehicle(/uav) boxes at conf 0.35
 - [ ] Wire detections → DMI WorldFact / practice mission (civil only)
 - [ ] Record short flight/bench log + failure modes (BLOCKED if no HW)
-- [ ] Plan Stage 3 data: UAV / landing_zone / custom (empty classes today)
 
-## What CERBER-CV v1 is / is not
+### August stack (Vision Stack canon — no YOLO26 flight swap yet)
+
+See [CERBER_VISION_STACK.md](./CERBER_VISION_STACK.md).
+
+- [ ] L3 Track: BoT-SORT on `detector_alpha_v2.onnx`
+- [ ] L1 Detect++: FLAME (fire) + InsPLAD/MPID (power_line) → Hub revision
+- [ ] L2 Segment: SegFormer service + LoveDA/LandCover
+- [ ] L5 Fusion sketch: Detect+Seg+Track → DMI WorldFact
+- [ ] YOLO26 offline A/B only (layout · FPS · export gate)
+
+## What CERBER-CV is / is not
 
 | Is | Is not |
 |----|--------|
-| Civil aerial **scene** detector | Full UAV intelligence |
-| Trained: human + vehicle | Trained: uav, landing_zone, fire, … |
+| Civil aerial **Detect** lane (v1 scene / v2 +UAV) | Full CERBER Vision Stack alone |
+| Trained: human, vehicle (+ uav in v2) | Trained: landing_zone, fire, road seg, … |
 | Flight path: ONNX Runtime | Cloud LLM / Ultralytics in flight |
 
 ## Artifacts
 
 | Artifact | Location |
 |----------|----------|
-| Hub | `MagistrTheOne/CERBER-CV` |
-| Train run | `runs/detect/cerber-detect/v1/` (pod) |
-| Flight ONNX | `06_autonomy/models/onnx/detector_alpha.onnx` |
-| Flight config | `06_autonomy/models/configs/detector_alpha.yaml` |
+| Flight ONNX | `detector_alpha.onnx` (v1) · `detector_alpha_v2.onnx` (v2) |
+| Flight config | `detector_alpha.yaml` · `detector_alpha_v2.yaml` |
+| Hub | CERBER-CV · CERBER-CV-v2 · Collection |

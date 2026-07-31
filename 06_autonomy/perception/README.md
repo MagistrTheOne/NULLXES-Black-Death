@@ -1,25 +1,15 @@
-# NULLXES CERBER — perception
+# CERBER perception code
 
-Onboard sensing → scene understanding. **CERBER** is the perception *system*, not a single network.  
-Canon: [`00_docs/architecture/CERBER.md`](../../00_docs/architecture/CERBER.md)
+Canon stack: `00_docs/architecture/CERBER_VISION_STACK.md`
 
-```
-CERBER
-├── Vision          OpenCV · letterbox
-├── Detection       YOLO → ONNX Runtime
-├── Tracking        (lane — not Alpha-critical)
-├── Classification  detect classes / later heads
-├── Segmentation    (lane)
-├── Multi-Sensor Fusion   GNSS+IMU EKF · LiDAR later
-└── Obstacle / scene recognition → bus / DMI facts
-```
+| Dir | Layer | Status |
+|-----|-------|--------|
+| `vision/` | preprocess + **L1 Detect** ONNX | shipped (letterbox, session, decode) |
+| `segmentation/` | **L2 Segment** | TODO — SegFormer service |
+| `tracking/` | **L3 Track** | TODO — BoT-SORT |
+| `navigation/` | **L4 Nav** decision aids | TODO — OpenLander trial |
+| `fusion/` | Nav EKF + future **L5** CV scene fusion | EKF partial |
+| `sensors/` | adapters | stubs / BLOCKED without HW |
+| `slam/` | optional | README only |
 
-| Package | CERBER lane | Status |
-|---------|-------------|--------|
-| `vision/` | Vision + Detection | Algorithm ready; **BLOCKED** without real ONNX + sha256 |
-| `fusion/` | Multi-Sensor Fusion | Algorithm ready; needs real IMU/GNSS |
-| `sensors/` | ingest adapters | **BLOCKED** — no drivers yet |
-| `slam/` | map / VIO | **BLOCKED** Alpha Flight-1 |
-
-IMU bus contract: `ImuMsg.accel_mps2` = linear acceleration ENU, gravity removed by the driver.  
-No mocks. Missing hardware → **BLOCKED** + exact dependency.
+Weights/configs: `../models/`. Mission consumer: `../dmi/`.
