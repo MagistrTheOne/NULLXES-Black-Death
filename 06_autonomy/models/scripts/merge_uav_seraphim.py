@@ -33,28 +33,39 @@ def _remap_to_uav(src: Path, dst: Path) -> None:
     dst.write_text("\n".join(lines_out) + ("\n" if lines_out else ""), encoding="utf-8")
 
 
+_IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+
+
 def _iter_yolo_pairs(split_dir: Path) -> list[tuple[Path, Path]]:
-    """Seraphim layout: train|test/{images,labels} or flat images+labels."""
+    """Seraphim layout: train|test/{images,labels} (possibly nested / xet-late)."""
     pairs: list[tuple[Path, Path]] = []
+    if not split_dir.is_dir():
+        return pairs
+
     img_dir = split_dir / "images"
     lbl_dir = split_dir / "labels"
-    if img_dir.is_dir() and lbl_dir.is_dir():
-        for img in img_dir.glob("*.*"):
-            if img.suffix.lower() not in {".jpg", ".jpeg", ".png", ".bmp", ".webp"}:
-                continue
-            lab = lbl_dir / f"{img.stem}.txt"
-            if lab.is_file():
-                pairs.append((img, lab))
-        return pairs
-    # flat: *.jpg next to *.txt
-    for img in split_dir.rglob("*.*"):
-        if img.suffix.lower() not in {".jpg", ".jpeg", ".png", ".bmp", ".webp"}:
+    search_imgs = img_dir if img_dir.is_dir() else split_dir
+    search_lbl = lbl_dir if lbl_dir.is_dir() else split_dir
+
+    lbl_by_stem: dict[str, Path] = {}
+    for lab in search_lbl.rglob("*.txt"):
+        lbl_by_stem[lab.stem] = lab
+
+    for img in search_imgs.rglob("*"):
+        if not img.is_file() or img.suffix.lower() not in _IMG_EXT:
             continue
-        lab = img.with_suffix(".txt")
-        if not lab.is_file():
-            lab = split_dir / "labels" / f"{img.stem}.txt"
-        if lab.is_file():
+        lab = lbl_by_stem.get(img.stem)
+        if lab is None:
+            # same stem beside image
+            cand = img.with_suffix(".txt")
+            lab = cand if cand.is_file() else None
+        if lab is not None:
             pairs.append((img, lab))
+
+    print(
+        f"  scan {split_dir}: imgs_with_labels={len(pairs)} "
+        f"label_stems={len(lbl_by_stem)}"
+    )
     return pairs
 
 
@@ -167,6 +178,16 @@ def main() -> int:
         seed=args.seed,
     )
     print(f"merged uav=2 train+={n_tr} val+={n_va}")
+    if n_tr + n_va == 0:
+        print(
+            "BLOCKED: 0 UAV pairs. Check layout under sources/seraphim_uav "
+            "(Xet may still be reconstructing — re-run with --skip-download).",
+            file=sys.stderr,
+        )
+        # quick tree hint
+        for p in sorted(src.rglob("*"))[:40]:
+            print(f"  {p.relative_to(src)}", file=sys.stderr)
+        return 1
     print("next: fine-tune from best.pt (keep VisDrone images already in root)")
     return 0
 
