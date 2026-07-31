@@ -35,7 +35,15 @@ _VISDRONE_TO_CERBER = {
     9: 1,  # motor
 }
 
-HF_UETT4K = "mugheessarwarawan/UETT4k-Anti-UAV"
+# UETT4K is NOT on Hugging Face. Full dump is SharePoint (from GitHub README).
+# GitHub only hosts paper/sample refs — not the 33k YOLO tree.
+UETT4K_GITHUB = "https://github.com/mugheessarwarawan/UETT4K-Anti-UAV"
+UETT4K_SHAREPOINT = (
+    "https://pern-my.sharepoint.com/:f:/g/personal/mughees_sarwar_ist_edu_pk/"
+    "EnIRYWzXcZZBkOUUn0Ltb-4BiXzC6SQpZvIlGbnsFqQKaA?e=M2SULN"
+)
+# Optional HF substitute for class uav=2 (YOLO, downloadable):
+HF_UAV_YOLO = "lgrzybowski/seraphim-drone-detection-dataset"
 UAVDT_URL = "https://datasetninja.com/uavdt"
 DOTA_URL = "https://datasetninja.com/dota"
 VISDRONE_DOCS = "https://docs.ultralytics.com/datasets/detect/visdrone"
@@ -99,7 +107,27 @@ def fetch_visdrone(root: Path) -> Path:
     return vd_root
 
 
-def fetch_hf_uett4k(root: Path, token: str | None) -> Path:
+def write_uett4k_download_note(root: Path) -> Path:
+    """UETT4K full set is SharePoint-only; GitHub has no bulk YOLO dump."""
+    dest = root / "sources" / "uett4k"
+    dest.mkdir(parents=True, exist_ok=True)
+    note = dest / "DOWNLOAD.txt"
+    note.write_text(
+        "UETT4K Anti-UAV (~33601 imgs) is NOT in git LFS / HF.\n"
+        f"GitHub (readme + link): {UETT4K_GITHUB}\n"
+        f"Full dataset (SharePoint): {UETT4K_SHAREPOINT}\n"
+        "Download zips in browser / rclone, unpack YOLO tree, map class → CERBER id=2 (uav),\n"
+        "copy into ../../images/{{train,val}} + ../../labels/{{train,val}}.\n"
+        f"Optional auto HF UAV YOLO: {HF_UAV_YOLO}\n",
+        encoding="utf-8",
+    )
+    print(f"UETT4K: not on GitHub as data — see {note}")
+    print(f"  SharePoint: {UETT4K_SHAREPOINT}")
+    return dest
+
+
+def fetch_hf_uav_yolo(root: Path, token: str | None) -> Path:
+    """Optional downloadable UAV detector set (Seraphim) → CERBER class uav=2."""
     try:
         from huggingface_hub import snapshot_download
     except ImportError as exc:
@@ -107,20 +135,19 @@ def fetch_hf_uett4k(root: Path, token: str | None) -> Path:
             "BLOCKED: huggingface_hub required. pip install huggingface_hub"
         ) from exc
 
-    dest = root / "sources" / "uett4k"
+    dest = root / "sources" / "seraphim_uav"
     dest.mkdir(parents=True, exist_ok=True)
-    print(f"HF snapshot: {HF_UETT4K} → {dest}")
+    print(f"HF snapshot: {HF_UAV_YOLO} → {dest}")
     path = snapshot_download(
-        repo_id=HF_UETT4K,
+        repo_id=HF_UAV_YOLO,
         repo_type="dataset",
         local_dir=str(dest),
         token=token,
     )
-    readme = dest / "CERBER_IMPORT.txt"
-    readme.write_text(
-        "UETT4k downloaded. Convert annotations to YOLO CERBER id=2 (uav) "
-        "and copy into images/{train,val} + labels/{train,val} before full train.\n"
-        f"Hub: https://huggingface.co/datasets/{HF_UETT4K}\n",
+    (dest / "CERBER_IMPORT.txt").write_text(
+        "Seraphim drone YOLO (class 0). Remap to CERBER id=2 (uav) and merge "
+        "into images/{train,val} + labels/{train,val}.\n"
+        f"Hub: https://huggingface.co/datasets/{HF_UAV_YOLO}\n",
         encoding="utf-8",
     )
     return Path(path)
@@ -139,7 +166,8 @@ Place converted YOLO trees here, then merge into `../images` + `../labels`.
 | UAVDT | {UAVDT_URL} |
 | DOTA | {DOTA_URL} |
 | VisDrone (docs) | {VISDRONE_DOCS} |
-| UETT4k (HF) | https://huggingface.co/datasets/{HF_UETT4K} |
+| UETT4K (SharePoint via GitHub README) | {UETT4K_SHAREPOINT} |
+| UAV YOLO alt (HF Seraphim) | https://huggingface.co/datasets/{HF_UAV_YOLO} |
 
 Remap rules: `06_autonomy/models/datasets/remap_rules.yaml`
 """,
@@ -160,7 +188,12 @@ def main() -> int:
         help="dataset root (images/, labels/, data.yaml)",
     )
     p.add_argument("--skip-visdrone", action="store_true")
-    p.add_argument("--skip-hf", action="store_true")
+    p.add_argument("--skip-hf", action="store_true", help="skip optional Seraphim UAV HF")
+    p.add_argument(
+        "--fetch-uav-hf",
+        action="store_true",
+        help=f"download {HF_UAV_YOLO} (UETT4K is SharePoint-only)",
+    )
     p.add_argument("--hf-token", default=None, help="HF token or set HF_TOKEN env")
     args = p.parse_args()
 
@@ -171,6 +204,7 @@ def main() -> int:
     (root / "labels" / "val").mkdir(parents=True, exist_ok=True)
 
     print_manual_sources(root)
+    write_uett4k_download_note(root)
     data_yaml = _write_data_yaml(root, template)
     print(f"data.yaml → {data_yaml}")
 
@@ -181,18 +215,14 @@ def main() -> int:
         print(str(exc), file=sys.stderr)
         return 1
 
-    if not args.skip_hf:
+    if args.fetch_uav_hf and not args.skip_hf:
         import os
 
         token = args.hf_token or os.environ.get("HF_TOKEN")
         try:
-            fetch_hf_uett4k(root, token)
-        except Exception as exc:  # noqa: BLE001 — surface HF auth/network clearly
-            print(f"HF UETT4k: {exc}", file=sys.stderr)
-            print(
-                "Continue without HF or: huggingface-cli login / --hf-token",
-                file=sys.stderr,
-            )
+            fetch_hf_uav_yolo(root, token)
+        except Exception as exc:  # noqa: BLE001
+            print(f"HF UAV YOLO: {exc}", file=sys.stderr)
 
     print("OK — next: python models/scripts/train_cerber_detect.py --data", data_yaml)
     return 0
