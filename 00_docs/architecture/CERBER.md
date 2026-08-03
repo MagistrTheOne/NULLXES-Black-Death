@@ -84,9 +84,23 @@ Detect class ids: **do not reorder** — see `detector_alpha.yaml` (0 human … 
 | Collection | [nullxes-black-death-uav](https://huggingface.co/collections/MagistrTheOne/nullxes-black-death-uav-6a6c066b4f2f23d31e2a7d56) |
 | Model sources (2026-07-31) | [CERBER_MODEL_SOURCES_2026-07-31.md](./CERBER_MODEL_SOURCES_2026-07-31.md) |
 
+## CERBER RT (Robot Track)
+
+Ground robot lane — keep aerial ids locked; separate ONNX/schema.
+
+| Doc | Content |
+|-----|---------|
+| [CERBER_RT.md](./CERBER_RT.md) | **ТЗ / plan** · acceptance · GPU · HW · phases |
+| [ADR-003](../adr/ADR-003_CERBER_RT.md) | Decision lock · signature block |
+| Config | `06_autonomy/models/configs/detector_rt_v1.yaml` |
+
+Mission: QR → human → indoor objects → range/bumper stop (L0).  
+Stack: same Python 3.11 + C++ L0 + ORT.
+
 ## Civil constraint
 
-Obstacle / UAV class = traffic & safety awareness. No combat / weapons framing.
+Obstacle / UAV class = traffic & safety awareness. No combat / weapons framing.  
+CERBER RT: indoor navigation / logistics awareness only.
 
 ## Refs
 

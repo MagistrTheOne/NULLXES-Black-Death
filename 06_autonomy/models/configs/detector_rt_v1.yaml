@@ -1,0 +1,29 @@
+# NULLXES CERBER RT — detect head v1 (robot)
+# Separate schema from detector_alpha*.yaml — DO NOT merge class orders.
+# sha256 empty → runtime MUST fail-closed until filled after export.
+model_path: 06_autonomy/models/onnx/detector_rt_v1.onnx
+onnx_layout: yolo_v8_raw
+input_name: images
+output_name: output0
+sha256: ""
+input_size: [640, 640]
+confidence: 0.35
+iou: 0.45
+classes:
+  - human
+  - chair
+  - table
+  - door
+  - obstacle
+  - wall_segment
+  - qr_panel
+  - robot
+  - cargo_box
+  - unknown_object
+cameras:
+  - forward
+providers:
+  - CUDAExecutionProvider
+  - CPUExecutionProvider
+product: CERBER_RT
+track: robot
