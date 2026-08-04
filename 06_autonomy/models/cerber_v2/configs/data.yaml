@@ -1,0 +1,19 @@
+# Rewritten by prepare_data.py — path becomes absolute dataset root
+path: /workspace/datasets/cerber_v2
+train: images/train
+val: images/val
+
+names:
+  0: human
+  1: vehicle
+  2: uav
+  3: landing_zone
+  4: obstacle
+  5: power_line
+  6: road
+  7: building
+  8: forest
+  9: water
+  10: fire
+  11: infrastructure
+  12: cargo

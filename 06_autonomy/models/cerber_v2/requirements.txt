@@ -1,0 +1,14 @@
+# CERBER V2 RunPod — extras only. Torch comes from the pod image.
+#   pip install -r 06_autonomy/models/cerber_v2/requirements.txt
+
+ultralytics>=8.0,<9
+huggingface_hub>=0.23
+PyYAML>=6.0
+datasets>=2.19
+gdown>=5.0
+tqdm>=4.66
+numpy>=1.26
+opencv-python-headless>=4.8,<5
+onnx>=1.15
+onnxruntime-gpu>=1.17; platform_system != "Darwin"
+onnxruntime>=1.17; platform_system == "Darwin"

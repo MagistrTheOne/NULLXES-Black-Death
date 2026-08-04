@@ -4,6 +4,7 @@
 |------|------|--------|
 | `detector_alpha.onnx` | CERBER-CV **v1** scene (VisDrone human/vehicle) | `configs/detector_alpha.yaml` |
 | `detector_alpha_v2.onnx` | CERBER-CV **v2** +UAV FT | `configs/detector_alpha_v2.yaml` |
+| `detector_alpha_v2b.onnx` | CERBER-CV **v2b** pursuit boost (RunPod pack) | `configs/detector_alpha_v2b.yaml` · pack `cerber_v2/` |
 
 Layout: **yolo_v8_raw** `[1, 4+nc, N]`. Weights gitignored (`*.onnx`); keep sha256 in yaml.  
 Hub: [CERBER-CV](https://huggingface.co/MagistrTheOne/CERBER-CV) · [CERBER-CV-v2](https://huggingface.co/MagistrTheOne/CERBER-CV-v2)
