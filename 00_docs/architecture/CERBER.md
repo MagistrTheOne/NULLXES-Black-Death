@@ -90,6 +90,12 @@ Bare-metal train pack (no Docker): **`06_autonomy/models/cerber_v2/`**
 Prepare VisDrone + Seraphim + HF UAV extras → train `v2-pursuit` → `detector_alpha_v2b.onnx`.  
 Cheat sheet: `06_autonomy/models/cerber_v2/README.md` · `scripts/runpod_all.sh`
 
+## CERBER Lab (visual sim)
+
+Arcade WASD flying-wing app (not twin): **`07_simulation/cerber_lab/`**  
+Presets: S800-class · AR Wing Pro-class · optional real ONNX PiP.  
+`python 07_simulation/cerber_lab/run_lab.py --wing ar_wing`
+
 ## CERBER RT (Robot Track)
 
 Ground robot lane — keep aerial ids locked; separate ONNX/schema.

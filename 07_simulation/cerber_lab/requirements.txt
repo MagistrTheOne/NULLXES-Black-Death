@@ -1,0 +1,7 @@
+# CERBER Lab — visual sim only (not flight image)
+ursina>=7.0.0
+panda3d>=1.10.14
+numpy>=1.26,<3
+opencv-python>=4.8,<5
+PyYAML>=6.0
+onnxruntime>=1.17,<2
