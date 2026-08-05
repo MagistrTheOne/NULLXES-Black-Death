@@ -1,6 +1,14 @@
-# CERBER Lab — visual flight sim (arcade)
+# CERBER Lab — DEPRECATED
 
-**Status:** desktop viz app · **not** Alpha / BLACK DEATH digital twin · **not** HIL  
+**Use instead:** [`../cerber_studio/`](../cerber_studio/) · canon [`CERBER_STUDIO.md`](../../00_docs/architecture/CERBER_STUDIO.md)
+
+Legacy Ursina arcade kept for reference only. Do not extend.
+
+---
+
+# CERBER Lab — visual flight sim (arcade) [legacy]
+
+**Status:** DEPRECATED · **not** Alpha / BLACK DEATH digital twin · **not** HIL  
 **Folder:** `07_simulation/cerber_lab/`
 
 WASD flying-wing trainer with optional **real CERBER ONNX** overlay on the nose camera.

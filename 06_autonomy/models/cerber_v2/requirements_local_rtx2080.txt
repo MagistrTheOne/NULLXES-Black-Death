@@ -1,0 +1,14 @@
+# CERBER V2 — local RTX 2080 SUPER (Windows). Torch installed separately (see setup script).
+#   .\.venv\Scripts\pip install -r requirements_local_rtx2080.txt
+
+ultralytics>=8.0,<9
+huggingface_hub>=0.23
+PyYAML>=6.0
+datasets>=2.19
+gdown>=5.0
+tqdm>=4.66
+numpy>=1.26
+opencv-python-headless>=4.8,<5
+onnx>=1.15
+onnxruntime-gpu>=1.17
+pillow>=10.0

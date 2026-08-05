@@ -2,20 +2,20 @@
 
 | Area | Status |
 |------|--------|
-| **`cerber_lab/`** | **Desktop arcade viz** — WASD wing + CERBER PiP (not twin) |
+| **`cerber_studio/`** | **PRIMARY** — NULLXES CERBER Studio (PySide6 + Panda3D + ORT/ZMQ) |
+| `cerber_lab/` | **DEPRECATED** — Ursina arcade; use Studio |
 | `digital_twin/topic_map.yaml` | topic contract (OK) |
 | `gazebo/` | proxy box only — **BLOCKED** as twin |
 | `airsim/` | Multirotor sketch — **BLOCKED** as twin |
 | `scenarios/` · `hil/` | YAML templates only — no fake runners |
 | `soft_runtime/` | **BLOCKED** — mocks removed |
 
-## CERBER Lab (run now)
+## CERBER Studio (run now)
 
 ```bash
-cd 07_simulation/cerber_lab
+cd 07_simulation/cerber_studio
 pip install -r requirements.txt
-python run_lab.py --wing ar_wing
-python run_lab.py --wing s800 --cerber
+python run_studio.py
 ```
 
-See `cerber_lab/README.md`.
+Canon: `00_docs/architecture/CERBER_STUDIO.md`.

@@ -1,0 +1,1 @@
+"""CERBER Studio worker package."""

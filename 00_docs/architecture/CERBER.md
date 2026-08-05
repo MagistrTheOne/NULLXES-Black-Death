@@ -90,11 +90,12 @@ Bare-metal train pack (no Docker): **`06_autonomy/models/cerber_v2/`**
 Prepare VisDrone + Seraphim + HF UAV extras → train `v2-pursuit` → `detector_alpha_v2b.onnx`.  
 Cheat sheet: `06_autonomy/models/cerber_v2/README.md` · `scripts/runpod_all.sh`
 
-## CERBER Lab (visual sim)
+## CERBER Studio (engineering IDE)
 
-Arcade WASD flying-wing app (not twin): **`07_simulation/cerber_lab/`**  
-Presets: S800-class · AR Wing Pro-class · optional real ONNX PiP.  
-`python 07_simulation/cerber_lab/run_lab.py --wing ar_wing`
+Python lab (not twin · not Unity): **`07_simulation/cerber_studio/`**  
+PySide6 + Panda3D + ZMQ CERBER worker + tracker.  
+Canon: [CERBER_STUDIO.md](./CERBER_STUDIO.md) · `python 07_simulation/cerber_studio/run_studio.py`  
+Deprecated: `07_simulation/cerber_lab/` (Ursina).
 
 ## CERBER RT (Robot Track)
 

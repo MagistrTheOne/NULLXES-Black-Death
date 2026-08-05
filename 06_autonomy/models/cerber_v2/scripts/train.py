@@ -92,18 +92,23 @@ def main() -> int:
 
     print(f"weights={weights}")
     print(f"data={data}")
+    train_kw: dict = {
+        "data": str(data.resolve()),
+        "imgsz": int(args.imgsz or cfg["imgsz"]),
+        "epochs": int(args.epochs or cfg["epochs"]),
+        "batch": int(args.batch or cfg["batch"]),
+        "device": args.device if args.device is not None else cfg.get("device", 0),
+        "workers": int(cfg.get("workers", 8)),
+        "project": str(cfg.get("project", "cerber-detect")),
+        "name": str(cfg.get("run_name", "v2-pursuit")),
+        "exist_ok": True,
+    }
+    if "amp" in cfg:
+        train_kw["amp"] = bool(cfg["amp"])
+    if "cache" in cfg:
+        train_kw["cache"] = cfg["cache"]
     model = YOLO(str(weights))
-    results = model.train(
-        data=str(data.resolve()),
-        imgsz=int(args.imgsz or cfg["imgsz"]),
-        epochs=int(args.epochs or cfg["epochs"]),
-        batch=int(args.batch or cfg["batch"]),
-        device=args.device if args.device is not None else cfg.get("device", 0),
-        workers=int(cfg.get("workers", 8)),
-        project=str(cfg.get("project", "cerber-detect")),
-        name=str(cfg.get("run_name", "v2-pursuit")),
-        exist_ok=True,
-    )
+    results = model.train(**train_kw)
     best = Path(results.save_dir) / "weights" / "best.pt"
     print(f"best={best}")
     print("next: python export_onnx.py --weights", best)

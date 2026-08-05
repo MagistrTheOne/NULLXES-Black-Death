@@ -1,0 +1,19 @@
+# CERBER V2 — local train on RTX 2080 SUPER 8GB (not RunPod)
+# RunPod keeps train.yaml (imgsz 1280 / batch 16). This profile fits 8GB VRAM.
+project: cerber-detect
+run_name: v2-pursuit-2080
+base_weights: 06_autonomy/models/weights/cerber-cv-v2/best.pt
+hub_fallback: MagistrTheOne/CERBER-CV-v2
+data_yaml: data.yaml
+imgsz: 640
+epochs: 60
+batch: 6
+device: 0
+workers: 4
+export_imgsz: 640
+export_opset: 17
+flight_config: configs/detector_alpha_v2b.yaml
+flight_onnx: ../../onnx/detector_alpha_v2b.onnx
+# OOM: drop batch to 4, then 2. Do not raise imgsz to 1280 on 8GB.
+amp: true
+cache: false

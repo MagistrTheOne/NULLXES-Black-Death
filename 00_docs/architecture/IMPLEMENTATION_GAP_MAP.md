@@ -15,7 +15,7 @@
 | `04_propulsion_energy` | DOC_ONLY | Alpha energy notes |
 | `05_avionics` | PARTIAL | L0 C++; drivers empty |
 | `06_autonomy` | HAS_CODE core | Detect/DMI/dual/SoftBus; Track/Seg/Nav missing |
-| `07_simulation` | PARTIAL | **cerber_lab HAS_CODE**; twin BLOCKED |
+| `07_simulation` | PARTIAL | **cerber_studio** primary; lab deprecated; twin BLOCKED |
 | `08` / `09` | DOC_ONLY | practice plans / mfg notes |
 | `10_tests` | PARTIAL | unit OK; integ/HIL/flight BLOCKED |
 | `99_tools` | PARTIAL | L0 smoke + CI yml |
@@ -35,7 +35,7 @@
 | 7 | `cerber_v2` → v2b ONNX | pack HAS_CODE | RunPod not run | `detector_alpha_v2b.onnx` + sha |
 | 8 | `control/guidance` chase | simple_guidance | no tracks | chase from track_id |
 | 9 | Practice airframes | DOC plans | kit | edu power-on + IMU topic |
-| 10 | `cerber_lab` demo | HAS_CODE | ORT/sha optional | `--cerber` + pursuit viz |
+| 10 | `cerber_studio` | HAS_CODE | ORT/sha optional | run Studio + worker overlay |
 
 **Artifacts:** v1/v2 ONNX **present** · v2b / RT ONNX **absent**.
 
@@ -78,7 +78,8 @@
 |------|----------|------|---|
 | `05_avionics/flight_software` | PARTIAL | bench IMU | P0 |
 | `05_avionics/drivers` | SKELETON | HAL | P0 |
-| `07_simulation/cerber_lab` | HAS_CODE | demo | P0 |
+| `07_simulation/cerber_studio` | HAS_CODE | Studio IDE | P0 |
+| `07_simulation/cerber_lab` | DEPRECATED | use Studio | — |
 | `gazebo` / `airsim` | SKELETON BLOCKED twin | real model later | P2 |
 | `soft_runtime` | BLOCKED by policy | no fake runners | lock |
 | `08_prototypes/practice_*` | DOC | execute TEST_PLAN_EDU | P0 |
@@ -118,6 +119,6 @@ edu kit IMU + L0 hold
     → live CERBER cam → DMI WorldFact
     → tracking/ BoT-SORT
     → RunPod cerber_v2 → v2b ONNX
-    → guidance chase + cerber_lab --cerber
+    → guidance chase + cerber_studio
     → dual failover 2-process
 ```
