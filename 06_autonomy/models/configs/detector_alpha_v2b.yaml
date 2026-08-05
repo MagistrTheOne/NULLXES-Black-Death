@@ -1,10 +1,8 @@
-# CERBER-CV v2b — pursuit UAV boost (export fills sha256)
-# Do not reorder class ids (aerial LOCKED).
 model_path: 06_autonomy/models/onnx/detector_alpha_v2b.onnx
 onnx_layout: yolo_v8_raw
 input_name: images
 output_name: output0
-sha256: ""
+sha256: 3b1a7016606a92916782f9d3a3741682eee74e0aedddc6a684aac01a5f3e2c0e
 input_size:
 - 640
 - 640

@@ -1,0 +1,61 @@
+{
+  "png": "D:\\NULLXES\\NULLXES BLACK DEATH\\06_autonomy\\models\\cerber_v2\\exports\\compare_2080_vs_6000\\compare_2080_vs_6000.png",
+  "pdf": "D:\\NULLXES\\NULLXES BLACK DEATH\\06_autonomy\\models\\cerber_v2\\exports\\compare_2080_vs_6000\\compare_2080_vs_6000.pdf",
+  "runs": [
+    {
+      "id": "PRO6000_v1",
+      "label": "RTX PRO 6000\nv1 VisDrone",
+      "short": "6000 v1",
+      "gpu": "RTX PRO 6000 ~97GB",
+      "imgsz": 1280,
+      "batch": 32,
+      "epochs": 100,
+      "wall_h": 2.015,
+      "train_n": null,
+      "val_n": 548,
+      "mAP50": 0.76,
+      "mAP50_95": 0.439,
+      "P": 0.818,
+      "R": 0.692,
+      "note": "from scratch-ish yolov8s",
+      "color": "#4CC9F0"
+    },
+    {
+      "id": "PRO6000_v2",
+      "label": "RTX PRO 6000\nv2 +UAV FT",
+      "short": "6000 v2",
+      "gpu": "RTX PRO 6000 ~97GB",
+      "imgsz": 640,
+      "batch": 64,
+      "epochs": 40,
+      "wall_h": 0.427,
+      "train_n": 13568,
+      "val_n": 1800,
+      "mAP50": 0.709,
+      "mAP50_95": 0.419,
+      "P": 0.816,
+      "R": 0.655,
+      "note": "Seraphim UAV; uav mAP50 0.926",
+      "color": "#90E0EF"
+    },
+    {
+      "id": "2080_ft",
+      "label": "RTX 2080 SUPER\nVisDrone FT",
+      "short": "2080 FT",
+      "gpu": "RTX 2080 SUPER 8GB",
+      "imgsz": 640,
+      "batch": 6,
+      "epochs": 60,
+      "wall_h": 2.2,
+      "train_n": 6471,
+      "val_n": 548,
+      "mAP50": 0.6078,
+      "mAP50_95": 0.3279,
+      "P": 0.7569,
+      "R": 0.5552,
+      "note": "FT from cerber-cv-v2; no Seraphim",
+      "color": "#C45C26"
+    }
+  ],
+  "caveat": "Not identical hyperparams; directional HW/run compare from CERBER canon + local 2080 export"
+}

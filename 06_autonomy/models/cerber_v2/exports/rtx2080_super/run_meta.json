@@ -1,0 +1,24 @@
+{
+  "label": "rtx2080_super",
+  "gpu": "NVIDIA GeForce RTX 2080 SUPER 8GB",
+  "imgsz": 640,
+  "batch": 6,
+  "train_images": 6471,
+  "val_images": 548,
+  "epochs": 60,
+  "wall_time_min": 132.17,
+  "best_mAP50": 0.6078,
+  "best_mAP50_epoch": 39,
+  "last_mAP50": 0.6059,
+  "best_mAP50_95": 0.3279,
+  "best_precision": 0.7569,
+  "best_recall": 0.5552,
+  "dataset": "VisDrone-only (Seraphim skipped)",
+  "run_name": "v2-pursuit-2080",
+  "source_csv": "D:\\NULLXES\\NULLXES BLACK DEATH\\runs\\detect\\cerber-detect\\v2-pursuit-2080\\results.csv",
+  "exports": {
+    "png": "D:\\NULLXES\\NULLXES BLACK DEATH\\06_autonomy\\models\\cerber_v2\\exports\\rtx2080_super\\curves_rtx2080_super.png",
+    "pdf": "D:\\NULLXES\\NULLXES BLACK DEATH\\06_autonomy\\models\\cerber_v2\\exports\\rtx2080_super\\curves_rtx2080_super.pdf",
+    "overlay_csv": "D:\\NULLXES\\NULLXES BLACK DEATH\\06_autonomy\\models\\cerber_v2\\exports\\rtx2080_super\\metrics_overlay.csv"
+  }
+}

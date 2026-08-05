@@ -1,0 +1,4 @@
+id,short,gpu,imgsz,batch,epochs,wall_h,val_n,mAP50,mAP50_95,P,R,note
+PRO6000_v1,6000 v1,RTX PRO 6000 ~97GB,1280,32,100,2.015,548,0.76,0.439,0.818,0.692,from scratch-ish yolov8s
+PRO6000_v2,6000 v2,RTX PRO 6000 ~97GB,640,64,40,0.427,1800,0.709,0.419,0.816,0.655,Seraphim UAV; uav mAP50 0.926
+2080_ft,2080 FT,RTX 2080 SUPER 8GB,640,6,60,2.2,548,0.6078,0.3279,0.7569,0.5552,FT from cerber-cv-v2; no Seraphim

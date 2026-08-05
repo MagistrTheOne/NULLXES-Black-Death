@@ -18,12 +18,59 @@ install/
 log/
 *.pcd
 
-# Models / data (крупные артефакты — хранить отдельно или LFS)
+# Models / weights / engines
 *.onnx
 *.pt
 *.pth
 *.engine
+*.pkl
+*.h5
 !06_autonomy/models/**/.gitkeep
+
+# Datasets / media (train data never in git)
+datasets/
+**/datasets/
+**/sources/
+runs/
+wandb/
+ultralytics/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.webp
+*.tif
+*.tiff
+*.gif
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.incomplete
+*.lock
+!00_docs/**/*.png
+!00_docs/**/*.jpg
+!06_autonomy/models/cerber_v2/exports/**
+!99_tools/**/*.md
+
+# Labels / YOLO trees generated locally
+**/images/
+**/labels/
+!**/images/.gitkeep
+!**/labels/.gitkeep
+
+# HF / local caches
+.cache/
+**/.cache/
+**/hf_cache/
+*.arrow
+*.parquet
 
 # IDE / OS
 .idea/
@@ -43,7 +90,6 @@ Desktop.ini
 *.frd
 *.odb
 *.log
-!99_tools/**/*.md
 
 # Secrets
 .env
