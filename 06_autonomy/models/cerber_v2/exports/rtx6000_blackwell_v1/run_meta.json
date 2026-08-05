@@ -1,0 +1,12 @@
+{
+  "label": "rtx6000_blackwell_v1",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell ~97GB",
+  "imgsz": 1280,
+  "batch": 32,
+  "epochs": 100,
+  "wall_time_h": 2.015,
+  "canon_mAP50": 0.760,
+  "canon_mAP50_95": 0.439,
+  "local_reval_VisDrone548": {"P": 0.819, "R": 0.693, "mAP50": 0.762, "mAP50_95": 0.442, "imgsz": 1280},
+  "source": "MagistrTheOne/CERBER-CV + local val plots"
+}

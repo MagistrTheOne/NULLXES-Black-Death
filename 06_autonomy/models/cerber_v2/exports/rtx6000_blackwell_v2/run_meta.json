@@ -1,0 +1,26 @@
+{
+  "label": "rtx6000_blackwell_v2",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell ~97GB",
+  "imgsz": 640,
+  "batch": 64,
+  "train_images": 13568,
+  "val_images": 1800,
+  "epochs": 40,
+  "wall_time_min": 25.59,
+  "best_mAP50": 0.7094,
+  "best_mAP50_epoch": 39,
+  "last_mAP50": 0.7086,
+  "best_mAP50_95": 0.4197,
+  "best_precision": 0.8198,
+  "best_recall": 0.6573,
+  "dataset": "VisDrone + Seraphim UAV FT (canon CERBER-CV-v2)",
+  "run_name": "v1-uav-ft",
+  "local_reval_VisDrone548": {
+    "P": 0.749,
+    "R": 0.549,
+    "mAP50": 0.603,
+    "mAP50_95": 0.325,
+    "imgsz": 640
+  },
+  "source": "MagistrTheOne/CERBER-CV-v2 + local val plots"
+}

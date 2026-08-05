@@ -57,6 +57,9 @@ ultralytics/
 !00_docs/**/*.png
 !00_docs/**/*.jpg
 !06_autonomy/models/cerber_v2/exports/**
+# keep plots/metrics in exports; do not grow repo with weight dumps
+06_autonomy/models/cerber_v2/exports/**/*.pt
+06_autonomy/models/cerber_v2/exports/**/*.onnx
 !99_tools/**/*.md
 
 # Labels / YOLO trees generated locally
