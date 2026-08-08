@@ -127,10 +127,16 @@ Detect → Track → pursue / escort / deny airspace presence.
 
 Obstacle / UAV = airspace awareness + defensive pursuit without weapons.  
 CERBER RT: indoor navigation / logistics awareness only.  
-No weapons / munitions datasets or framing in train or runtime.
+No weapons / munitions datasets or framing in train or runtime.  
+Product boundary: [ADR-004](../adr/ADR-004_CIVIL_PRODUCT_BOUNDARY.md).
+
+## POSEIDON
+
+Specialist dataset agents (router + ONNX packs) — sibling of CERBER generalist.  
+Canon: [POSEIDON.md](./POSEIDON.md) · [ADR-005](../adr/ADR-005_POSEIDON.md).
 
 ## Refs
 
 - Datasets / A100: `06_autonomy/models/datasets/DATASET_STACK_A100.md`  
 - Brain map: `BRAIN_SCHEME.md`  
-- Code root: `06_autonomy/perception/`
+- Code root: `06_autonomy/perception/` · `06_autonomy/poseidon/`

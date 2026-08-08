@@ -2,8 +2,40 @@
 
 from __future__ import annotations
 
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
+
+
+def _ensure_cuda_dll_path() -> None:
+    """Windows: expose torch/cuDNN CUDA 12 DLLs to ORT CUDA EP."""
+    if sys.platform != "win32":
+        return
+    candidates: list[Path] = []
+    try:
+        import torch
+
+        candidates.append(Path(torch.__file__).resolve().parent / "lib")
+    except Exception:
+        pass
+    site = Path(sys.prefix) / "Lib" / "site-packages" / "nvidia"
+    if site.is_dir():
+        for sub in ("cublas", "cudnn", "cuda_runtime", "cufft", "curand", "cusolver", "cusparse"):
+            bin_dir = site / sub / "bin"
+            if bin_dir.is_dir():
+                candidates.append(bin_dir)
+    path = os.environ.get("PATH", "")
+    parts = path.split(os.pathsep)
+    for d in candidates:
+        s = str(d)
+        if d.is_dir() and s not in parts:
+            parts.insert(0, s)
+            try:
+                os.add_dll_directory(s)
+            except (OSError, AttributeError):
+                pass
+    os.environ["PATH"] = os.pathsep.join(parts)
 
 
 @dataclass(frozen=True)
@@ -36,6 +68,7 @@ class OrtSessionFactory:
         input_name: str,
         output_name: str,
     ) -> OrtSession:
+        _ensure_cuda_dll_path()
         import onnxruntime as ort
 
         if not providers:

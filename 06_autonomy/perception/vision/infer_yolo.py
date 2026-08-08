@@ -51,10 +51,20 @@ class YoloDetector:
         self._session = session
 
     def infer(self, bgr: np.ndarray) -> list[Detection]:
+        dets, _ = self.infer_timed(bgr)
+        return dets
+
+    def infer_timed(self, bgr: np.ndarray) -> tuple[list[Detection], dict[str, float]]:
+        """Run detect with stage timings in milliseconds."""
+        import time
+
         th, tw = self.cfg.input_h, self.cfg.input_w
+        t0 = time.perf_counter()
         padded, ratio, (pad_x, pad_y) = letterbox(bgr, (th, tw))
         tensor = bgr_to_nchw_float(padded)
+        t1 = time.perf_counter()
         raw = self._session.run(tensor)
+        t2 = time.perf_counter()
         dets = decode_yolo_v8_raw(
             np.asarray(raw),
             num_classes=self.cfg.num_classes,
@@ -64,7 +74,13 @@ class YoloDetector:
             pad_y=pad_y,
             orig_hw=bgr.shape[:2],
         )
-        return nms(dets, self.cfg.iou)
+        dets = nms(dets, self.cfg.iou)
+        t3 = time.perf_counter()
+        return dets, {
+            "preprocess_ms": (t1 - t0) * 1000.0,
+            "inference_ms": (t2 - t1) * 1000.0,
+            "nms_ms": (t3 - t2) * 1000.0,
+        }
 
 
 def build_detector(

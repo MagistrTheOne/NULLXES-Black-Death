@@ -1,0 +1,39 @@
+# NULLXES POSEIDON / CERBER model registry (server + companion)
+# Fail-closed: runtime loads only entries with sha256 != pending
+
+version: 1
+server_roles:
+  train: "NULLXES GPU farm — Ultralytics train → ONNX opset 17 / TRT"
+  gsc: "GroundSwarmCoordinator — TaskOffer / sectors (no LLM)"
+  registry: "This file + pack.yaml sha256"
+
+cerber:
+  v1:
+    config: 06_autonomy/models/configs/detector_alpha.yaml
+    onnx: 06_autonomy/models/onnx/detector_alpha.onnx
+  v2:
+    config: 06_autonomy/models/configs/detector_alpha_v2.yaml
+    onnx: 06_autonomy/models/onnx/detector_alpha_v2.onnx
+  v2b:
+    config: 06_autonomy/models/configs/detector_alpha_v2b.yaml
+    onnx: 06_autonomy/models/onnx/detector_alpha_v2b.onnx
+
+poseidon_packs:
+  - pack_id: uav_seraphim
+    dataset: seraphim-drone-detection
+    manifest: 06_autonomy/models/poseidon/packs/uav_seraphim/pack.yaml
+    wave: P0
+  - pack_id: fire_flame
+    dataset: FLAME
+    manifest: 06_autonomy/models/poseidon/packs/fire_flame/pack.yaml
+    wave: P1
+  - pack_id: power_insplad
+    dataset: InsPLAD-MPID
+    manifest: 06_autonomy/models/poseidon/packs/power_insplad/pack.yaml
+    wave: P1
+
+civil_reject:
+  - weapon
+  - tank
+  - fire-control
+  - munition

@@ -1,0 +1,29 @@
+# POSEIDON router v1 — rule gates, no LLM (ADR-005)
+max_packs_per_frame: 1
+priority:
+  - uav_seraphim
+  - fire_flame
+  - power_insplad
+
+gates:
+  uav_seraphim:
+    mission_modes:
+      - AIRSPACE_GUARD
+      - NOMINAL
+      - DISASTER
+    cerber_hint_cls: [2]
+    cerber_hint_min_conf: 0.15
+    always: false
+  fire_flame:
+    mission_modes:
+      - DISASTER
+      - INFRA_INSPECT
+      - NOMINAL
+    cerber_hint_cls: [10]
+    cerber_hint_min_conf: 0.10
+  power_insplad:
+    mission_modes:
+      - INFRA_INSPECT
+      - NOMINAL
+    cerber_hint_cls: [5]
+    cerber_hint_min_conf: 0.10

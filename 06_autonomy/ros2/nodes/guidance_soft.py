@@ -1,7 +1,7 @@
 """Soft-bus guidance node.
 
-Publishes setpoint only when real NAV + GOAL have arrived and this channel is active.
-Does not invent mission goals or cruise altitude.
+Publishes setpoint when NAV + (GOAL or TrackTarget) present and channel active.
+Track modes: chase / escort / deny — civil presence only (ADR-004).
 """
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ import math
 import time
 
 from control.guidance.simple_guidance import NavState, simple_guidance
+from control.guidance.track_guidance import track_guidance
 from soft_bus.bus import SoftBus
 from soft_bus.messages import (
     TOPIC_ACTIVE,
@@ -17,11 +18,13 @@ from soft_bus.messages import (
     TOPIC_GOAL,
     TOPIC_NAV,
     TOPIC_SETPOINT,
+    TOPIC_TRACK_TARGET,
     ActiveChannel,
     FmMode,
     GoalMsg,
     NavStateMsg,
     Setpoint,
+    TrackTarget,
 )
 
 
@@ -31,10 +34,12 @@ class GuidanceSoftNode:
         self.channel_id = channel_id
         self._nav: NavStateMsg | None = None
         self._goal: GoalMsg | None = None
+        self._track: TrackTarget | None = None
         self._mode = "SAFE_LOITER"
         self._active = "A"
         bus.subscribe(TOPIC_NAV, self._on_nav)
         bus.subscribe(TOPIC_GOAL, self._on_goal)
+        bus.subscribe(TOPIC_TRACK_TARGET, self._on_track)
         bus.subscribe(TOPIC_FM_MODE, self._on_mode)
         bus.subscribe(TOPIC_ACTIVE, self._on_active)
 
@@ -44,6 +49,10 @@ class GuidanceSoftNode:
 
     def _on_goal(self, m: GoalMsg) -> None:
         self._goal = m
+        self.publish()
+
+    def _on_track(self, m: TrackTarget) -> None:
+        self._track = m
         self.publish()
 
     def _on_mode(self, m: FmMode) -> None:
@@ -57,16 +66,17 @@ class GuidanceSoftNode:
     def publish(self) -> None:
         if self._active != self.channel_id:
             return
-        if self._nav is None or self._goal is None:
+        if self._nav is None:
             return
         if math.isnan(self._nav.yaw):
-            return  # attitude not wired — do not invent heading
+            return
 
         thrust = 0.35
         if self._mode in ("SAFE_LOITER", "RTB"):
             thrust = 0.25
         if self._mode == "DEGRADED_PROP":
             thrust = 0.3
+
         nav = NavState(
             self._nav.x,
             self._nav.y,
@@ -76,12 +86,39 @@ class GuidanceSoftNode:
             self._nav.vz,
             self._nav.yaw,
         )
-        out = simple_guidance(nav, self._goal.x, self._goal.y, self._goal.z, thrust)
+
+        if self._track is not None and self._mode not in ("SAFE_LOITER", "RTB"):
+            out = track_guidance(
+                nav,
+                self._track.x,
+                self._track.y,
+                self._track.z,
+                self._track.mode,
+            )
+            # Scale thrust for FM modes
+            if self._mode in ("SAFE_LOITER", "RTB"):
+                pass
+            else:
+                out = type(out)(
+                    out.roll_rad,
+                    out.pitch_rad,
+                    out.yaw_rate_rps,
+                    thrust,
+                    out.valid,
+                )
+        elif self._goal is not None:
+            out = simple_guidance(
+                nav, self._goal.x, self._goal.y, self._goal.z, thrust
+            )
+        else:
+            return
+
         key = (
             round(out.roll_rad, 4),
             round(out.pitch_rad, 4),
             round(out.thrust_norm, 4),
             self._mode,
+            getattr(self._track, "track_id", -1) if self._track else -1,
         )
         if getattr(self, "_last_key", None) == key:
             return

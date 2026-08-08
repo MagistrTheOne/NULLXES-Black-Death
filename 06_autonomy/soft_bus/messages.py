@@ -35,12 +35,63 @@ class Detection:
     y1: float
     x2: float
     y2: float
+    track_id: int = -1
 
 
 @dataclass
 class DetectionArray:
     detections: list[Detection] = field(default_factory=list)
     camera: str = "forward"
+    stamp_s: float = 0.0
+
+
+@dataclass
+class TrackMsg:
+    track_id: int
+    cls_id: int
+    conf: float
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    age: int = 0
+    hits: int = 0
+
+
+@dataclass
+class TrackArray:
+    tracks: list[TrackMsg] = field(default_factory=list)
+    camera: str = "forward"
+    stamp_s: float = 0.0
+
+
+@dataclass
+class SceneAlert:
+    severity: str  # info | warn | critical
+    kind: str
+    fact_id: str
+    summary: str
+
+
+@dataclass
+class SceneAssessment:
+    stamp_s: float
+    summary: str
+    alerts: list[SceneAlert] = field(default_factory=list)
+    suggested_intent_kind: str = "ALERT_ONLY"
+    link_ok: bool = True
+
+
+@dataclass
+class PoseidonPackStatus:
+    pack_id: str
+    latency_ms: float
+    n_dets: int = 0
+
+
+@dataclass
+class PoseidonActivePacks:
+    packs: list[PoseidonPackStatus] = field(default_factory=list)
     stamp_s: float = 0.0
 
 
@@ -140,6 +191,20 @@ class GoalMsg:
     stamp_s: float = 0.0
 
 
+@dataclass
+class TrackTarget:
+    """Civil chase/escort/deny target in ENU — presence geometry only (ADR-004)."""
+
+    track_id: int
+    mode: str  # chase | escort | deny
+    x: float
+    y: float
+    z: float
+    cls_id: int = -1
+    conf: float = 0.0
+    stamp_s: float = 0.0
+
+
 # Canon topic constants
 TOPIC_SETPOINT = "/bd/l0/setpoint"
 TOPIC_ACTIVE = "/bd/dual/active"
@@ -156,8 +221,13 @@ TOPIC_GNSS = "/bd/gnss/fix"
 TOPIC_NAV = "/bd/nav/state"
 TOPIC_DETECTIONS = "/bd/vision/detections"
 TOPIC_VISION_HEALTH = "/bd/vision/health"
+TOPIC_TRACKS = "/bd/vision/tracks"
+TOPIC_SCENE = "/bd/vision/scene"
+TOPIC_POSEIDON_DETECTIONS = "/bd/poseidon/detections"
+TOPIC_POSEIDON_ACTIVE = "/bd/poseidon/active_packs"
 TOPIC_HB_A = "/bd/dual/heartbeat_A"
 TOPIC_HB_B = "/bd/dual/heartbeat_B"
 TOPIC_MIRROR = "/bd/dual/mirror"
 TOPIC_GOAL = "/bd/planning/goal"
 TOPIC_BATTERY_SOC = "/bd/power/battery_soc"
+TOPIC_TRACK_TARGET = "/bd/guidance/track_target"

@@ -1,0 +1,16 @@
+# POSEIDON train host — extras only.
+# Torch + CUDA come from the machine image (RunPod PyTorch / farm AMI).
+# Do NOT pip install torch / torchvision / torchtorch.
+#
+#   python -c "import torch; assert torch.cuda.is_available()"
+#   pip install -r 06_autonomy/models/poseidon/requirements.txt
+
+ultralytics>=8.0,<9
+huggingface_hub>=0.23
+PyYAML>=6.0
+tqdm>=4.66
+numpy>=1.26
+opencv-python-headless>=4.8,<5
+onnx>=1.15
+onnxruntime-gpu>=1.17; platform_system != "Darwin"
+onnxruntime>=1.17; platform_system == "Darwin"

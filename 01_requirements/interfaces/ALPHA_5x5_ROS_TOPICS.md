@@ -27,7 +27,12 @@
 | `/bd/gnss/fix` | 5–10 Hz |
 | `/bd/nav/state` | 50 Hz |
 | `/bd/vision/detections` | 10–30 Hz |
+| `/bd/vision/tracks` | 10–30 Hz |
+| `/bd/vision/scene` | event / ≤10 Hz (SceneAssessment) |
 | `/bd/vision/health` | 2 Hz |
+| `/bd/poseidon/detections` | on specialist fire |
+| `/bd/poseidon/active_packs` | on specialist fire |
+| `/bd/guidance/track_target` | event (civil chase/escort/deny) |
 
 ## Dual-compute
 

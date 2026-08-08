@@ -1,0 +1,12 @@
+pack_id: power_insplad
+project: poseidon
+run_name: poseidon-power_insplad
+base_weights: yolov8s.pt
+data_yaml: data.yaml
+imgsz: 640
+epochs: 100
+batch: 32
+device: 0
+workers: 8
+export_imgsz: 640
+export_opset: 17
