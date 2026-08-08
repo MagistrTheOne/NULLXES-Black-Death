@@ -1,6 +1,7 @@
 # Implementation Gap Map — NULLXES BLACK DEATH
 
 **Date:** 2026-08-04 · FS audit · no runtime  
+**Superseded for repo-wide status:** [`REPO_STATUS_MAP.md`](REPO_STATUS_MAP.md) **(2026-08-08)** — use that file; autonomy rows below are stale (Track/SensorHub/Fusion/POSEIDON/L0Bridge now HAS_CODE).  
 **Legend:** DOC_ONLY · SKELETON · PARTIAL · HAS_CODE
 
 ---
@@ -14,11 +15,11 @@
 | `03_structure` | PARTIAL | notes + thin export |
 | `04_propulsion_energy` | DOC_ONLY | Alpha energy notes |
 | `05_avionics` | PARTIAL | L0 C++; drivers empty |
-| `06_autonomy` | HAS_CODE core | Detect/DMI/dual/SoftBus; Track/Seg/Nav missing |
+| `06_autonomy` | MIXED → see REPO_STATUS_MAP | SoftBus chain HAS_CODE; packs/VIO native pending |
 | `07_simulation` | PARTIAL | **cerber_studio** primary; lab deprecated; twin BLOCKED |
 | `08` / `09` | DOC_ONLY | practice plans / mfg notes |
 | `10_tests` | PARTIAL | unit OK; integ/HIL/flight BLOCKED |
-| `99_tools` | PARTIAL | L0 smoke + CI yml |
+| `99_tools` | PARTIAL | L0 smoke + CI yml (not under `.github/`) |
 
 ---
 

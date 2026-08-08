@@ -1,17 +1,19 @@
 # CERBER perception code
 
-Canon stack: `00_docs/architecture/CERBER_VISION_STACK.md` · Robot: `00_docs/architecture/CERBER_RT.md`
+Canon: `00_docs/architecture/CERBER_VISION_STACK.md` · Status SoT: `00_docs/architecture/REPO_STATUS_MAP.md`
 
 | Dir | Layer | Status |
 |-----|-------|--------|
-| `vision/` | preprocess + **L1 Detect** ONNX (aerial + RT session) | shipped (letterbox, session, decode) |
-| `qr/` | **CERBER RT** QR decoder | planned — see CERBER_RT |
-| `segmentation/` | **L2 Segment** | planned — SegFormer service |
-| `tracking/` | **L3 Track** | planned — BoT-SORT |
-| `navigation/` | **L4 Nav** decision aids | planned — OpenLander / RT crawl |
-| `fusion/` | Nav EKF + CV / proximity fusion | EKF partial; RT proximity planned |
-| `sensors/` | adapters | stubs / BLOCKED without HW |
-| `slam/` | optional | README only |
+| `vision/` | L1 Detect ONNX (CERBER) | **HAS_CODE** — needs live cam + engine on target |
+| `sensors/` | SensorHub cam + FC IMU/GNSS | **HAS_CODE** v1 |
+| `calibration/` | Intrinsics/extrinsics loader | **HAS_CODE** — bench YAML in `../calib/` |
+| `tracking/` | BoT-SORT + IOU degraded fallback | **HAS_CODE** |
+| `fusion/` | SceneFusion WorldFact + EKF + nav_fuse + SceneAnalyst | **HAS_CODE** |
+| `segmentation/` | SegFormer SoftBus service | **HAS_CODE shell** — no weights → `ok=false` |
+| `depth/` | Obstacle grid service | **HAS_CODE shell** — FLIGHT-2 |
+| `slam/` | `IVioProvider` (OpenVINS/Basalt) | **Contract** — native lib not linked (`degraded`) |
+| `qr/` | CERBER RT QR | **absent** — wait ADR-003 |
+| `navigation/` | OpenLander / crawl aids | **absent** |
 
-Weights/configs: `../models/` (`detector_alpha*.yaml` aerial · `detector_rt_v1.yaml` robot).  
-Mission consumer: `../dmi/`.
+Weights: `../models/onnx/detector_alpha*.onnx` · POSEIDON packs: `../models/poseidon/packs/` (manifests; ONNX pending).  
+Mission consumer: `../dmi/`. SoftBus nodes: `../ros2/nodes/`.

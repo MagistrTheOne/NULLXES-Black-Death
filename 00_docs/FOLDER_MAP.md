@@ -1,5 +1,7 @@
 # Назначение папок — NULLXES BLACK DEATH
 
+**Статус реализации (что есть / чего нет):** [`architecture/REPO_STATUS_MAP.md`](architecture/REPO_STATUS_MAP.md)
+
 ## Корневые блоки
 
 | Папка | Назначение |
