@@ -70,6 +70,12 @@ class WorldFact:
     confidence: float
     source_id: str
     stamp_s: float = 0.0
+    frame_id: str = "enu"
+    cov_xx: float = 1.0e6
+    cov_yy: float = 1.0e6
+    cov_zz: float = 1.0e6
+    stamp_ns: int = 0
+    sensor_stamp_ns: int = 0
 
 
 @dataclass(frozen=True)

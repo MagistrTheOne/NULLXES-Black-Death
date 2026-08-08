@@ -11,18 +11,21 @@ from pathlib import Path
 from dmi.messages import TOPIC_DMI_WORLD_FACT, WorldFact
 from dmi.world_cache import SharedWorldCache
 from perception.fusion.scene_analyst import analyze_scene
-from perception.fusion.scene_fusion import CERBER_NAMES, tracks_to_facts
-from perception.tracking import DetIn, IouTracker
+from perception.fusion.scene_fusion import CERBER_NAMES, FusionCalib, tracks_to_facts
+from perception.tracking import DetIn, FallbackTracker, IouTracker
 from soft_bus.bus import SoftBus
 from soft_bus.messages import (
+    TOPIC_CAM_FORWARD,
     TOPIC_DETECTIONS,
     TOPIC_NAV,
+    TOPIC_NAV_FUSED,
     TOPIC_POSEIDON_ACTIVE,
     TOPIC_POSEIDON_DETECTIONS,
     TOPIC_SCENE,
     TOPIC_TRACKS,
     Detection as BusDet,
     DetectionArray,
+    ImageMsg,
     NavStateMsg,
     PoseidonActivePacks,
     PoseidonPackStatus,
@@ -36,6 +39,25 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
+def _load_fusion_calib() -> FusionCalib | None:
+    try:
+        from perception.calibration.loader import load_calib_bundle
+
+        root = _repo_root() / "06_autonomy" / "calib"
+        bundle = load_calib_bundle(
+            root / "camera_forward.yaml",
+            root / "extrinsics.yaml",
+            root / "imu0.yaml",
+        )
+        return FusionCalib(
+            intrinsics=bundle.camera,
+            T_body_cam=bundle.T_body_cam,
+            td_cam_imu_s=bundle.td_cam_imu_s,
+        )
+    except Exception:
+        return None
+
+
 class VisionFactsSoftNode:
     def __init__(
         self,
@@ -45,14 +67,19 @@ class VisionFactsSoftNode:
         enable_poseidon: bool = True,
         mission_mode: str = "NOMINAL",
         link_ok: bool = True,
+        use_botsort: bool = True,
+        prefer_fused_nav: bool = True,
     ) -> None:
         self.bus = bus
         self.source_id = source_id
         self.mission_mode = mission_mode
         self.link_ok = link_ok
-        self.tracker = IouTracker()
+        self.prefer_fused_nav = prefer_fused_nav
+        self.tracker = FallbackTracker() if use_botsort else IouTracker()
         self.cache = SharedWorldCache()
         self._nav: NavStateMsg | None = None
+        self._frame: object | None = None
+        self._calib = _load_fusion_calib()
         self._poseidon = None
         if enable_poseidon:
             try:
@@ -73,6 +100,8 @@ class VisionFactsSoftNode:
 
         bus.subscribe(TOPIC_DETECTIONS, self._on_detections)
         bus.subscribe(TOPIC_NAV, self._on_nav)
+        bus.subscribe(TOPIC_NAV_FUSED, self._on_fused)
+        bus.subscribe(TOPIC_CAM_FORWARD, self._on_cam)
 
     def set_link_ok(self, ok: bool) -> None:
         self.link_ok = ok
@@ -81,16 +110,21 @@ class VisionFactsSoftNode:
         self.mission_mode = mode
 
     def _on_nav(self, nav: NavStateMsg) -> None:
-        self._nav = nav
+        if not self.prefer_fused_nav or self._nav is None or self._nav.source != "fused":
+            self._nav = nav
+
+    def _on_fused(self, nav: NavStateMsg) -> None:
+        if self.prefer_fused_nav:
+            self._nav = nav
+
+    def _on_cam(self, img: ImageMsg) -> None:
+        self._frame = img.bgr
 
     def _on_detections(self, arr: DetectionArray) -> None:
         now = time.time()
         stamp = arr.stamp_s or now
         dets = list(arr.detections)
 
-        # Optional POSEIDON pass requires image — specialist path is bus-side only
-        # when poseidon detections published separately; merge if present in same tick
-        # via TOPIC_POSEIDON_DETECTIONS latest.
         poseidon_arr = self.bus.latest(TOPIC_POSEIDON_DETECTIONS)
         if isinstance(poseidon_arr, DetectionArray):
             dets = dets + list(poseidon_arr.detections)
@@ -109,7 +143,10 @@ class VisionFactsSoftNode:
             )
             for d in dets
         ]
-        tracks = self.tracker.update(det_ins)
+        if isinstance(self.tracker, FallbackTracker):
+            tracks = self.tracker.update(det_ins, frame_bgr=self._frame)
+        else:
+            tracks = self.tracker.update(det_ins)
         self.bus.publish(
             TOPIC_TRACKS,
             TrackArray(
@@ -133,7 +170,11 @@ class VisionFactsSoftNode:
         )
 
         facts = tracks_to_facts(
-            tracks, self._nav, source_id=self.source_id, stamp_s=stamp
+            tracks,
+            self._nav,
+            calib=self._calib,
+            source_id=self.source_id,
+            stamp_s=stamp,
         )
         for fact in facts:
             self.cache.upsert(fact, now_s=now)

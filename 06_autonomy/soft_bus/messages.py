@@ -25,6 +25,13 @@ class NavStateMsg:
     vz: float = 0.0
     yaw: float = 0.0
     stamp_s: float = 0.0
+    stamp_ns: int = 0
+    sensor_stamp_ns: int = 0
+    frame_id: str = "enu"
+    cov_xx: float = 1.0e6
+    cov_yy: float = 1.0e6
+    cov_zz: float = 1.0e6
+    source: str = "fc"  # fc | vio | fused
 
 
 @dataclass
@@ -137,6 +144,9 @@ class ImuMsg:
     gyro_rps: tuple[float, float, float] = (0.0, 0.0, 0.0)
     accel_mps2: tuple[float, float, float] = (0.0, 0.0, 0.0)
     stamp_s: float = 0.0
+    stamp_ns: int = 0
+    sensor_stamp_ns: int = 0
+    frame_id: str = "body"
 
 
 @dataclass
@@ -146,6 +156,10 @@ class GnssFix:
     z: float = 0.0
     fix_ok: bool = False
     stamp_s: float = 0.0
+    stamp_ns: int = 0
+    sensor_stamp_ns: int = 0
+    frame_id: str = "enu"
+    hdop: float = 99.0
 
 
 @dataclass
@@ -173,6 +187,98 @@ class ImageMsg:
     bgr: object  # np.ndarray
     camera: str = "forward"
     stamp_s: float = 0.0
+    stamp_ns: int = 0
+    sensor_stamp_ns: int = 0
+    frame_id: str = "cam_forward"
+    seq: int = 0
+
+
+@dataclass
+class CalibActiveMsg:
+    """Active calibration file hashes — fail-closed if empty/mismatch."""
+
+    camera_hash: str = ""
+    imu_hash: str = ""
+    extrinsics_hash: str = ""
+    stamp_s: float = 0.0
+    ok: bool = False
+
+
+@dataclass
+class TimeSyncMsg:
+    """Companion monotonic ↔ FC / sensor offsets [ns]."""
+
+    cam_imu_offset_ns: int = 0
+    fc_offset_ns: int = 0
+    stamp_ns: int = 0
+    quality: str = "unknown"  # unknown | coarse | locked
+
+
+@dataclass
+class VioStateMsg:
+    x: float = 0.0
+    y: float = 0.0
+    z: float = 0.0
+    vx: float = 0.0
+    vy: float = 0.0
+    vz: float = 0.0
+    qw: float = 1.0
+    qx: float = 0.0
+    qy: float = 0.0
+    qz: float = 0.0
+    cov_xx: float = 1.0e6
+    cov_yy: float = 1.0e6
+    cov_zz: float = 1.0e6
+    status: str = "uninit"  # uninit | ok | degraded | diverge
+    provider: str = ""
+    stamp_s: float = 0.0
+    stamp_ns: int = 0
+    sensor_stamp_ns: int = 0
+    frame_id: str = "body"
+
+
+@dataclass
+class MavlinkHealthMsg:
+    link_ok: bool = False
+    mode: str = ""
+    armed: bool = False
+    guided_ok: bool = False
+    failsafe: bool = False
+    last_heartbeat_s: float = 0.0
+    stamp_s: float = 0.0
+
+
+@dataclass
+class SensorHubHealth:
+    cam_ok: bool = False
+    imu_ok: bool = False
+    gnss_ok: bool = False
+    dropped_frames: int = 0
+    detail: str = ""
+    stamp_s: float = 0.0
+
+
+@dataclass
+class SegMetaMsg:
+    """Rate-limited segmentation meta (mask optional / out-of-band)."""
+
+    classes_present: list[str] = field(default_factory=list)
+    latency_ms: float = 0.0
+    ok: bool = False
+    stamp_s: float = 0.0
+    stamp_ns: int = 0
+
+
+@dataclass
+class DepthGridMsg:
+    """Coarse obstacle grid in body/ENU — FLIGHT-2."""
+
+    cells: list[tuple[float, float, float, float]] = field(default_factory=list)
+    # (x, y, z, confidence)
+    frame_id: str = "body"
+    ok: bool = False
+    stamp_s: float = 0.0
+    stamp_ns: int = 0
 
 
 @dataclass
@@ -231,3 +337,12 @@ TOPIC_MIRROR = "/bd/dual/mirror"
 TOPIC_GOAL = "/bd/planning/goal"
 TOPIC_BATTERY_SOC = "/bd/power/battery_soc"
 TOPIC_TRACK_TARGET = "/bd/guidance/track_target"
+TOPIC_NAV_VIO = "/bd/nav/vio"
+TOPIC_NAV_FUSED = "/bd/nav/fused"
+TOPIC_VISION_SEG = "/bd/vision/seg"
+TOPIC_DEPTH_GRID = "/bd/depth/grid"
+TOPIC_CALIB_ACTIVE = "/bd/calib/active"
+TOPIC_TIME_SYNC = "/bd/time/sync"
+TOPIC_MAVLINK_HEALTH = "/bd/l0/mavlink_health"
+TOPIC_SENSORHUB_HEALTH = "/bd/sensorhub/health"
+TOPIC_PLANE_CMD = "/bd/l0/plane_cmd"

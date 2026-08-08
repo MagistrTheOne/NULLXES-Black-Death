@@ -1,0 +1,13 @@
+# Identity mounts for BENCH — replace with Kalibr + CAD for FLIGHT-1.
+T_body_cam:
+  parent_frame: body
+  child_frame: cam_forward
+  R: [0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0]
+  # cam +Z forward, +X right, +Y down → body ENU-style +X forward, +Y left, +Z up (approx)
+  t: [0.15, 0.0, 0.0]
+T_body_imu:
+  parent_frame: body
+  child_frame: imu0
+  R: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+  t: [0.0, 0.0, 0.0]
+td_cam_imu_s: 0.0

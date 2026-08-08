@@ -1,6 +1,9 @@
-# SLAM
+# VIO / SLAM
 
-**BLOCKED** for Alpha Flight-1.
+**Status:** SoftBus contract HAS_CODE — native OpenVINS/Basalt NOT linked
 
-OpenVINS / ORB-SLAM3 (or equivalent) may land here after sensor drivers exist.
-Do not commit stubs, toy maps, or invented pose streams.
+- `ivio.IVioProvider` — SoftBus interface
+- `OpenVinsProvider` / `BasaltProvider` — deploy wrappers (status=`degraded` until native backend)
+- Soft node: `ros2/nodes/vio_soft.py` → `/bd/nav/vio` + `/bd/nav/fused`
+
+Winner chosen by onboard bench + GPL policy (see ONBOARD_PERCEPTION_RESEARCH).

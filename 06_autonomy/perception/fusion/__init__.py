@@ -1,14 +1,24 @@
 """Nav + CV scene fusion."""
 
 from .ekf_nav import NavEKF, make_nav_ekf
+from .nav_fuse import fuse_nav_vio
 from .scene_analyst import AnalystConfig, analyze_scene
-from .scene_fusion import CameraPinModel, track_to_enu, tracks_to_facts
+from .scene_fusion import (
+    CERBER_NAMES,
+    FusionCalib,
+    ObjectHeightPrior,
+    track_to_enu,
+    tracks_to_facts,
+)
 
 __all__ = [
     "AnalystConfig",
-    "CameraPinModel",
+    "CERBER_NAMES",
+    "FusionCalib",
     "NavEKF",
+    "ObjectHeightPrior",
     "analyze_scene",
+    "fuse_nav_vio",
     "make_nav_ekf",
     "track_to_enu",
     "tracks_to_facts",

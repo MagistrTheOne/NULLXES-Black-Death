@@ -1,11 +1,11 @@
-# Sensors adapters
+# Sensors / SensorHub
 
-**BLOCKED** — no production drivers in this tree yet.
+**Status:** HAS_CODE (v1)
 
-Expected (when wired from `05_avionics` / vendor SDKs):
-- cameras → `ImageMsg` on `/bd/cam/*`
-- IMU → `ImuMsg` on `/bd/l0/imu` (linear accel ENU, gravity removed)
-- GNSS → `GnssFix` on `/bd/gnss/fix`
-- LiDAR → scan topic `/bd/lidar/scan`
+- `camera_source.OpenCvCameraSource` — V4L2 / CSI / USB via OpenCV
+- `fc_telemetry` + `mavlink_link.MavlinkFcLink` — ArduPilot Plane telemetry → ENU SoftBus
+- `sensor_hub.SensorHub` — publishes `/bd/cam/*`, `/bd/l0/imu`, `/bd/gnss/fix`, `/bd/nav/state` (FC), `/bd/time/sync`, `/bd/sensorhub/health`
 
-Do not add fake publishers or synthetic samples here.
+Soft node: `ros2/nodes/sensor_hub_soft.py`
+
+Production path uses real devices or HIL MAVLink. Unit tests inject `FcTelemetry` via `SensorHub.ingest_fc` (no fake publishers inside the hub).
