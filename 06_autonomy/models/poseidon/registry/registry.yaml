@@ -1,11 +1,11 @@
 # NULLXES POSEIDON / CERBER model registry (server + companion)
-# Fail-closed: runtime loads only entries with sha256 != pending
+# Fail-closed: STABLE requires sha256 != pending (MODEL_RELEASE_SPEC)
 
-version: 1
+version: 2
 server_roles:
   train: "NULLXES GPU farm — Ultralytics train → ONNX opset 17 / TRT"
   gsc: "GroundSwarmCoordinator — TaskOffer / sectors (no LLM)"
-  registry: "This file + pack.yaml sha256"
+  registry: "This file + pack.yaml sha256 + release_channel"
 
 cerber:
   v1:
@@ -23,14 +23,27 @@ poseidon_packs:
     dataset: seraphim-drone-detection
     manifest: 06_autonomy/models/poseidon/packs/uav_seraphim/pack.yaml
     wave: P0
+    release_channel: CANDIDATE
   - pack_id: fire_flame
     dataset: FLAME
     manifest: 06_autonomy/models/poseidon/packs/fire_flame/pack.yaml
     wave: P1
+    release_channel: CANDIDATE
   - pack_id: power_insplad
     dataset: InsPLAD-MPID
     manifest: 06_autonomy/models/poseidon/packs/power_insplad/pack.yaml
     wave: P1
+    release_channel: CANDIDATE
+  - pack_id: scene_segformer_b0
+    dataset: landcover-loveda-uavid
+    manifest: 06_autonomy/models/poseidon/packs/scene_segformer_b0/pack.yaml
+    wave: P2
+    release_channel: CANDIDATE
+  - pack_id: vehicle_attr_lowagl
+    dataset: compcars-vmmr-lowagl
+    manifest: 06_autonomy/models/poseidon/packs/vehicle_attr_lowagl/pack.yaml
+    wave: P2
+    release_channel: CANDIDATE
 
 civil_reject:
   - weapon

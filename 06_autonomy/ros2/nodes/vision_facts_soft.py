@@ -1,4 +1,4 @@
-"""Vision → Track → Fusion → WorldFact + SceneAssessment (+ optional POSEIDON).
+"""Vision → Track → Fusion → WorldFact/WorldObject + SceneAssessment (+ optional POSEIDON).
 
 No-link: still publishes local facts/scene; GSC optional (ADR-002/004).
 """
@@ -6,12 +6,20 @@ No-link: still publishes local facts/scene; GSC optional (ADR-002/004).
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 from pathlib import Path
 
-from dmi.messages import TOPIC_DMI_WORLD_FACT, WorldFact
+from dmi.messages import (
+    TOPIC_DMI_EVENT,
+    TOPIC_DMI_WORLD_FACT,
+    TOPIC_DMI_WORLD_OBJECT,
+    OntologyEvent,
+    WorldFact,
+)
 from dmi.world_cache import SharedWorldCache
 from perception.fusion.scene_analyst import analyze_scene
-from perception.fusion.scene_fusion import CERBER_NAMES, FusionCalib, tracks_to_facts
+from perception.fusion.scene_fusion import CERBER_NAMES, FusionCalib, fact_to_world_object, tracks_to_facts
+from perception.trace.recorder import FlightRecorder, new_trace_id
 from perception.tracking import DetIn, FallbackTracker, IouTracker
 from soft_bus.bus import SoftBus
 from soft_bus.messages import (
@@ -69,6 +77,7 @@ class VisionFactsSoftNode:
         link_ok: bool = True,
         use_botsort: bool = True,
         prefer_fused_nav: bool = True,
+        recorder: FlightRecorder | None = None,
     ) -> None:
         self.bus = bus
         self.source_id = source_id
@@ -77,6 +86,7 @@ class VisionFactsSoftNode:
         self.prefer_fused_nav = prefer_fused_nav
         self.tracker = FallbackTracker() if use_botsort else IouTracker()
         self.cache = SharedWorldCache()
+        self.recorder = recorder or FlightRecorder(bus, agent_id=source_id)
         self._nav: NavStateMsg | None = None
         self._frame: object | None = None
         self._calib = _load_fusion_calib()
@@ -123,30 +133,34 @@ class VisionFactsSoftNode:
     def _on_detections(self, arr: DetectionArray) -> None:
         now = time.time()
         stamp = arr.stamp_s or now
+        trace_id = arr.trace_id or new_trace_id(self.source_id)
         dets = list(arr.detections)
 
         poseidon_arr = self.bus.latest(TOPIC_POSEIDON_DETECTIONS)
         if isinstance(poseidon_arr, DetectionArray):
             dets = dets + list(poseidon_arr.detections)
 
-        det_ins = [
-            DetIn(
-                cls_id=d.cls_id,
-                name=CERBER_NAMES[d.cls_id]
-                if 0 <= d.cls_id < len(CERBER_NAMES)
-                else str(d.cls_id),
-                conf=d.conf,
-                x1=d.x1,
-                y1=d.y1,
-                x2=d.x2,
-                y2=d.y2,
-            )
-            for d in dets
-        ]
-        if isinstance(self.tracker, FallbackTracker):
-            tracks = self.tracker.update(det_ins, frame_bgr=self._frame)
-        else:
-            tracks = self.tracker.update(det_ins)
+        with self.recorder.span("track", trace_id=trace_id) as track_span:
+            det_ins = [
+                DetIn(
+                    cls_id=d.cls_id,
+                    name=CERBER_NAMES[d.cls_id]
+                    if 0 <= d.cls_id < len(CERBER_NAMES)
+                    else str(d.cls_id),
+                    conf=d.conf,
+                    x1=d.x1,
+                    y1=d.y1,
+                    x2=d.x2,
+                    y2=d.y2,
+                )
+                for d in dets
+            ]
+            if isinstance(self.tracker, FallbackTracker):
+                tracks = self.tracker.update(det_ins, frame_bgr=self._frame)
+            else:
+                tracks = self.tracker.update(det_ins)
+            track_span.attrs["n_tracks"] = str(len(tracks))
+
         self.bus.publish(
             TOPIC_TRACKS,
             TrackArray(
@@ -166,22 +180,45 @@ class VisionFactsSoftNode:
                 ],
                 camera=arr.camera,
                 stamp_s=stamp,
+                trace_id=trace_id,
             ),
         )
 
-        facts = tracks_to_facts(
-            tracks,
-            self._nav,
-            calib=self._calib,
-            source_id=self.source_id,
-            stamp_s=stamp,
-        )
-        for fact in facts:
-            self.cache.upsert(fact, now_s=now)
-            self.bus.publish(TOPIC_DMI_WORLD_FACT, fact)
+        with self.recorder.span("fusion", trace_id=trace_id) as fus_span:
+            facts = tracks_to_facts(
+                tracks,
+                self._nav,
+                calib=self._calib,
+                source_id=self.source_id,
+                stamp_s=stamp,
+            )
+            facts = [replace(f, trace_id=trace_id) for f in facts]
+            fus_span.attrs["n_facts"] = str(len(facts))
 
-        assessment = analyze_scene(facts, stamp_s=stamp, link_ok=self.link_ok)
-        self.bus.publish(TOPIC_SCENE, assessment)
+        with self.recorder.span("ontology", trace_id=trace_id):
+            for fact in facts:
+                self.cache.upsert(fact, now_s=now)
+                self.bus.publish(TOPIC_DMI_WORLD_FACT, fact)
+                obj = fact_to_world_object(fact)
+                changed, stored = self.cache.upsert_object(obj, now_s=now)
+                self.bus.publish(TOPIC_DMI_WORLD_OBJECT, stored)
+                if changed and stored.first_seen_s == stored.last_seen_s:
+                    self.bus.publish(
+                        TOPIC_DMI_EVENT,
+                        OntologyEvent(
+                            event_id=f"ev-{stored.object_id}-{int(now * 1000)}",
+                            kind="DETECTED",
+                            object_id=stored.object_id,
+                            agent_id=self.source_id,
+                            detail=stored.type,
+                            stamp_s=now,
+                            trace_id=trace_id,
+                        ),
+                    )
+
+        with self.recorder.span("scene_analyst", trace_id=trace_id):
+            assessment = analyze_scene(facts, stamp_s=stamp, link_ok=self.link_ok)
+            self.bus.publish(TOPIC_SCENE, assessment)
 
     def ingest_image_poseidon(self, bgr, cerber_dets: list[BusDet]) -> None:
         """Companion path: run POSEIDON on frame using CERBER hints."""

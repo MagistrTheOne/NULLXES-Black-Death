@@ -1,6 +1,7 @@
 # Назначение папок — NULLXES BLACK DEATH
 
-**Статус реализации (что есть / чего нет):** [`architecture/REPO_STATUS_MAP.md`](architecture/REPO_STATUS_MAP.md)
+**Статус реализации (что есть / чего нет):** [`architecture/REPO_STATUS_MAP.md`](architecture/REPO_STATUS_MAP.md)  
+**DMI Ontology / Trace / Model Release / Mission Policy:** [`architecture/DMI_ONTOLOGY.md`](architecture/DMI_ONTOLOGY.md) · [`TRACE_SPEC.md`](architecture/TRACE_SPEC.md) · [`MODEL_RELEASE_SPEC.md`](architecture/MODEL_RELEASE_SPEC.md) · [`MISSION_POLICY_SPEC.md`](architecture/MISSION_POLICY_SPEC.md) · [`SEGMENTATION_LANES.md`](architecture/SEGMENTATION_LANES.md)
 
 ## Корневые блоки
 

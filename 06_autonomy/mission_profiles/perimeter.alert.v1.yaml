@@ -1,0 +1,27 @@
+profile_id: perimeter.alert.v1
+version: 1
+expires_at: "2099-01-01T00:00:00Z"
+allowed_actions:
+  - OBSERVE
+  - TRACK
+  - ALERT
+  - HANDOFF
+  - LOITER
+  - RTB
+  - DENY_PRESENCE
+  - GOTO_XYZ
+denied_actions:
+  - INSPECT
+  - CHASE
+allowed_models:
+  - cerber:v2
+  - poseidon:uav_seraphim
+require_signed_models: true
+geofence:
+  xmin: -2000
+  xmax: 2000
+  ymin: -2000
+  ymax: 2000
+  zmin: 0
+  zmax: 200
+max_agl_m: 150

@@ -32,9 +32,11 @@ def main() -> int:
         manifest = REPO / entry["manifest"]
         try:
             spec = load_pack_spec(manifest, verify_sha=True)
+            ch = entry.get("release_channel", spec.release_channel)
             print(
-                f"OK pack={spec.pack_id} onnx={'yes' if spec.model_path.is_file() else 'pending'} "
-                f"remap={spec.cerber_remap}"
+                f"OK pack={spec.pack_id} layout={spec.onnx_layout} "
+                f"channel={ch} onnx={'yes' if spec.model_path.is_file() else 'pending'} "
+                f"status={spec.validation_status}"
             )
         except PackSpecError as exc:
             print(f"BLOCKED: {exc}")

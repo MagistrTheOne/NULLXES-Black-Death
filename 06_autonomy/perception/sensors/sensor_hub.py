@@ -18,6 +18,8 @@ from soft_bus.messages import (
     TimeSyncMsg,
 )
 
+from perception.trace.recorder import FlightRecorder, new_trace_id
+
 from .camera_source import FrameSource
 from .fc_telemetry import FcTelemetry, map_fc_to_bus
 
@@ -34,17 +36,22 @@ class SensorHub:
         camera: FrameSource | None = None,
         fc_poll: Callable[[], FcTelemetry | None] | None = None,
         publish_fc_nav: bool = True,
+        recorder: FlightRecorder | None = None,
+        agent_id: str = "bd",
     ) -> None:
         self.bus = bus
         self.camera = camera
         self.fc_poll = fc_poll
         self.publish_fc_nav = publish_fc_nav
+        self.recorder = recorder or FlightRecorder(bus, agent_id=agent_id)
+        self.agent_id = agent_id
         self.dropped_frames = 0
         self._cam_ok = False
         self._imu_ok = False
         self._gnss_ok = False
         self._fc_offset_ns = 0
         self._last_fc_boot_ns = 0
+        self.last_trace_id = ""
 
     def start_camera(self) -> bool:
         if self.camera is None:
@@ -94,18 +101,22 @@ class SensorHub:
             else:
                 self._cam_ok = True
                 topic = _CAM_TOPICS.get(self.camera.name, TOPIC_CAM_FORWARD)
-                self.bus.publish(
-                    topic,
-                    ImageMsg(
-                        bgr=frame.bgr,
-                        camera=self.camera.name,
-                        stamp_s=now_s,
-                        stamp_ns=now_ns,
-                        sensor_stamp_ns=frame.sensor_stamp_ns,
-                        frame_id=f"cam_{self.camera.name}",
-                        seq=frame.seq,
-                    ),
-                )
+                trace_id = new_trace_id(self.agent_id)
+                self.last_trace_id = trace_id
+                with self.recorder.span("sensorhub", trace_id=trace_id, attrs={"seq": str(frame.seq)}):
+                    self.bus.publish(
+                        topic,
+                        ImageMsg(
+                            bgr=frame.bgr,
+                            camera=self.camera.name,
+                            stamp_s=now_s,
+                            stamp_ns=now_ns,
+                            sensor_stamp_ns=frame.sensor_stamp_ns,
+                            frame_id=f"cam_{self.camera.name}",
+                            seq=frame.seq,
+                            trace_id=trace_id,
+                        ),
+                    )
 
         if self.fc_poll is not None:
             sample = self.fc_poll()

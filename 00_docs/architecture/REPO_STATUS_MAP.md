@@ -35,6 +35,11 @@
 |------|--------|------|
 | `adr/ADR-001…005` | Accepted except **ADR-003 Proposed** | RT unsigned |
 | `architecture/ONBOARD_PERCEPTION_RESEARCH_2026-08.md` | Current | Plane Guided, P0/P1 |
+| `architecture/DMI_ONTOLOGY.md` | Canon | WorldObject / Relations / Events |
+| `architecture/TRACE_SPEC.md` | Canon | trace_id Flight Recorder |
+| `architecture/MODEL_RELEASE_SPEC.md` | Canon | STABLE/CANDIDATE ModelPack |
+| `architecture/MISSION_POLICY_SPEC.md` | Canon | Runtime MissionProfile gate |
+| `architecture/SEGMENTATION_LANES.md` | Canon | SceneSeg / VehicleAttr / ObsInterest |
 | `architecture/FLIGHT1_BOM_LOCK.md` | PENDING | All HW rows open |
 | `architecture/IMPLEMENTATION_GAP_MAP.md` | **STALE** (2026-08-04) | Use this file for autonomy |
 | `architecture/CERBER_STATUS.md` | Partial | Stage1 done / Stage2 open |

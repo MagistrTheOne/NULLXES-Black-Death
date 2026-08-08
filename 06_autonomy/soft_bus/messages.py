@@ -50,6 +50,7 @@ class DetectionArray:
     detections: list[Detection] = field(default_factory=list)
     camera: str = "forward"
     stamp_s: float = 0.0
+    trace_id: str = ""
 
 
 @dataclass
@@ -70,6 +71,22 @@ class TrackArray:
     tracks: list[TrackMsg] = field(default_factory=list)
     camera: str = "forward"
     stamp_s: float = 0.0
+    trace_id: str = ""
+
+
+@dataclass
+class TraceSpan:
+    """One stage in an end-to-end autonomy trace (TRACE_SPEC)."""
+
+    trace_id: str
+    span_id: str
+    stage: str
+    status: str = "ok"  # ok | degrade | error | skip
+    t_start_ns: int = 0
+    t_end_ns: int = 0
+    parent_span_id: str = ""
+    detail: str = ""
+    attrs: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -191,6 +208,7 @@ class ImageMsg:
     sensor_stamp_ns: int = 0
     frame_id: str = "cam_forward"
     seq: int = 0
+    trace_id: str = ""
 
 
 @dataclass
@@ -295,6 +313,25 @@ class GoalMsg:
     y: float = 0.0
     z: float = 0.0
     stamp_s: float = 0.0
+    trace_id: str = ""
+    action: str = "GOTO_XYZ"
+
+
+@dataclass
+class MissionProfileMsg:
+    profile_id: str
+    version: int = 1
+    content_hash: str = ""
+    stamp_s: float = 0.0
+
+
+@dataclass
+class PolicyDecisionMsg:
+    action: str
+    allowed: bool
+    reason: str = ""
+    trace_id: str = ""
+    stamp_s: float = 0.0
 
 
 @dataclass
@@ -346,3 +383,6 @@ TOPIC_TIME_SYNC = "/bd/time/sync"
 TOPIC_MAVLINK_HEALTH = "/bd/l0/mavlink_health"
 TOPIC_SENSORHUB_HEALTH = "/bd/sensorhub/health"
 TOPIC_PLANE_CMD = "/bd/l0/plane_cmd"
+TOPIC_TRACE_SPAN = "/bd/trace/span"
+TOPIC_MISSION_PROFILE = "/bd/mission/profile"
+TOPIC_POLICY_DECISION = "/bd/mission/policy_decision"

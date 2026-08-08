@@ -9,7 +9,8 @@ Canon: `00_docs/architecture/CERBER_VISION_STACK.md` · Status SoT: `00_docs/arc
 | `calibration/` | Intrinsics/extrinsics loader | **HAS_CODE** — bench YAML in `../calib/` |
 | `tracking/` | BoT-SORT + IOU degraded fallback | **HAS_CODE** |
 | `fusion/` | SceneFusion WorldFact + EKF + nav_fuse + SceneAnalyst | **HAS_CODE** |
-| `segmentation/` | SegFormer SoftBus service | **HAS_CODE shell** — no weights → `ok=false` |
+| `segmentation/` | SegFormer SoftBus service | **HAS_CODE shell** — pack `scene_segformer_b0` pending weights |
+| `trace/` | FlightRecorder TraceSpan | **HAS_CODE** — TRACE_SPEC |
 | `depth/` | Obstacle grid service | **HAS_CODE shell** — FLIGHT-2 |
 | `slam/` | `IVioProvider` (OpenVINS/Basalt) | **Contract** — native lib not linked (`degraded`) |
 | `qr/` | CERBER RT QR | **absent** — wait ADR-003 |

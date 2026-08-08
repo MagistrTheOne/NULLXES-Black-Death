@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from dmi.messages import WorldFact
+from dmi.messages import WorldFact, WorldObject
 from perception.calibration.models import CameraIntrinsics, Extrinsics
 from perception.tracking.iou_tracker import Track
 from soft_bus.messages import NavStateMsg
@@ -127,6 +127,7 @@ def track_to_enu(
             cov_zz=1.0e6,
             stamp_ns=stamp_ns,
             sensor_stamp_ns=sensor_ns,
+            track_id=int(track.track_id),
         )
 
     K = calib.intrinsics
@@ -164,6 +165,7 @@ def track_to_enu(
         cov_zz=float(cov_z),
         stamp_ns=stamp_ns,
         sensor_stamp_ns=sensor_ns,
+        track_id=int(track.track_id),
     )
 
 
@@ -193,6 +195,7 @@ def tracks_to_facts(
                     cov_xx=1.0e6,
                     cov_yy=1.0e6,
                     cov_zz=1.0e6,
+                    track_id=int(t.track_id),
                 )
             )
         return facts
@@ -202,3 +205,33 @@ def tracks_to_facts(
         )
         for t in tracks
     ]
+
+
+def fact_to_world_object(
+    fact: WorldFact,
+    *,
+    attrs: dict[str, str] | None = None,
+    state: str = "observed",
+) -> WorldObject:
+    """Promote observation snapshot to ontology WorldObject."""
+    return WorldObject(
+        object_id=fact.fact_id,
+        type=fact.kind,
+        x=fact.x,
+        y=fact.y,
+        z=fact.z,
+        confidence=fact.confidence,
+        source_id=fact.source_id,
+        track_id=fact.track_id,
+        cov_xx=fact.cov_xx,
+        cov_yy=fact.cov_yy,
+        cov_zz=fact.cov_zz,
+        frame_id=fact.frame_id,
+        state=state,
+        attrs=dict(attrs or {}),
+        first_seen_s=fact.stamp_s,
+        last_seen_s=fact.stamp_s,
+        stamp_ns=fact.stamp_ns,
+        sensor_stamp_ns=fact.sensor_stamp_ns,
+        trace_id=fact.trace_id,
+    )

@@ -1,7 +1,16 @@
 # CERBER Detect — Datasets
 
 **Status:** [CERBER_STATUS.md](./CERBER_STATUS.md) · stack: `06_autonomy/models/datasets/DATASET_STACK_A100.md`  
-**Head nc=13:** human · vehicle · uav · landing_zone · obstacle · power_line · road · building · forest · water · fire · infrastructure · cargo
+**Lanes (seg / attrs):** [SEGMENTATION_LANES.md](SEGMENTATION_LANES.md) · ontology: [DMI_ONTOLOGY.md](DMI_ONTOLOGY.md)  
+**Head nc=13 (locked):** human · vehicle · uav · landing_zone · obstacle · power_line · road · building · forest · water · fire · infrastructure · cargo
+
+### Extra lanes (not CERBER head)
+
+| Lane | Output | Datasets | Pack |
+|------|--------|----------|------|
+| SceneSeg | terrain masks | LandCover.ai · LoveDA · UAVid | `scene_segformer_b0` |
+| VehicleAttr | make/model attrs | CompCars / VMMR **low-AGL only**; VisDrone ≠ make | `vehicle_attr_lowagl` |
+| ObsInterest | WorldObject.type | Same as CERBER + POSEIDON specialists | CERBER + uav/fire/power packs |
 
 ## Coverage now (trained)
 

@@ -1,0 +1,30 @@
+profile_id: inspection.powerline.v1
+version: 1
+expires_at: "2099-01-01T00:00:00Z"
+allowed_actions:
+  - OBSERVE
+  - TRACK
+  - MAP
+  - INSPECT
+  - ALERT
+  - HANDOFF
+  - LOITER
+  - RTB
+  - GOTO_XYZ
+  - EXPLORE_SECTOR
+denied_actions:
+  - CHASE
+allowed_models:
+  - cerber:v2
+  - poseidon:power_insplad
+  - poseidon:uav_seraphim
+  - poseidon:scene_segformer_b0
+require_signed_models: true
+geofence:
+  xmin: -5000
+  xmax: 5000
+  ymin: -5000
+  ymax: 5000
+  zmin: 0
+  zmax: 400
+max_agl_m: 120

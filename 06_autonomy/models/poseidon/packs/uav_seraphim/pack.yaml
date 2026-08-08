@@ -1,4 +1,5 @@
 pack_id: uav_seraphim
+version: 0.1.0
 dataset: seraphim-drone-detection
 onnx_layout: yolo_v8_raw
 model_path: model.onnx
@@ -17,3 +18,8 @@ providers:
   - CPUExecutionProvider
 budget_ms: 12
 required: false
+runtime: ort
+precision: fp16
+validation_status: pending
+release_channel: CANDIDATE
+created_at: "2026-08-08T00:00:00Z"
