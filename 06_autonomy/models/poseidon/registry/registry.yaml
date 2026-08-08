@@ -1,11 +1,12 @@
-# NULLXES POSEIDON / CERBER model registry (server + companion)
+# NULLXES POSEIDON model registry (server + companion)
 # Fail-closed: STABLE requires sha256 != pending (MODEL_RELEASE_SPEC)
+# Post-FT product naming: POSEIDON-* only (base_repo = Hub provenance)
 
-version: 2
+version: 3
 server_roles:
-  train: "NULLXES GPU farm — Ultralytics train → ONNX opset 17 / TRT"
-  gsc: "GroundSwarmCoordinator — TaskOffer / sectors (no LLM)"
-  registry: "This file + pack.yaml sha256 + release_channel"
+  train: "NULLXES GPU farm — CV ONNX / VE bank / VL LoRA → poseidon_* packs"
+  gsc: "GroundSwarmCoordinator — TaskOffer / sectors + POSEIDON-FW-GSC"
+  registry: "This file + pack.yaml sha256 + release_channel + product_name"
 
 cerber:
   v1:
@@ -19,30 +20,72 @@ cerber:
     onnx: 06_autonomy/models/onnx/detector_alpha_v2b.onnx
 
 poseidon_packs:
+  # --- CV ---
   - pack_id: uav_seraphim
+    family: cv
+    product_name: POSEIDON-CV-UAV-01
     dataset: seraphim-drone-detection
     manifest: 06_autonomy/models/poseidon/packs/uav_seraphim/pack.yaml
     wave: P0
     release_channel: CANDIDATE
   - pack_id: fire_flame
+    family: cv
+    product_name: POSEIDON-CV-FIRE-01
     dataset: FLAME
     manifest: 06_autonomy/models/poseidon/packs/fire_flame/pack.yaml
     wave: P1
     release_channel: CANDIDATE
   - pack_id: power_insplad
+    family: cv
+    product_name: POSEIDON-CV-POWER-01
     dataset: InsPLAD-MPID
     manifest: 06_autonomy/models/poseidon/packs/power_insplad/pack.yaml
     wave: P1
     release_channel: CANDIDATE
   - pack_id: scene_segformer_b0
+    family: cv
+    product_name: POSEIDON-CV-SCENESEG-01
     dataset: landcover-loveda-uavid
     manifest: 06_autonomy/models/poseidon/packs/scene_segformer_b0/pack.yaml
     wave: P2
     release_channel: CANDIDATE
   - pack_id: vehicle_attr_lowagl
+    family: cv
+    product_name: POSEIDON-CV-VEHICLEATTR-01
     dataset: compcars-vmmr-lowagl
     manifest: 06_autonomy/models/poseidon/packs/vehicle_attr_lowagl/pack.yaml
     wave: P2
+    release_channel: CANDIDATE
+  # --- VE ---
+  - pack_id: poseidon_ve_emb_2b
+    family: ve
+    product_name: POSEIDON-VE-01
+    dataset: poseidon-civil-concepts-v1
+    manifest: 06_autonomy/models/poseidon/packs/poseidon_ve_emb_2b/pack.yaml
+    wave: P0
+    release_channel: CANDIDATE
+  - pack_id: poseidon_ve_rr_2b
+    family: ve
+    product_name: POSEIDON-VE-R01
+    dataset: poseidon-civil-concepts-v1
+    manifest: 06_autonomy/models/poseidon/packs/poseidon_ve_rr_2b/pack.yaml
+    wave: P1
+    release_channel: CANDIDATE
+  # --- VL ---
+  - pack_id: poseidon_vl_scenefact_2b
+    family: vl
+    product_name: POSEIDON-VL-01
+    dataset: poseidon-scenefact-civil-v1
+    manifest: 06_autonomy/models/poseidon/packs/poseidon_vl_scenefact_2b/pack.yaml
+    wave: P1
+    release_channel: CANDIDATE
+  # --- FW (GSC only) ---
+  - pack_id: poseidon_fw_gsc
+    family: fw
+    product_name: POSEIDON-FW-GSC
+    dataset: agentworldbench-gsc-bootstrap
+    manifest: 06_autonomy/models/poseidon/packs/poseidon_fw_gsc/pack.yaml
+    wave: P3
     release_channel: CANDIDATE
 
 civil_reject:

@@ -1,14 +1,29 @@
 # POSEIDON packs
 
-Local specialist ONNX agents. Canon: `00_docs/architecture/POSEIDON.md` · ADR-005.
+Local specialist agents. Canon: `00_docs/architecture/POSEIDON.md` · `POSEIDON_VE_VL.md` · ADR-005 · ADR-006.
 
-| Pack | Dataset | CERBER id |
-|------|---------|-----------|
-| `uav_seraphim` | Seraphim / DUT | `uav=2` |
-| `fire_flame` | FLAME | `fire=10` |
-| `power_insplad` | InsPLAD/MPID | `power_line=5` |
+## Naming lock (post-FT)
 
-Export on NULLXES GPU servers → fill `model.onnx` + `sha256` in `pack.yaml`.  
-Civil only — no weapon packs (ADR-004).
+| Field | Rule |
+|-------|------|
+| `pack_id` / SoftBus `model` / `product_name` | **POSEIDON-*** / `poseidon_*` only |
+| Hub upstream | `base_repo` in pack.yaml only |
+| Forbidden as pack_id | `qwen*`, `siglip*`, `florence*` |
 
-**Train:** [TRAIN.md](./TRAIN.md) — image PyTorch only, never `pip install torch`.
+## Family matrix
+
+| Family | Product | pack_id | Role |
+|--------|---------|---------|------|
+| **cv** | POSEIDON-CV-UAV-01 | `uav_seraphim` | Detect UAV → CERBER `2` |
+| **cv** | POSEIDON-CV-FIRE-01 | `fire_flame` | Fire → `10` |
+| **cv** | POSEIDON-CV-POWER-01 | `power_insplad` | Power line → `5` |
+| **cv** | POSEIDON-CV-SCENESEG-01 | `scene_segformer_b0` | Scene seg |
+| **cv** | POSEIDON-CV-VEHICLEATTR-01 | `vehicle_attr_lowagl` | Low-AGL attrs |
+| **ve** | POSEIDON-VE-01 | `poseidon_ve_emb_2b` | Open-vocab ConceptHit |
+| **ve** | POSEIDON-VE-R01 | `poseidon_ve_rr_2b` | Concept rerank |
+| **vl** | POSEIDON-VL-01 | `poseidon_vl_scenefact_2b` | SceneFact (async) |
+| **fw** | POSEIDON-FW-GSC | `poseidon_fw_gsc` | WorldDelta GSC only |
+
+Export on NULLXES GPU servers → fill artifacts + `sha256`. Civil only (ADR-004).
+
+**Train:** [TRAIN.md](./TRAIN.md) · **Registry:** [registry/registry.yaml](./registry/registry.yaml)

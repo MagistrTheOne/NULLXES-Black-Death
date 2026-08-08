@@ -120,6 +120,86 @@ class PoseidonActivePacks:
 
 
 @dataclass
+class ConceptHit:
+    """POSEIDON-VE open-vocab hit (product model = POSEIDON-VE-*)."""
+
+    object_id: str
+    track_id: int
+    concept: str
+    score: float
+    source: str = "poseidon_ve"
+    model: str = "POSEIDON-VE-01"
+    emb_dim: int = 0
+    stamp_ns: int = 0
+    trace_id: str = ""
+    reranker: str = ""
+
+
+@dataclass
+class ConceptHitArray:
+    hits: list[ConceptHit] = field(default_factory=list)
+    stamp_s: float = 0.0
+    trace_id: str = ""
+
+
+@dataclass
+class SceneFactObject:
+    object_id: str
+    role: str = "subject"
+    concept: str = ""
+    score: float = 0.0
+
+
+@dataclass
+class SceneFactRelation:
+    kind: str
+    subject_id: str
+    object_id: str
+    confidence: float = 0.0
+
+
+@dataclass
+class SceneFactEvent:
+    kind: str
+    confidence: float = 0.0
+
+
+@dataclass
+class SceneFact:
+    """POSEIDON-VL structured scene semantics — never GuidanceIntent."""
+
+    scene_id: str
+    stamp_ns: int = 0
+    trace_id: str = ""
+    source: str = "poseidon_vl"
+    model: str = "POSEIDON-VL-01"
+    scene_type: str = ""
+    summary: str = ""
+    objects: list[SceneFactObject] = field(default_factory=list)
+    relations: list[SceneFactRelation] = field(default_factory=list)
+    events: list[SceneFactEvent] = field(default_factory=list)
+    validity: bool = False
+    hallucination_flags: list[str] = field(default_factory=list)
+    budget_ms_used: float = 0.0
+
+
+@dataclass
+class WorldDelta:
+    """POSEIDON-FW next-state prediction — DMI only, never Guidance."""
+
+    delta_id: str
+    parent_trace_id: str = ""
+    action_id: str = ""
+    model: str = "POSEIDON-FW-GSC"
+    horizon_s: float = 5.0
+    predicted_summary: str = ""
+    risk_flags: list[str] = field(default_factory=list)
+    confidence: float = 0.0
+    validity: bool = False
+    stamp_s: float = 0.0
+
+
+@dataclass
 class VisionHealth:
     """Pessimistic defaults — healthy must come from a real publisher."""
 
@@ -368,6 +448,9 @@ TOPIC_TRACKS = "/bd/vision/tracks"
 TOPIC_SCENE = "/bd/vision/scene"
 TOPIC_POSEIDON_DETECTIONS = "/bd/poseidon/detections"
 TOPIC_POSEIDON_ACTIVE = "/bd/poseidon/active_packs"
+TOPIC_POSEIDON_VE_HITS = "/bd/poseidon/ve/hits"
+TOPIC_POSEIDON_VL_SCENE = "/bd/poseidon/vl/scene"
+TOPIC_POSEIDON_FW_DELTA = "/bd/poseidon/fw/delta"
 TOPIC_HB_A = "/bd/dual/heartbeat_A"
 TOPIC_HB_B = "/bd/dual/heartbeat_B"
 TOPIC_MIRROR = "/bd/dual/mirror"

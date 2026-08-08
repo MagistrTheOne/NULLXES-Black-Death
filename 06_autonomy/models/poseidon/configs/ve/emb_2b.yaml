@@ -1,0 +1,7 @@
+pack_id: poseidon_ve_emb_2b
+product_name: POSEIDON-VE-01
+base_repo: Qwen/Qwen3-VL-Embedding-2B
+concepts_source: 06_autonomy/models/poseidon/concepts/civil_v1.yaml
+export_imgsz: 224
+precision: fp16
+# After build: artifact lives only under packs/poseidon_ve_emb_2b/ (POSEIDON naming)

@@ -1,4 +1,6 @@
 pack_id: uav_seraphim
+family: cv
+product_name: POSEIDON-CV-UAV-01
 version: 0.1.0
 dataset: seraphim-drone-detection
 onnx_layout: yolo_v8_raw

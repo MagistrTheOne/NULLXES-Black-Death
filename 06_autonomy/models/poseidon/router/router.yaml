@@ -1,9 +1,24 @@
-# POSEIDON router v1 — rule gates, no LLM (ADR-005)
+# POSEIDON router v2 — CV + VE/VL event gates, no LLM (ADR-005 / ADR-006)
 max_packs_per_frame: 1
+max_ve_rois_per_frame: 4
+max_vl_calls_per_s: 2
+futureworld_on_companion: false
+ve_unknown_conf_lo: 0.25
+ve_unknown_conf_hi: 0.55
+ve_margin_escalate: 0.08
+vl_escalate_on_ve_miss: true
+
 priority:
   - uav_seraphim
   - fire_flame
   - power_insplad
+
+ve_priority:
+  - poseidon_ve_emb_2b
+  - poseidon_ve_rr_2b
+
+vl_priority:
+  - poseidon_vl_scenefact_2b
 
 gates:
   uav_seraphim:
@@ -27,3 +42,28 @@ gates:
       - NOMINAL
     cerber_hint_cls: [5]
     cerber_hint_min_conf: 0.10
+
+ve_gates:
+  poseidon_ve_emb_2b:
+    on_unknown: true
+    on_disagreement: true
+    mission_modes:
+      - NOMINAL
+      - DISASTER
+      - INFRA_INSPECT
+      - AIRSPACE_GUARD
+  poseidon_ve_rr_2b:
+    on_ve_margin: true
+    mission_modes:
+      - NOMINAL
+      - DISASTER
+      - INFRA_INSPECT
+      - AIRSPACE_GUARD
+
+vl_gates:
+  poseidon_vl_scenefact_2b:
+    on_ve_escalate: true
+    mission_modes:
+      - DISASTER
+      - INFRA_INSPECT
+      - NOMINAL

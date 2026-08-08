@@ -1,8 +1,16 @@
 # POSEIDON — Train on NULLXES / RunPod machines
 
-**Canon:** [POSEIDON.md](../../../00_docs/architecture/POSEIDON.md) · ADR-005  
-**Out:** `packs/<pack_id>/model.onnx` + `sha256` in `pack.yaml`  
-**Civil:** ADR-004 — no weapon / tank packs
+**Canon:** [POSEIDON.md](../../../00_docs/architecture/POSEIDON.md) · ADR-005 · ADR-006  
+**Out:** `packs/<pack_id>/` artifacts + `sha256` — **product ids always POSEIDON / poseidon_***  
+**Civil:** ADR-004 — no weapon / tank packs  
+**Hub base:** only `base_repo` in pack.yaml (never pack_id)
+
+## Naming after export
+
+| Wrong | Right |
+|-------|-------|
+| `qwen3_vl_emb` pack_id | `poseidon_ve_emb_2b` |
+| SoftBus model=`Qwen/...` | SoftBus model=`POSEIDON-VE-01` |
 
 ## Machine image
 
@@ -11,124 +19,83 @@ Use a **PyTorch CUDA host image** (RunPod PyTorch template / internal farm AMI).
 | Do | Do not |
 |----|--------|
 | Use system / image `torch` + CUDA | `pip install torch` / `torchvision` |
-| `pip install -r requirements.txt` (extras only) | Pin a second torch from PyPI |
+| `pip install -r requirements.txt` (extras only) | Pin a second torch from PyPi |
 | One pack = one dataset = one train job | Mix FLAME+Seraphim into one head without remap plan |
-
-Verify before train:
 
 ```bash
 python -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 ```
 
-Suggested VRAM: ≥24 GB (4090 / L40S / RTX PRO 6000). Disk depends on dataset.
+Suggested VRAM: ≥24 GB (4090 / L40S / RTX PRO 6000).
 
 ## Layout
 
 ```
 06_autonomy/models/poseidon/
-  requirements.txt          # NO torch
-  TRAIN.md                  # this file
-  configs/
-    train_uav_seraphim.yaml
-    train_fire_flame.yaml
-    train_power_insplad.yaml
+  concepts/civil_v1.yaml
+  configs/                  # CV train_*.yaml
+  configs/ve/ emb_2b.yaml rr_2b.yaml
+  configs/vl/ scenefact_2b.yaml
   packs/<pack_id>/pack.yaml
   scripts/
-    train_pack.py
-    export_pack.py
-    validate_registry.py
-    runpod_pack.sh
+    train_pack.py export_pack.py validate_registry.py runpod_pack.sh
+    build_ve_pack.py train_vl_scenefact.py
 ```
 
-## One-shot (pod / farm)
+## CV packs (detect)
 
 ```bash
-cd /workspace
-git clone https://github.com/MagistrTheOne/NULLXES-Black-Death.git
-cd NULLXES-Black-Death
-
-# Torch already on image — only Ultralytics + hub + onnx extras
-pip install -r 06_autonomy/models/poseidon/requirements.txt
-
-export HF_TOKEN=hf_...                    # if gated datasets
 export POSEIDON_DATA_ROOT=/workspace/datasets/poseidon
-
-# Example: UAV specialist (P0)
 bash 06_autonomy/models/poseidon/scripts/runpod_pack.sh uav_seraphim
 ```
 
-`runpod_pack.sh <pack_id>`:
-
-1. Assert `torch` importable (fail if missing — install via image, not pip torch)
-2. Prepare YOLO data tree under `$POSEIDON_DATA_ROOT/<pack_id>/`
-3. `train_pack.py` — Ultralytics detect FT
-4. `export_pack.py` — ONNX opset 17 + sha into `pack.yaml`
-
-## Manual per pack
-
-### P0 — `uav_seraphim`
-
-Dataset: Seraphim (HF) and/or DUT / UETT4K YOLO trees. Single class `uav` → remap `0→2` at export/runtime (`cerber_remap` in pack.yaml).
-
-```bash
-export POSEIDON_DATA_ROOT=/workspace/datasets/poseidon
-PACK=uav_seraphim
-
-# Data: YOLO layout with names: ['uav']  (nc=1)
-# $POSEIDON_DATA_ROOT/uav_seraphim/data.yaml
-
-python 06_autonomy/models/poseidon/scripts/train_pack.py \
-  --train-config 06_autonomy/models/poseidon/configs/train_uav_seraphim.yaml \
-  --data "$POSEIDON_DATA_ROOT/uav_seraphim/data.yaml"
-
-python 06_autonomy/models/poseidon/scripts/export_pack.py \
-  --pack uav_seraphim \
-  --weights runs/detect/poseidon-uav_seraphim/weights/best.pt
-```
-
-Reuse CERBER data prep for Seraphim if needed:
-
-```bash
-export CERBER_V2_ROOT=/workspace/datasets/cerber_v2
-python 06_autonomy/models/cerber_v2/scripts/prepare_data.py --root "$CERBER_V2_ROOT" --full-seraphim
-# then point train data.yaml at UAV-only slice or remap labels to single class 0=uav
-```
-
-### P1 — `fire_flame` / `power_insplad`
-
-Same flow, configs:
-
-- `configs/train_fire_flame.yaml` — FLAME → class `fire`
-- `configs/train_power_insplad.yaml` — InsPLAD/MPID → class `power_line`
-
-Place YOLO trees:
-
-```
-$POSEIDON_DATA_ROOT/fire_flame/{images,labels}/{train,val}/ + data.yaml
-$POSEIDON_DATA_ROOT/power_insplad/{images,labels}/{train,val}/ + data.yaml
-```
-
-## Train knobs (defaults in yaml)
-
 | Knob | UAV / fire / power |
 |------|--------------------|
-| model | `yolov8s.pt` (image torch) |
+| model | `yolov8s.pt` |
 | imgsz | 1280 UAV · 640 fire/power |
 | epochs | 60–100 |
-| batch | fit VRAM (16 @ 1280 on 48GB; drop on 24GB) |
 | export | imgsz 640 opset 17 |
 
-## After export — companion load
+Product names: `POSEIDON-CV-UAV-01` / `FIRE-01` / `POWER-01`.
+
+## VE pack — `poseidon_ve_emb_2b` → POSEIDON-VE-01
+
+Production Hub base: `Qwen/Qwen3-VL-Embedding-2B` (`load_from_hub: true`).
+
+```bash
+python 06_autonomy/models/poseidon/scripts/build_ve_pack.py \
+  --config 06_autonomy/models/poseidon/configs/ve/emb_2b.yaml
+```
+
+Bakes `concepts.fp16.npy` into the pack. SoftBus model = `POSEIDON-VE-01`.  
+Reranker: `poseidon_ve_rr_2b` ← `Qwen/Qwen3-VL-Reranker-2B`.
+
+## VL pack — `poseidon_vl_scenefact_2b` → POSEIDON-VL-01
+
+Production Hub base: `Qwen/Qwen3-VL-2B-Instruct` (fallback `Qwen2-VL-2B-Instruct`).
+
+```bash
+python 06_autonomy/models/poseidon/scripts/train_vl_scenefact.py \
+  --config 06_autonomy/models/poseidon/configs/vl/scenefact_2b.yaml \
+  --data "$POSEIDON_DATA_ROOT/scenefact_civil_v1"
+```
+
+LoRA SFT → adapters under pack dir. SoftBus model = `POSEIDON-VL-01`.
+
+## FW — `poseidon_fw_gsc` → POSEIDON-FW-GSC
+
+GSC bootstrap: pin AgentWorld under pack dir; `companion_load: false`.  
+Aerial FT later: `poseidon_fw_aerial_v1` from SoftBus traces.
+
+## Validate
 
 ```bash
 python 06_autonomy/models/poseidon/scripts/validate_registry.py
-# pack.yaml sha256 != pending  →  PoseidonRuntime loads ORT session
 ```
 
-Flight: CERBER generalist + router enables pack (`AIRSPACE_GUARD` / CERBER hints).
-
-## Explicitly forbidden
+## Forbidden
 
 - `pip install torch*` on train hosts  
-- Cloud LLM / Ollama in train or runtime  
-- Weapon / tank datasets (civil reject in `registry/registry.yaml`)
+- Cloud LLM / Ollama in flight path  
+- Shipping Hub names as pack_id / SoftBus model  
+- Weapon / tank datasets  

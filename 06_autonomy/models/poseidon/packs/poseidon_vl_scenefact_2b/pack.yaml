@@ -1,0 +1,31 @@
+pack_id: poseidon_vl_scenefact_2b
+family: vl
+product_name: POSEIDON-VL-01
+version: 0.1.0
+dataset: poseidon-scenefact-civil-v1
+dataset_hash: pending
+onnx_layout: qwen_vl
+model_path: model.onnx
+sha256: pending
+load_from_hub: true
+base_repo: Qwen/Qwen3-VL-2B-Instruct
+fallback_base_repo: Qwen/Qwen2-VL-2B-Instruct
+schema_version: scenefact.v1
+max_frames_temporal: 3
+input_size: [448, 448]
+input_name: input
+output_name: output
+classes:
+  - scene_fact
+runtime: transformers_hub
+precision: fp16
+hardware_target: orin_nx_16
+validation_status: pending
+release_channel: CANDIDATE
+created_at: "2026-08-08T00:00:00Z"
+budget_ms: 400
+required: false
+companion_load: true
+providers:
+  - CUDAExecutionProvider
+  - CPUExecutionProvider

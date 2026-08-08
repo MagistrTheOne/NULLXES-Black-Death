@@ -29,8 +29,11 @@ from soft_bus.messages import (
     TOPIC_NAV_FUSED,
     TOPIC_POSEIDON_ACTIVE,
     TOPIC_POSEIDON_DETECTIONS,
+    TOPIC_POSEIDON_VE_HITS,
+    TOPIC_POSEIDON_VL_SCENE,
     TOPIC_SCENE,
     TOPIC_TRACKS,
+    ConceptHitArray,
     Detection as BusDet,
     DetectionArray,
     ImageMsg,
@@ -91,22 +94,29 @@ class VisionFactsSoftNode:
         self._frame: object | None = None
         self._calib = _load_fusion_calib()
         self._poseidon = None
+        self._semantic = None
         if enable_poseidon:
             try:
                 from poseidon.runtime import PoseidonRuntime
+                from poseidon.semantic import PoseidonSemanticRuntime
 
                 root = _repo_root()
-                self._poseidon = PoseidonRuntime(
-                    packs_root=root / "06_autonomy" / "models" / "poseidon" / "packs",
-                    router_yaml=root
+                packs = root / "06_autonomy" / "models" / "poseidon" / "packs"
+                router = (
+                    root
                     / "06_autonomy"
                     / "models"
                     / "poseidon"
                     / "router"
-                    / "router.yaml",
+                    / "router.yaml"
+                )
+                self._poseidon = PoseidonRuntime(packs_root=packs, router_yaml=router)
+                self._semantic = PoseidonSemanticRuntime(
+                    packs_root=packs, router_yaml=router, repo_root=root
                 )
             except Exception:
                 self._poseidon = None
+                self._semantic = None
 
         bus.subscribe(TOPIC_DETECTIONS, self._on_detections)
         bus.subscribe(TOPIC_NAV, self._on_nav)
@@ -216,12 +226,72 @@ class VisionFactsSoftNode:
                         ),
                     )
 
+        self._maybe_semantic(tracks, stamp_ns=int(stamp * 1e9), trace_id=trace_id)
+
         with self.recorder.span("scene_analyst", trace_id=trace_id):
             assessment = analyze_scene(facts, stamp_s=stamp, link_ok=self.link_ok)
             self.bus.publish(TOPIC_SCENE, assessment)
 
+    def _maybe_semantic(self, tracks, *, stamp_ns: int, trace_id: str) -> None:
+        """Event-driven VE/VL on uncertain tracks — publishes ConceptHit/SceneFact only."""
+        if self._semantic is None or self._frame is None:
+            return
+        from poseidon.router import RouterContext
+        from poseidon.ve import apply_concept_hit_attrs
+
+        h, w = self._frame.shape[:2]
+        uncertain = [
+            t
+            for t in tracks
+            if float(t.conf) < 0.55
+            or (0 <= t.cls_id < len(CERBER_NAMES) and CERBER_NAMES[t.cls_id] in ("obstacle",))
+        ]
+        if not uncertain:
+            return
+        t = uncertain[0]
+        x1, y1 = max(0, int(t.x1)), max(0, int(t.y1))
+        x2, y2 = min(w, int(t.x2)), min(h, int(t.y2))
+        if x2 <= x1 or y2 <= y1:
+            return
+        crop = self._frame[y1:y2, x1:x2]
+        if crop.size == 0:
+            return
+        ctx = RouterContext(
+            mission_mode=self.mission_mode,
+            has_unknown=True,
+            unknown_conf=float(t.conf),
+            link_ok=self.link_ok,
+        )
+        with self.recorder.span("poseidon_ve_vl", trace_id=trace_id) as sp:
+            sem = self._semantic.step_roi(
+                crop,
+                ctx,
+                object_id=f"trk-{t.track_id}",
+                track_id=int(t.track_id),
+                trace_id=trace_id,
+                stamp_ns=stamp_ns,
+            )
+            sp.attrs["n_hits"] = str(len(sem.hits))
+            sp.attrs["vl"] = "1" if sem.scene and sem.scene.validity else "0"
+        if sem.hits:
+            self.bus.publish(
+                TOPIC_POSEIDON_VE_HITS,
+                ConceptHitArray(hits=sem.hits, stamp_s=time.time(), trace_id=trace_id),
+            )
+            obj = self.cache.get_object(f"trk-{t.track_id}", now_s=time.time())
+            if obj is not None:
+                from dataclasses import replace
+
+                merged = replace(
+                    obj, attrs=apply_concept_hit_attrs(obj.attrs, sem.hits[0])
+                )
+                _, stored = self.cache.upsert_object(merged, now_s=time.time())
+                self.bus.publish(TOPIC_DMI_WORLD_OBJECT, stored)
+        if sem.scene is not None:
+            self.bus.publish(TOPIC_POSEIDON_VL_SCENE, sem.scene)
+
     def ingest_image_poseidon(self, bgr, cerber_dets: list[BusDet]) -> None:
-        """Companion path: run POSEIDON on frame using CERBER hints."""
+        """Companion path: CV specialists + optional semantic escalate."""
         if self._poseidon is None:
             return
         from poseidon.router import RouterContext
@@ -236,6 +306,10 @@ class VisionFactsSoftNode:
             cerber_cls_ids=cls_ids,
             cerber_max_conf=max_conf,
             link_ok=self.link_ok,
+            has_unknown=any(c < 0 for c in cls_ids) or any(
+                max_conf.get(c, 1.0) < 0.55 for c in cls_ids
+            ),
+            unknown_conf=min((max_conf.get(c, 0.0) for c in cls_ids), default=0.0),
         )
         step = self._poseidon.step(bgr, ctx)
         now = time.time()
@@ -260,6 +334,37 @@ class VisionFactsSoftNode:
                 stamp_s=now,
             ),
         )
+        if self._semantic is not None:
+            self._frame = bgr
+            # Synthetic track from first low-conf det for VE ROI
+            from perception.tracking import Track
+
+            low = [d for d in cerber_dets if d.conf < 0.55]
+            if low:
+                d0 = low[0]
+                name = (
+                    CERBER_NAMES[d0.cls_id]
+                    if 0 <= d0.cls_id < len(CERBER_NAMES)
+                    else "unknown"
+                )
+                tracks = [
+                    Track(
+                        track_id=0,
+                        cls_id=d0.cls_id,
+                        name=name,
+                        conf=d0.conf,
+                        x1=d0.x1,
+                        y1=d0.y1,
+                        x2=d0.x2,
+                        y2=d0.y2,
+                        age=1,
+                        hits=1,
+                        time_since_update=0,
+                    )
+                ]
+                self._maybe_semantic(
+                    tracks, stamp_ns=int(now * 1e9), trace_id=new_trace_id(self.source_id)
+                )
 
     def all_facts(self) -> list[WorldFact]:
         return self.cache.all_facts(now_s=time.time())

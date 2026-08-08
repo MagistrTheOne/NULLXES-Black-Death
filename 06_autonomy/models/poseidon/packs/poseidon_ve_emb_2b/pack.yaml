@@ -1,0 +1,46 @@
+pack_id: poseidon_ve_emb_2b
+family: ve
+product_name: POSEIDON-VE-01
+version: 0.1.0
+dataset: poseidon-civil-concepts-v1
+dataset_hash: pending
+onnx_layout: qwen_vl_emb
+model_path: model.onnx
+sha256: pending
+load_from_hub: true
+base_repo: Qwen/Qwen3-VL-Embedding-2B
+concept_bank_path: concepts.fp16.npy
+concepts_source: 06_autonomy/models/poseidon/concepts/civil_v1.yaml
+input_size: [224, 224]
+input_name: pixel_values
+output_name: embedding
+classes:
+  - smoke
+  - flame
+  - damaged_insulator
+  - fallen_tree
+  - blocked_road
+  - unknown_uav
+  - normal_infrastructure
+  - cloud_shadow
+  - water_glare
+  - power_line
+  - vehicle
+  - human
+  - building
+  - vegetation
+  - safe_terrain
+score_threshold: 0.28
+emb_dim: 2048
+runtime: transformers_hub
+precision: fp16
+hardware_target: orin_nx_16
+validation_status: pending
+release_channel: CANDIDATE
+created_at: "2026-08-08T00:00:00Z"
+budget_ms: 12
+required: false
+companion_load: true
+providers:
+  - CUDAExecutionProvider
+  - CPUExecutionProvider

@@ -1,0 +1,4 @@
+pack_id: poseidon_ve_rr_2b
+product_name: POSEIDON-VE-R01
+base_repo: Qwen/Qwen3-VL-Reranker-2B
+precision: fp16

@@ -1,0 +1,9 @@
+pack_id: poseidon_vl_scenefact_2b
+product_name: POSEIDON-VL-01
+base_repo: Qwen/Qwen3-VL-2B-Instruct
+fallback_base_repo: Qwen/Qwen2-VL-2B-Instruct
+schema_version: scenefact.v1
+lora_r: 16
+lora_alpha: 32
+max_seq_length: 2048
+# Export target pack_id must remain poseidon_vl_scenefact_2b

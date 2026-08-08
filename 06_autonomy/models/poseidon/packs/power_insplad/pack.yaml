@@ -1,4 +1,6 @@
 pack_id: power_insplad
+family: cv
+product_name: POSEIDON-CV-POWER-01
 dataset: InsPLAD-MPID
 onnx_layout: yolo_v8_raw
 model_path: model.onnx

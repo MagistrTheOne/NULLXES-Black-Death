@@ -30,3 +30,11 @@ def test_track_guidance_valid():
     nav = NavState(0, 0, 10, 0, 0, 0, 0)
     out = track_guidance(nav, 50, 0, 10, "escort")
     assert out.valid
+
+
+def test_track_guidance_respects_fm_cruise_thrust():
+    """FM-scaled thrust must reach simple_guidance (not stuck at cfg 0.35)."""
+    nav = NavState(0, 0, 10, 0, 0, 0, 0)
+    out = track_guidance(nav, 50, 0, 10, "chase", cruise_thrust=0.3)
+    assert out.valid
+    assert abs(out.thrust_norm - 0.3) < 1e-6

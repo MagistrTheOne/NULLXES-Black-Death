@@ -116,7 +116,9 @@ def test_pack_spec_stable_pending_blocked(tmp_path: Path):
     p = tmp_path / "pack.yaml"
     p.write_text(
         """
-pack_id: bad_stable
+pack_id: uav_bad_stable
+family: cv
+product_name: POSEIDON-CV-UAV-BAD
 dataset: x
 onnx_layout: yolo_v8_raw
 model_path: model.onnx

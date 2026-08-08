@@ -1,0 +1,20 @@
+# POSEIDON-VE civil concept bank v1 (ADR-004)
+# Encoded offline into packs/poseidon_ve_emb_2b/concepts.fp16.npy
+version: 1
+product_name: POSEIDON-VE-01
+concepts:
+  - smoke
+  - flame
+  - damaged_insulator
+  - fallen_tree
+  - blocked_road
+  - unknown_uav
+  - normal_infrastructure
+  - cloud_shadow
+  - water_glare
+  - power_line
+  - vehicle
+  - human
+  - building
+  - vegetation
+  - safe_terrain

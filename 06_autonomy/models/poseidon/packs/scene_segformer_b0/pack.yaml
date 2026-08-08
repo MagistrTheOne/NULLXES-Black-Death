@@ -1,4 +1,6 @@
 pack_id: scene_segformer_b0
+family: cv
+product_name: POSEIDON-CV-SCENESEG-01
 version: 0.1.0
 dataset: landcover-loveda-uavid
 dataset_hash: pending

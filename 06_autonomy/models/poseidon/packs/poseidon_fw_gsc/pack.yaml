@@ -1,0 +1,30 @@
+pack_id: poseidon_fw_gsc
+family: fw
+product_name: POSEIDON-FW-GSC
+version: 0.1.0
+dataset: agentworldbench-gsc-bootstrap
+dataset_hash: pending
+onnx_layout: qwen_vl
+model_path: model.onnx
+sha256: pending
+load_from_hub: true
+base_repo: Qwen/Qwen-AgentWorld-35B-A3B
+schema_version: worlddelta.v1
+horizon_s: 5.0
+input_size: [1, 1]
+input_name: input
+output_name: output
+classes:
+  - world_delta
+runtime: vllm_gsc
+precision: bf16
+hardware_target: gsc_gpu
+validation_status: pending
+release_channel: CANDIDATE
+created_at: "2026-08-08T00:00:00Z"
+budget_ms: 2000
+required: false
+companion_load: false
+gsc_api_env: POSEIDON_FW_GSC_URL
+providers:
+  - CPUExecutionProvider

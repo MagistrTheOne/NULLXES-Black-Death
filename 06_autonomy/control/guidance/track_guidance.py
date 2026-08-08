@@ -71,6 +71,7 @@ def track_guidance(
     target_y: float,
     target_z: float,
     mode: str,
+    cruise_thrust: float | None = None,
     *,
     cfg: TrackGuidanceConfig | None = None,
 ) -> SetpointOut:
@@ -78,4 +79,5 @@ def track_guidance(
     gx, gy, gz = goal_from_track_mode(
         nav, target_x, target_y, target_z, mode, cfg=cfg
     )
-    return simple_guidance(nav, gx, gy, gz, cfg.cruise_thrust)
+    thrust = cfg.cruise_thrust if cruise_thrust is None else float(cruise_thrust)
+    return simple_guidance(nav, gx, gy, gz, thrust)
