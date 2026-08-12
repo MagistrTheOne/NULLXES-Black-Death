@@ -176,12 +176,11 @@ Source: [BoT-SORT arXiv:2206.14651](https://ar5iv.labs.arxiv.org/html/2206.14651
 
 ## I. FC ↔ Companion contract
 
-### FC baseline — FACT (Matek H743-WING)
+### FC baseline — SUPERSEDED (Matek H743-WING)
 
-- MCU STM32H743 @ 480 MHz; **7 UARTs**, **CAN**, **2× I2C**, dual IMU (revision-dependent: V3 often MPU6000 + ICM42605), DPS310 baro, microSD.  
-Sources: [Matek H743-WING manual PDF](https://www.mateksys.com/downloads/H743-WING_Manual.pdf); [ArduPilot MatekH743 wiki](https://github.com/ArduPilot/ardupilot_wiki/blob/master/common/source/docs/common-matekh743-wing.rst); [Lumenier H743-WING V3](https://www.lumenier.com/products/mateksys-h743-wing-v3-flight-controller).
+Research snapshot. **Flight-1 lock 2026-08-13:** Holybro Pixhawk 6C + M10 + PM. See [FLIGHT1_BOM_LOCK.md](FLIGHT1_BOM_LOCK.md). Do not buy H743-WING V3 as default (OEM catalog gone).
 
-**RECOMMENDATION firmware for FLIGHT-1:** **ArduPilot Plane** (wing) on MatekH743 — mature MAVLink companion story. Custom L0 only after ArduPilot path proven.
+**Firmware for FLIGHT-1:** **ArduPilot Plane** target `Pixhawk6C`. Custom L0 only after ArduPilot path proven.
 
 ### Minimal safe MAVLink contract
 

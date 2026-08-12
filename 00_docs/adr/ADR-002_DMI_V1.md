@@ -33,7 +33,7 @@ Raft, Paxos, MARL onboard, cloud AI in the flight path, 5G as a hard dependency,
 | Stage | When | Platform | Proves |
 |-------|------|----------|--------|
 | 1 | ~2026-08-03 | edu sample airframe | bus, L0 hold, real IMU path, DMI intent on host |
-| 2 | ~2026-09 | SonicModell AR Wing Pro | same contracts on wing; CTOL practice |
+| 2 | ~2026-09 | Skywalker X8 PNP (Flight-1) | same contracts on wing; CTOL practice. BOM: `FLIGHT1_BOM_LOCK.md` |
 
 Alpha 5×5 geometry remains locked per ADR-001. Practice frames do **not** reopen Alpha planform.
 

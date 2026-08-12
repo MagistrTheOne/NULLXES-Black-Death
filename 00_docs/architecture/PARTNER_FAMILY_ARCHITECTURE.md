@@ -252,7 +252,7 @@ flowchart LR
 | Этап | Результат |
 |------|-----------|
 | **Сейчас** | Контракты + алгоритмы; Vision **BLOCKED** без реального ONNX; **DMI v1** modules |
-| **Practice** | edu (~авг) → SonicModell AR Wing Pro (~сент) — шина / L0 / DMI intent |
+| **Practice** | edu (~авг) → Skywalker X8 PNP Flight-1 (~сент) — шина / L0 / DMI intent |
 | **Alpha Flight-1** | **Black Judgment** доказывает архитектуру одной машины |
 | **DMI multi-agent** | N× Judgment-class; L0 swarm-blind; partner term **CMI** = DMI |
 | **Lessons + ADR-021** | Открытие Beta-Endurance / Beta-Heavy |

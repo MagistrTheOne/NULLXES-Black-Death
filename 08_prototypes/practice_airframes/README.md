@@ -5,9 +5,9 @@
 | Stage | Window | Airframe | Focus |
 |-------|--------|----------|-------|
 | 1 | ~2026-08-03 | edu sample | power, FC link, real IMU topic, L0 hold, host DMI coordinator |
-| 2 | ~2026-09 | **SonicModell AR Wing Pro** | CTOL practice; same contracts on wing; 1–2 agents if two kits |
+| 2 | ~2026-09 | **Skywalker X8 PNP** (Flight-1) | CTOL + companion; BOM locked `FLIGHT1_BOM_LOCK.md` |
 
-Canon: [ADR-002 DMI](../../00_docs/adr/ADR-002_DMI_V1.md) · test plans in this folder · bench contracts in `10_tests/practice/`.
+Canon: [ADR-002 DMI](../../00_docs/adr/ADR-002_DMI_V1.md) · [FLIGHT1_BOM_LOCK.md](../../00_docs/architecture/FLIGHT1_BOM_LOCK.md) · `TEST_PLAN_X8_FLIGHT1.md` · bench in `10_tests/practice/`.
 
 ## Proves
 

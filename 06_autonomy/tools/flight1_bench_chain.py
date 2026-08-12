@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """FLIGHT-1 props-off software chain: SensorHub→Track→WorldFact→DMI→Plane cmd.
 
-Physical cam/H743 optional. Without HW, injects FC telemetry + synthetic frame
+Physical cam/Pixhawk 6C optional. Without HW, injects FC telemetry + synthetic frame
 through the same SensorHub / VisionFacts contracts (no webcam-script bypass).
 """
 

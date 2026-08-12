@@ -18,7 +18,7 @@ BLACK DEATH (civil infrastructure flying platform)
 
     DMI v1 (L6) — Distributed Mission Intelligence
     N× Judgment-class / practice airframes (not N× 50×50)
-    PRACTICE: edu (~Aug 2026) → SonicModell AR Wing Pro (~Sep 2026)
+    PRACTICE: edu (~Aug 2026) → SonicModell AR Wing Pro (~Sep 2026) → **Skywalker X8 PNP Flight-1** (BOM locked 2026-08-13)
 ```
 
 | Line | Name | Goal | Touches airframe? | Touches autonomy canon? |

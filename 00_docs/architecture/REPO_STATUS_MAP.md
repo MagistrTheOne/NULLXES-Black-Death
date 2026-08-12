@@ -40,7 +40,7 @@
 | `architecture/MODEL_RELEASE_SPEC.md` | Canon | STABLE/CANDIDATE ModelPack |
 | `architecture/MISSION_POLICY_SPEC.md` | Canon | Runtime MissionProfile gate |
 | `architecture/SEGMENTATION_LANES.md` | Canon | SceneSeg / VehicleAttr / ObsInterest |
-| `architecture/FLIGHT1_BOM_LOCK.md` | PENDING | All HW rows open |
+| `architecture/FLIGHT1_BOM_LOCK.md` | LOCKED 2026-08-13 | X8 PNP + Pixhawk 6C + Orin NX 16GB + IMX568 CSI |
 | `architecture/IMPLEMENTATION_GAP_MAP.md` | **STALE** (2026-08-04) | Use this file for autonomy |
 | `architecture/CERBER_STATUS.md` | Partial | Stage1 done / Stage2 open |
 | `ALPHA_LESSONS_LEARNED.md` | BLOCKED empty | After Flight-1 |
@@ -107,7 +107,7 @@ Numbers chained to analytic aero. PE-05 6 h rejected for Alpha.
 | `buses/`, `hardware/`, `timing/` | DOC_ONLY | Specs; HW not locked |
 | `drivers/` | EMPTY | |
 
-**Flight-1 path:** ArduPilot Plane on Matek H743 + `06_autonomy/l0_bridge` — not bare C++ L0 PWM.
+**Flight-1 path:** ArduPilot Plane on **Pixhawk 6C** + `06_autonomy/l0_bridge` — not bare C++ L0 PWM. Airframe: Skywalker X8 PNP. See [FLIGHT1_BOM_LOCK.md](FLIGHT1_BOM_LOCK.md).
 
 ---
 
@@ -227,7 +227,7 @@ Tracked configs live in `06_autonomy/models/datasets/` (yaml/docs only).
 ## Do not confuse
 
 1. **SoftBus ahead of `bd_interfaces`** — SoftBus is SoT for Flight-1 topics.  
-2. **Two L0 stories** — C++ lib (`05`) vs ArduPlane bridge (`06/l0_bridge`). Flight-1 = Plane+H743.  
+2. **Two L0 stories** — C++ lib (`05`) vs ArduPlane bridge (`06/l0_bridge`). Flight-1 = Plane + Pixhawk 6C.  
 3. **POSEIDON folder ≠ packs loaded** — runtime yes, ONNX no.  
 4. **Calib YAML in repo ≠ flight calibration.**  
 5. **Prelim aero ≠ XFOIL/CFD.**  
@@ -243,8 +243,8 @@ Tracked configs live in `06_autonomy/models/datasets/` (yaml/docs only).
 
 | Gate | Blocker |
 |------|---------|
-| Freeze FLIGHT-1 HW | Fill `FLIGHT1_BOM_LOCK.md` |
-| Physical birth E2E | Cam + H743 + Orin props-off |
+| Freeze FLIGHT-1 HW | DONE 2026-08-13 — `FLIGHT1_BOM_LOCK.md` |
+| Physical birth E2E | IMX568 CSI + Pixhawk 6C + Orin NX 16GB props-off |
 | POSEIDON specialists | Export `uav_seraphim/model.onnx` + sha |
 | VIO ok status | Native OpenVINS/Basalt + license |
 | Validated aero/energy | XFOIL polars → re-size battery |
