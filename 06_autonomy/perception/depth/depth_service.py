@@ -1,4 +1,4 @@
-"""Depth / obstacle grid service — FLIGHT-2 stereo or NN depth."""
+"""Depth / obstacle grid service — fail-closed until a real depth ORT pack exists."""
 
 from __future__ import annotations
 
@@ -17,10 +17,11 @@ class DepthService:
         if onnx_path is not None and onnx_path.is_file():
             import onnxruntime as ort
 
-            self._session = ort.InferenceSession(
-                str(onnx_path),
-                providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
-            )
+            available = set(ort.get_available_providers())
+            providers = [p for p in ("CUDAExecutionProvider", "CPUExecutionProvider") if p in available]
+            if not providers:
+                providers = ["CPUExecutionProvider"]
+            self._session = ort.InferenceSession(str(onnx_path), providers=providers)
 
     @property
     def ready(self) -> bool:
@@ -31,10 +32,11 @@ class DepthService:
         if now - self._last_s < self.min_period_s:
             return None
         self._last_s = now
+        # No depth decoder in this sprint: never claim ok with an empty grid.
         return DepthGridMsg(
             cells=[],
             frame_id="body",
-            ok=self._session is not None,
+            ok=False,
             stamp_s=now,
             stamp_ns=image.stamp_ns,
         )

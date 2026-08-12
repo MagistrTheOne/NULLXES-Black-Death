@@ -75,7 +75,7 @@ class SensorHub:
         self.bus.publish(TOPIC_GNSS, gnss)
         if self.publish_fc_nav:
             self.bus.publish(TOPIC_NAV, nav)
-        self._imu_ok = True
+        self._imu_ok = bool(fc.imu_sample_ok)
         self._gnss_ok = gnss.fix_ok
         self.bus.publish(
             TOPIC_TIME_SYNC,

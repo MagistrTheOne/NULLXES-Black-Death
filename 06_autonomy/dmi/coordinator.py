@@ -28,7 +28,8 @@ class GroundSwarmCoordinator:
     _sectors: dict[str, Sector] = field(default_factory=dict)
     _open_offer: TaskOffer | None = None
     _open_offer_deadline: float = 0.0
-    _assigned_tasks: dict[str, str] = field(default_factory=dict)  # task_id -> agent_id
+    _assigned_tasks: dict[str, str] = field(default_factory=dict)
+    _rejected: dict[str, set[str]] = field(default_factory=dict)
 
     def upsert_agent(self, status: AgentStatus) -> None:
         self._agents[status.agent_id] = status
@@ -37,7 +38,6 @@ class GroundSwarmCoordinator:
         self._sectors[sector.sector_id] = sector
 
     def on_claim(self, claim: TaskClaim, *, now_s: float | None = None) -> bool:
-        """Apply ACCEPT/REJECT. Returns True if offer closed successfully."""
         now = now_s if now_s is not None else time.time()
         if self._open_offer is None:
             return False
@@ -54,11 +54,20 @@ class GroundSwarmCoordinator:
                 sec = self._sectors.get(self._open_offer.intent.sector_id)
                 if sec is not None:
                     self._sectors[sec.sector_id] = Sector(
-                        sec.sector_id, sec.x, sec.y, sec.z, claim.agent_id
+                        sec.sector_id,
+                        sec.x,
+                        sec.y,
+                        sec.z,
+                        claim.agent_id,
+                        sec.xmin,
+                        sec.xmax,
+                        sec.ymin,
+                        sec.ymax,
+                        sec.spacing_m,
                     )
             self._open_offer = None
             return True
-        # REJECT — clear offer so allocator may retry another agent later
+        self._rejected.setdefault(claim.task_id, set()).add(claim.agent_id)
         self._open_offer = None
         return True
 
@@ -67,24 +76,20 @@ class GroundSwarmCoordinator:
         if self._open_offer is not None and now > self._open_offer_deadline:
             self._open_offer = None
 
-    def allocate_explore_sector(
+    def _candidates(
         self,
-        sector_id: str,
+        x: float,
+        y: float,
         *,
-        now_s: float | None = None,
-    ) -> TaskOffer | None:
-        """Exclusive offer to best agent for exploring a known sector."""
-        now = now_s if now_s is not None else time.time()
-        self.expire_offer(now_s=now)
-        if self._open_offer is not None:
-            return None
-        sector = self._sectors.get(sector_id)
-        if sector is None:
-            raise ValueError(f"unknown sector {sector_id!r}")
-        candidates: list[AgentScoreInput] = []
+        exclude: set[str] | None = None,
+    ) -> list[AgentScoreInput]:
+        skip = exclude or set()
+        out: list[AgentScoreInput] = []
         for st in self._agents.values():
-            dist = math.hypot(st.x - sector.x, st.y - sector.y)
-            candidates.append(
+            if st.agent_id in skip:
+                continue
+            dist = math.hypot(st.x - x, st.y - y)
+            out.append(
                 AgentScoreInput(
                     agent_id=st.agent_id,
                     distance_m=dist,
@@ -93,15 +98,56 @@ class GroundSwarmCoordinator:
                     health_factor=st.health_factor,
                 )
             )
+        return out
+
+    def _offer(
+        self,
+        *,
+        task_id: str,
+        intent: SwarmIntent,
+        score: float,
+        now: float,
+    ) -> TaskOffer | None:
+        if self._open_offer is not None:
+            return None
+        if self._assigned_tasks.get(task_id) == intent.agent_id:
+            return None
+        offer = TaskOffer(
+            offer_id=str(uuid.uuid4()),
+            task_id=task_id,
+            agent_id=intent.agent_id,
+            intent=intent,
+            score=score,
+            stamp_s=now,
+        )
+        self._open_offer = offer
+        self._open_offer_deadline = now + self.offer_timeout_s
+        return offer
+
+    def allocate_explore_sector(
+        self,
+        sector_id: str,
+        *,
+        now_s: float | None = None,
+        exclude: set[str] | None = None,
+    ) -> TaskOffer | None:
+        now = now_s if now_s is not None else time.time()
+        self.expire_offer(now_s=now)
+        if self._open_offer is not None:
+            return None
+        sector = self._sectors.get(sector_id)
+        if sector is None:
+            raise ValueError(f"unknown sector {sector_id!r}")
+        skip = set(exclude or ()) | self._rejected.get(f"explore-{sector_id}", set())
         best = select_best_agent(
-            candidates, max_distance_m=self.max_distance_m, weights=self.weights
+            self._candidates(sector.x, sector.y, exclude=skip),
+            max_distance_m=self.max_distance_m,
+            weights=self.weights,
         )
         if best is None:
             return None
         agent_id, score = best
         task_id = f"explore-{sector_id}"
-        if self._assigned_tasks.get(task_id) == agent_id:
-            return None
         intent = SwarmIntent(
             intent_id=str(uuid.uuid4()),
             kind=IntentKind.EXPLORE_SECTOR,
@@ -111,15 +157,74 @@ class GroundSwarmCoordinator:
             y=sector.y,
             z=sector.z,
             stamp_s=now,
+            xmin=sector.xmin,
+            xmax=sector.xmax,
+            ymin=sector.ymin,
+            ymax=sector.ymax,
+            spacing_m=sector.spacing_m,
         )
-        offer = TaskOffer(
-            offer_id=str(uuid.uuid4()),
-            task_id=task_id,
+        return self._offer(task_id=task_id, intent=intent, score=score, now=now)
+
+    def allocate_goto(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        *,
+        task_id: str = "goto",
+        now_s: float | None = None,
+        exclude: set[str] | None = None,
+    ) -> TaskOffer | None:
+        now = now_s if now_s is not None else time.time()
+        self.expire_offer(now_s=now)
+        skip = set(exclude or ()) | self._rejected.get(task_id, set())
+        best = select_best_agent(
+            self._candidates(x, y, exclude=skip),
+            max_distance_m=self.max_distance_m,
+            weights=self.weights,
+        )
+        if best is None:
+            return None
+        agent_id, score = best
+        intent = SwarmIntent(
+            intent_id=str(uuid.uuid4()),
+            kind=IntentKind.GOTO_XYZ,
             agent_id=agent_id,
-            intent=intent,
-            score=score,
+            x=x,
+            y=y,
+            z=z,
             stamp_s=now,
         )
-        self._open_offer = offer
-        self._open_offer_deadline = now + self.offer_timeout_s
-        return offer
+        return self._offer(task_id=task_id, intent=intent, score=score, now=now)
+
+    def allocate_loiter(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        *,
+        task_id: str = "loiter",
+        now_s: float | None = None,
+        exclude: set[str] | None = None,
+    ) -> TaskOffer | None:
+        now = now_s if now_s is not None else time.time()
+        self.expire_offer(now_s=now)
+        skip = set(exclude or ()) | self._rejected.get(task_id, set())
+        best = select_best_agent(
+            self._candidates(x, y, exclude=skip),
+            max_distance_m=self.max_distance_m,
+            weights=self.weights,
+        )
+        if best is None:
+            return None
+        agent_id, score = best
+        intent = SwarmIntent(
+            intent_id=str(uuid.uuid4()),
+            kind=IntentKind.LOITER,
+            agent_id=agent_id,
+            x=x,
+            y=y,
+            z=z,
+            stamp_s=now,
+        )
+        return self._offer(task_id=task_id, intent=intent, score=score, now=now)

@@ -14,7 +14,7 @@ from soft_bus.bus import SoftBus
 from soft_bus.messages import (
     TOPIC_GNSS,
     TOPIC_IMU,
-    TOPIC_NAV,
+    TOPIC_NAV_EKF,
     GnssFix,
     ImuMsg,
     NavStateMsg,
@@ -44,7 +44,7 @@ class NavSoftNode:
     def _publish(self, stamp: float) -> None:
         x = self.ekf.state
         self.bus.publish(
-            TOPIC_NAV,
+            TOPIC_NAV_EKF,
             NavStateMsg(
                 float(x[0]),
                 float(x[1]),
@@ -52,8 +52,9 @@ class NavSoftNode:
                 float(x[3]),
                 float(x[4]),
                 float(x[5]),
-                float("nan"),  # yaw: attitude estimator not wired — do not invent 0
+                float("nan"),
                 stamp,
+                source="ekf",
             ),
         )
 

@@ -5,7 +5,13 @@ from __future__ import annotations
 import time
 
 from perception.fusion.nav_fuse import fuse_nav_vio
-from perception.slam.ivio import BasaltProvider, IVioProvider, NullVioProvider, OpenVinsProvider
+from perception.slam.ivio import (
+    BasaltProvider,
+    IVioProvider,
+    NullVioProvider,
+    NullxesVoProvider,
+    OpenVinsProvider,
+)
 from soft_bus.bus import SoftBus
 from soft_bus.messages import (
     TOPIC_CAM_FORWARD,
@@ -16,12 +22,13 @@ from soft_bus.messages import (
     ImageMsg,
     ImuMsg,
     NavStateMsg,
-    VioStateMsg,
 )
 
 
 def make_provider(name: str) -> IVioProvider:
     key = name.lower()
+    if key in ("nullxes_vo", "nullxesvo", "nullxes"):
+        return NullxesVoProvider()
     if key in ("openvins", "openvinsprovider"):
         return OpenVinsProvider()
     if key in ("basalt", "basaltprovider"):
@@ -34,7 +41,7 @@ class VioSoftNode:
         self,
         bus: SoftBus,
         *,
-        provider: str = "openvins",
+        provider: str = "nullxes_vo",
         publish_fused: bool = True,
     ) -> None:
         self.bus = bus
@@ -62,7 +69,7 @@ class VioSoftNode:
             self.bus.publish(TOPIC_NAV_FUSED, fused)
 
 
-def main(bus: SoftBus | None = None, provider: str = "openvins") -> SoftBus:
+def main(bus: SoftBus | None = None, provider: str = "nullxes_vo") -> SoftBus:
     bus = bus or SoftBus()
     VioSoftNode(bus, provider=provider)
     return bus

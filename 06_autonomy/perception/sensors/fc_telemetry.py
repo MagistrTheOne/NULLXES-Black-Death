@@ -40,6 +40,33 @@ class FcTelemetry:
     # Timing
     time_boot_ms: int = 0
     sensor_stamp_ns: int = 0
+    imu_sample_ok: bool = False
+
+
+G_MPS2 = 9.80665
+
+
+def body_accel_to_enu_linear(
+    roll_rad: float,
+    pitch_rad: float,
+    yaw_ned_rad: float,
+    ax: float,
+    ay: float,
+    az: float,
+) -> tuple[float, float, float]:
+    """ArduPilot body (x-fwd, y-right, z-down) specific force → ENU linear accel.
+
+    Subtracts gravity in NED, then NED→ENU. Hover specific force ≈ (0,0,g) → ~0 linear.
+    """
+    cr, sr = math.cos(roll_rad), math.sin(roll_rad)
+    cp, sp = math.cos(pitch_rad), math.sin(pitch_rad)
+    cy, sy = math.cos(yaw_ned_rad), math.sin(yaw_ned_rad)
+    # body → NED
+    n = cp * cy * ax + (sr * sp * cy - cr * sy) * ay + (cr * sp * cy + sr * sy) * az
+    e = cp * sy * ax + (sr * sp * sy + cr * cy) * ay + (cr * sp * sy - sr * cy) * az
+    d = -sp * ax + sr * cp * ay + cr * cp * az
+    ln, le, ld = n, e, d - G_MPS2
+    return le, ln, -ld
 
 
 def ned_yaw_to_enu(yaw_ned: float) -> float:
@@ -69,16 +96,22 @@ def map_fc_to_bus(
     vx, vy, vz = ned_vel_to_enu(fc.vn_mps, fc.ve_mps, fc.vd_mps)
     yaw = ned_yaw_to_enu(fc.yaw_rad)
 
-    # Linear accel ENU: rotate body accel minus gravity — coarse; driver may refine.
-    # Here publish body rates as-is in body frame; NavEKF expects ENU linear accel.
-    # Pass zero linear ENU until attitude rotation is calibrated (SensorHub marks imu_ok).
+    if fc.imu_sample_ok:
+        ax, ay, az = body_accel_to_enu_linear(
+            fc.roll_rad, fc.pitch_rad, fc.yaw_rad, fc.accel_x, fc.accel_y, fc.accel_z
+        )
+        accel = (ax, ay, az)
+        imu_frame = "enu"
+    else:
+        accel = (0.0, 0.0, 0.0)
+        imu_frame = "enu"
     imu = ImuMsg(
         gyro_rps=(fc.gyro_x, fc.gyro_y, fc.gyro_z),
-        accel_mps2=(0.0, 0.0, 0.0),
+        accel_mps2=accel,
         stamp_s=stamp_s,
         stamp_ns=now_ns,
         sensor_stamp_ns=sensor_ns,
-        frame_id="body",
+        frame_id=imu_frame,
     )
     gnss = GnssFix(
         x=ex,

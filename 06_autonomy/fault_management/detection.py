@@ -14,6 +14,7 @@ class RawHealth:
     lidar_alive: bool
     peer_heartbeat_age_s: float
     battery_soc: float
+    lidar_reported: bool = False
 
 
 @dataclass
@@ -37,7 +38,7 @@ def detect(h: RawHealth) -> DetectedFaults:
         cam_fail=cams,
         imu_fail=imus,
         gnss_stale=h.gnss_fix_age_s > 5.0,
-        lidar_fail=not h.lidar_alive,
+        lidar_fail=(not h.lidar_alive) if h.lidar_reported else False,
         peer_dead=h.peer_heartbeat_age_s > 0.15,
         battery_low=h.battery_soc < 0.25,
         battery_critical=h.battery_soc < 0.12,

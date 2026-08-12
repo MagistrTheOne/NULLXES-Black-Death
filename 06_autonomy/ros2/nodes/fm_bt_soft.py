@@ -1,7 +1,7 @@
 """Soft-bus FM + behaviour tree node.
 
-Does not invent healthy sensors. Requires real vision/L0/SOC (and GNSS age);
-LiDAR alive only when a lidar health signal exists — until then lidar is treated failed.
+Does not invent healthy sensors. Requires real vision/L0/SOC (and GNSS age).
+LiDAR is optional until a lidar health topic exists (`lidar_reported`).
 """
 
 from __future__ import annotations
@@ -41,8 +41,9 @@ class FmBtSoftNode:
         self._soc: float | None = None
         self._gnss_stamp: float | None = None
         self._gnss_ok = False
-        # No lidar health topic yet → treat as failed (do not invent alive=True)
+        # No lidar health topic yet — do not invent alive, do not treat as failed.
         self._lidar_alive = False
+        self._lidar_reported = False
         bus.subscribe(TOPIC_VISION_HEALTH, self._on_vision)
         bus.subscribe(TOPIC_L0_HEALTH, self._on_l0)
         bus.subscribe(TOPIC_HB_A, lambda m: setattr(self, "_hb_a", m))
@@ -92,14 +93,16 @@ class FmBtSoftNode:
         raw = RawHealth(
             motor_thrust_residual=residual,
             cams_alive=cam_flags,
-            imu_alive=(self._l0.imu_ok, False),  # second IMU not wired — do not invent            gnss_fix_age_s=gnss_age,
+            imu_alive=(self._l0.imu_ok, False),
+            gnss_fix_age_s=gnss_age,
             lidar_alive=self._lidar_alive,
+            lidar_reported=self._lidar_reported,
             peer_heartbeat_age_s=peer_age,
             battery_soc=self._soc,
         )
         faults = detect(raw)
         mask = isolate(faults)
-        health, _ = reconfigure(faults, mask)
+        health, _ = reconfigure(faults, mask, lidar_reported=self._lidar_reported)
         health.battery_soc = self._soc
         health.compute_peer_alive = peer_age <= 0.15 and bool(peer and peer.healthy)
         mode = self.bt.tick(health)

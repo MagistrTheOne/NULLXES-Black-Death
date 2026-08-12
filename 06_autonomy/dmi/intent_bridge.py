@@ -11,6 +11,7 @@ _INTENT_ACTION = {
     IntentKind.LOITER: "LOITER",
     IntentKind.GOTO_XYZ: "GOTO_XYZ",
     IntentKind.EXPLORE_SECTOR: "EXPLORE_SECTOR",
+    IntentKind.RTB: "RTB",
 }
 
 
@@ -31,7 +32,7 @@ def intent_to_goal(intent: SwarmIntent, *, stamp_s: float | None = None) -> Goal
             trace_id=intent.trace_id,
             action=action,
         )
-    if intent.kind in (IntentKind.EXPLORE_SECTOR, IntentKind.GOTO_XYZ):
+    if intent.kind in (IntentKind.EXPLORE_SECTOR, IntentKind.GOTO_XYZ, IntentKind.RTB):
         return GoalMsg(
             x=intent.x,
             y=intent.y,

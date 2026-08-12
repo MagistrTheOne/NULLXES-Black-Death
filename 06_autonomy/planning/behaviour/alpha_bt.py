@@ -22,6 +22,7 @@ class HealthFlags:
     imu_ok: int = 0
     gnss_ok: bool = False
     lidar_ok: bool = False
+    lidar_reported: bool = False
     compute_peer_alive: bool = False
     battery_soc: float = 0.0
     nav_integrity: bool = False
@@ -42,7 +43,9 @@ class AlphaBT:
             self.mode = FlightMode.DEGRADED_COMPUTE
         elif h.thrusters_ok < 2:
             self.mode = FlightMode.DEGRADED_PROP
-        elif h.cams_ok < 2 or h.imu_ok < 1 or not h.gnss_ok or not h.lidar_ok:
+        elif h.cams_ok < 1 or h.imu_ok < 1 or not h.gnss_ok or (
+            h.lidar_reported and not h.lidar_ok
+        ):
             self.mode = FlightMode.DEGRADED_SENS
         else:
             self.mode = FlightMode.NOMINAL

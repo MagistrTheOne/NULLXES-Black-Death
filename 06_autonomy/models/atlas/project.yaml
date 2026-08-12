@@ -1,0 +1,4 @@
+product: BLACK-ATLAS
+companion_load: false
+packs:
+  - atlas_alloc_v1

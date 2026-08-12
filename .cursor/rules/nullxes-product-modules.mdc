@@ -1,0 +1,23 @@
+---
+description: NULLXES product module lock — CERBER vision, POSEIDON specialize, DMI decide, ATLAS GSC AI coordinator
+alwaysApply: true
+---
+
+# NULLXES product modules (LOCKED)
+
+| Product | Role | Not |
+|---------|------|-----|
+| **CERBER** | Vision / perception (Detect→Track→Fusion→WorldFact). YOLO→ONNX Runtime. | Chat LLM. Llama, Gemini, GPT, Ollama, cloud APIs. |
+| **POSEIDON** | Specialist packs (CV/VE/VL/FW). Facts only. | GuidanceIntent. Product ids `qwen*`/`llama*`/`gemini*`. |
+| **DMI** | DECIDE + swarm offer/claim. L0 swarm-blind. | Inner-loop. Cloud LLM. MARL onboard. |
+| **BLACK ATLAS** | GSC AI+coordinator. AllocationPlan → DMI executor. | Companion default. CERBER replacement. Fire-control. |
+| **BLACK DEATH** | Airframe + SoftBus autonomy stack | Cloud decision path |
+
+## Hard rules
+
+- Entire UAV stack (civil+military) runs **NULLXES nets** (train + export + sha). Architecture corpses (YOLO, DeepSets, Set Transformer, GAT) are references — **weights are ours**. No Qwen/Llama/Gemini/GPT/Ollama as product models.
+- CERBER stays eyes (detect ONNX). No LLM in `perception/`.
+- Flight path: CERBER → POSEIDON → DMI → Guidance → L0. ATLAS on GSC only.
+- ATLAS-ALLOC is written in-repo (`06_autonomy/atlas/`, `models/atlas/`). No Hub download of a coordinator LLM.
+- ATLAS proposes; DMI owns exclusive TaskOffer / ACCEPT / REJECT. Never GuidanceIntent.
+- L0 remains swarm-blind and weapon-blind.

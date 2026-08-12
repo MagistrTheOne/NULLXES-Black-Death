@@ -71,6 +71,7 @@ class MavlinkFcLink:
                 hdop=cur.hdop,
                 time_boot_ms=boot_ms,
                 sensor_stamp_ns=sensor_ns,
+                imu_sample_ok=cur.imu_sample_ok,
             )
             self._have_att = True
         elif t == "LOCAL_POSITION_NED":
@@ -97,6 +98,7 @@ class MavlinkFcLink:
                 hdop=cur.hdop,
                 time_boot_ms=boot_ms,
                 sensor_stamp_ns=sensor_ns,
+                imu_sample_ok=cur.imu_sample_ok,
             )
             self._have_pos = True
         elif t == "GPS_RAW_INT":
@@ -123,7 +125,8 @@ class MavlinkFcLink:
                 fix_ok=fix,
                 hdop=float(getattr(msg, "eph", 9900)) / 100.0,
                 time_boot_ms=boot_ms,
-                sensor_stamp_ns=time.monotonic_ns(),
+                sensor_stamp_ns=sensor_ns,
+                imu_sample_ok=cur.imu_sample_ok,
             )
         elif t in ("SCALED_IMU", "SCALED_IMU2", "HIGHRES_IMU"):
             # mG / mrad/s variants — normalize best-effort
@@ -156,6 +159,7 @@ class MavlinkFcLink:
                 hdop=cur.hdop,
                 time_boot_ms=boot_ms,
                 sensor_stamp_ns=sensor_ns,
+                imu_sample_ok=True,
             )
         else:
             return None

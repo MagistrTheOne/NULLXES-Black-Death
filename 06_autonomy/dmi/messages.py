@@ -15,6 +15,7 @@ class IntentKind(str, Enum):
     EXPLORE_SECTOR = "EXPLORE_SECTOR"
     GOTO_XYZ = "GOTO_XYZ"
     LOITER = "LOITER"
+    RTB = "RTB"
 
 
 class RelationKind(str, Enum):
@@ -50,6 +51,11 @@ class SwarmIntent:
     z: float = 0.0
     stamp_s: float = 0.0
     trace_id: str = ""
+    xmin: float = 0.0
+    xmax: float = 0.0
+    ymin: float = 0.0
+    ymax: float = 0.0
+    spacing_m: float = 40.0
 
 
 @dataclass(frozen=True)
@@ -170,6 +176,11 @@ class Sector:
     y: float
     z: float
     assigned_agent: str = ""
+    xmin: float = 0.0
+    xmax: float = 0.0
+    ymin: float = 0.0
+    ymax: float = 0.0
+    spacing_m: float = 40.0
 
 
 TOPIC_DMI_INTENT = "/bd/dmi/intent"

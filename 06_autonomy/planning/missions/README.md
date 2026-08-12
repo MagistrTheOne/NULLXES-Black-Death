@@ -1,5 +1,3 @@
 # Missions
 
-**BLOCKED** — civil mission packages not authored for Alpha Flight-1.
-
-Do not invent mission timelines or fake logistics plans here.
+HAS_CODE — YAML `MissionPlan` + `MissionExecutor`. Plan: `plans/inspect_powerline_v1.yaml`.

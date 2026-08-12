@@ -26,6 +26,7 @@ BLACK DEATH (civil infrastructure flying platform)
 | Alpha | **Black Judgment** (5×5) | Prove integrated system + fault behaviour | Frozen | Build / verify |
 | CERBER | perception system | Vision·detect·fusion·… (YOLO is an organ) | Sensors / ONNX | `perception/` |
 | DMI | multi-agent mission layer | Tasks / sectors / world cache; L0 swarm-blind | Practice frames first | Add L6; do not redesign L0 |
+| ATLAS | GSC AI + coordinator | AllocationPlan → DMI executor; COP merge | GSC host only | `06_autonomy/atlas/`; not CERBER, not companion |
 | Product | **BLACK DEATH** (~50×50) | Civil infrastructure platform | After Beta | Port, don't redesign |
 | Beta-Endurance | — | Max endurance / range | Yes (AR, span, energy) | Port, don't redesign |
 | Beta-Heavy | — | Payload, volume, infrastructure work | Yes (thick BWB, hardpoints) | Port, don't redesign |

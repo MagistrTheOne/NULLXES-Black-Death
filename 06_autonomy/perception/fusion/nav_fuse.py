@@ -13,7 +13,7 @@ def fuse_nav_vio(
 ) -> NavStateMsg:
     if fc is None and vio is None:
         return NavStateMsg(stamp_s=stamp_s, source="fused", frame_id="enu")
-    if vio is None or vio.status in ("uninit", "diverge"):
+    if vio is None or vio.status in ("uninit", "diverge", "degraded"):
         if fc is None:
             return NavStateMsg(stamp_s=stamp_s, source="fused", frame_id="enu")
         return NavStateMsg(

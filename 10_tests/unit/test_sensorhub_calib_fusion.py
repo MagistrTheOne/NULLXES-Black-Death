@@ -34,7 +34,7 @@ def test_fc_ned_to_enu_mapping():
     imu, gnss, nav = map_fc_to_bus(fc)
     assert gnss.x == 3.0 and gnss.y == 10.0 and gnss.z == 20.0
     assert nav.source == "fc"
-    assert imu.frame_id == "body"
+    assert imu.frame_id == "enu"
 
 
 def test_sensorhub_ingest_publishes():
@@ -129,8 +129,9 @@ def test_vio_provider_and_fuse():
     vio = p.push_image(img)
     assert vio is not None
     assert vio.provider == "openvins"
-    assert vio.status == "degraded"
+    assert vio.status == "uninit"
     fc = NavStateMsg(x=1, y=2, z=3, cov_xx=4, cov_yy=4, cov_zz=4, source="fc")
     fused = fuse_nav_vio(fc, vio, stamp_s=1.0)
-    assert fused.source == "fused"
+    assert fused.source == "fc"
+    assert fused.x == 1.0 and fused.y == 2.0 and fused.z == 3.0
     assert fused.frame_id == "enu"

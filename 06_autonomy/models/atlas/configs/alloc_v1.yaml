@@ -1,0 +1,11 @@
+pack_id: atlas_alloc_v1
+n_agents: 16
+n_sectors: 32
+agent_dim: 9
+sector_dim: 8
+hidden: 32
+max_distance_m: 500.0
+epochs: 40
+lr: 0.001
+batch_size: 32
+samples: 2048

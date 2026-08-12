@@ -16,21 +16,27 @@ class ReconfigOut:
     allow_mission: bool
 
 
-def reconfigure(faults: DetectedFaults, mask: IsolationMask) -> tuple[HealthFlags, ReconfigOut]:
+def reconfigure(
+    faults: DetectedFaults,
+    mask: IsolationMask,
+    *,
+    lidar_reported: bool = False,
+) -> tuple[HealthFlags, ReconfigOut]:
     thrusters_ok = sum(1 for x in mask.motors_enabled if x)
     cams_ok = sum(1 for x in mask.cams_enabled if x)
     imu_ok = sum(1 for x in mask.imus_enabled if x)
-    # battery_soc left 0 here — caller must set from real SOC telemetry
     h = HealthFlags(
         thrusters_ok=thrusters_ok,
         cams_ok=cams_ok,
         imu_ok=imu_ok,
         gnss_ok=mask.use_gnss and not faults.gnss_stale,
-        lidar_ok=mask.lidar_enabled,
+        lidar_ok=bool(mask.lidar_enabled) if lidar_reported else False,
+        lidar_reported=lidar_reported,
         compute_peer_alive=not faults.peer_dead,
         battery_soc=0.0,
         nav_integrity=imu_ok >= 1 and (mask.use_gnss or cams_ok >= 1),
     )
+    lidar_block = lidar_reported and not mask.lidar_enabled
     if faults.battery_critical or thrusters_ok == 0 or not h.nav_integrity:
         out = ReconfigOut(FlightMode.SAFE_LOITER, 0.2, False)
     elif faults.battery_low:
@@ -39,7 +45,7 @@ def reconfigure(faults: DetectedFaults, mask: IsolationMask) -> tuple[HealthFlag
         out = ReconfigOut(FlightMode.DEGRADED_PROP, 0.55, False)
     elif faults.peer_dead:
         out = ReconfigOut(FlightMode.DEGRADED_COMPUTE, 0.7, True)
-    elif cams_ok < 2 or imu_ok < 1 or not mask.lidar_enabled or faults.gnss_stale:
+    elif cams_ok < 1 or imu_ok < 1 or lidar_block or faults.gnss_stale:
         out = ReconfigOut(FlightMode.DEGRADED_SENS, 0.6, True)
     else:
         out = ReconfigOut(FlightMode.NOMINAL, 1.0, True)

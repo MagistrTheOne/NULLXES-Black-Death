@@ -1,0 +1,7 @@
+product: BLACK-ATLAS-ALLOC-01
+pack_id: atlas_alloc_v1
+version: 0.1.0
+companion_load: false
+family: alloc
+runtime: ort
+release_channel: CANDIDATE
