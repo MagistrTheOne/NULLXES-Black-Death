@@ -27,6 +27,7 @@ BLACK DEATH (civil infrastructure flying platform)
 | CERBER | perception system | Vision·detect·fusion·… (YOLO is an organ) | Sensors / ONNX | `perception/` |
 | DMI | multi-agent mission layer | Tasks / sectors / world cache; L0 swarm-blind | Practice frames first | Add L6; do not redesign L0 |
 | ATLAS | GSC AI + coordinator | AllocationPlan → DMI executor; COP merge | GSC host only | `06_autonomy/atlas/`; not CERBER, not companion |
+| Envelope | CIVIL \| DEFENSE | Same L0; MissionProfile switch; 30–50 km GSC COP | GSC + policy YAML | [ADR-008](adr/ADR-008_DUAL_ENVELOPE.md) · [MODE_ENVELOPES.md](architecture/MODE_ENVELOPES.md) |
 | Product | **BLACK DEATH** (~50×50) | Civil infrastructure platform | After Beta | Port, don't redesign |
 | Beta-Endurance | — | Max endurance / range | Yes (AR, span, energy) | Port, don't redesign |
 | Beta-Heavy | — | Payload, volume, infrastructure work | Yes (thick BWB, hardpoints) | Port, don't redesign |

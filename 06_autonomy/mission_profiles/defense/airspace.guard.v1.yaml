@@ -1,36 +1,36 @@
-profile_id: inspection.powerline.v1
+profile_id: airspace.guard.v1
 version: 1
-envelope: civil
+envelope: defense
 expires_at: "2099-01-01T00:00:00Z"
 allowed_actions:
   - OBSERVE
   - TRACK
-  - MAP
-  - INSPECT
   - ALERT
   - HANDOFF
   - LOITER
   - RTB
   - GOTO_XYZ
-  - EXPLORE_SECTOR
+  - ESCORT
+  - DENY_PRESENCE
+  - INGEST_TERRITORIAL
+  - CORRELATE_IFF
 denied_actions:
   - CHASE
+  - INSPECT
 allowed_models:
   - cerber:v2
-  - poseidon:power_insplad
   - poseidon:uav_seraphim
-  - poseidon:scene_segformer_b0
 require_signed_models: true
 geofence:
-  xmin: -5000
-  xmax: 5000
-  ymin: -5000
-  ymax: 5000
+  xmin: -8000
+  xmax: 8000
+  ymin: -8000
+  ymax: 8000
   zmin: 0
   zmax: 400
-max_agl_m: 120
-cop_radius_m: 5000
-rid_required: true
-rid_broadcast: true
+max_agl_m: 200
+cop_radius_m: 30000
+rid_required: false
+rid_broadcast: false
 emergency_termination: RTL
-registration_class: uchet
+registration_class: defense_hold

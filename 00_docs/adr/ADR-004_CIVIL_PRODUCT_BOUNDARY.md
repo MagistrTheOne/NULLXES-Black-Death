@@ -18,6 +18,7 @@ CERBER / POSEIDON / DMI are dual-use capable as perception and coordination stac
 5. **L0 remains swarm-blind and weapon-blind.** Guidance outputs setpoints only.
 6. **Human-on-loop** for mission mode changes when link is up; autonomy continues civil degrade when link is down.
 7. **Runtime inference:** ONNX Runtime / TensorRT on NULLXES hardware and servers only. No cloud LLM / Ollama in the flight or mission decision path.
+8. **Dual envelope (ADR-008):** CIVIL remains the product default. DEFENSE is the same airframe + GSC COP, not a kill-chain. Forbidden interfaces in (2) stay forbidden.
 
 ### Mission matrix
 

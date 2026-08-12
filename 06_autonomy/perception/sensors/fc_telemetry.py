@@ -123,6 +123,9 @@ def map_fc_to_bus(
         sensor_stamp_ns=sensor_ns,
         frame_id="enu",
         hdop=fc.hdop,
+        lat_deg=fc.lat_deg,
+        lon_deg=fc.lon_deg,
+        alt_amsl_m=fc.alt_amsl_m,
     )
     nav = NavStateMsg(
         x=ex,

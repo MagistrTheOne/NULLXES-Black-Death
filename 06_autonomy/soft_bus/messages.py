@@ -257,6 +257,9 @@ class GnssFix:
     sensor_stamp_ns: int = 0
     frame_id: str = "enu"
     hdop: float = 99.0
+    lat_deg: float = 0.0
+    lon_deg: float = 0.0
+    alt_amsl_m: float = 0.0
 
 
 @dataclass
@@ -403,6 +406,7 @@ class MissionProfileMsg:
     version: int = 1
     content_hash: str = ""
     stamp_s: float = 0.0
+    envelope: str = "civil"
 
 
 @dataclass
@@ -412,6 +416,68 @@ class PolicyDecisionMsg:
     reason: str = ""
     trace_id: str = ""
     stamp_s: float = 0.0
+
+
+@dataclass
+class EnvelopeMsg:
+    envelope: str
+    profile_id: str
+    content_hash: str
+    stamp_s: float
+    reason: str = ""
+    operator_ack: bool = False
+
+
+@dataclass
+class EnvelopeSwitchMsg:
+    envelope: str
+    profile_id: str
+    operator_ack: bool = False
+    stamp_s: float = 0.0
+
+
+@dataclass
+class TerritorialIngestMsg:
+    track_id: str
+    source: str
+    lat: float
+    lon: float
+    alt_m: float
+    ident: str
+    stamp_s: float = 0.0
+
+
+@dataclass
+class TerritorialTrackMsg:
+    track_id: str
+    source: str
+    lat: float
+    lon: float
+    alt_m: float
+    ident: str
+    affiliation: str
+    range_m: float
+    stamp_s: float = 0.0
+
+
+@dataclass
+class GnssIntegrityMsg:
+    ok: bool
+    reason: str
+    hdop: float = 99.0
+    jump_m: float = 0.0
+    stamp_s: float = 0.0
+
+
+@dataclass
+class RidBroadcastMsg:
+    ident: str
+    category: str
+    lat: float = 0.0
+    lon: float = 0.0
+    alt_m: float = 0.0
+    stamp_s: float = 0.0
+    dest: str = "era_glonass"
 
 
 @dataclass
@@ -470,3 +536,9 @@ TOPIC_PLANE_CMD = "/bd/l0/plane_cmd"
 TOPIC_TRACE_SPAN = "/bd/trace/span"
 TOPIC_MISSION_PROFILE = "/bd/mission/profile"
 TOPIC_POLICY_DECISION = "/bd/mission/policy_decision"
+TOPIC_MISSION_ENVELOPE = "/bd/mission/envelope"
+TOPIC_ENVELOPE_SWITCH = "/bd/mission/envelope_switch"
+TOPIC_TERRITORIAL_TRACK = "/bd/gsc/territorial_track"
+TOPIC_TERRITORIAL_INGEST = "/bd/gsc/territorial_ingest"
+TOPIC_GNSS_INTEGRITY = "/bd/gnss/integrity"
+TOPIC_RID_BROADCAST = "/bd/rid/broadcast"

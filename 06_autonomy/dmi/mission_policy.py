@@ -1,16 +1,58 @@
-"""Runtime MissionProfile gate (MISSION_POLICY_SPEC)."""
+"""Runtime MissionProfile gate (MISSION_POLICY_SPEC). CIVIL default. NEVER_ACTIONS hard-deny."""
 
 from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 from soft_bus.messages import PolicyDecisionMsg
+
+
+class EnvelopeKind(str, Enum):
+    CIVIL = "civil"
+    DEFENSE = "defense"
+
+
+def parse_envelope(raw: str | EnvelopeKind | None) -> EnvelopeKind:
+    if raw is None or raw == "":
+        return EnvelopeKind.CIVIL
+    s = str(raw).strip().lower()
+    if s in ("civil", "civ"):
+        return EnvelopeKind.CIVIL
+    if s in ("defense", "defence", "mil", "military"):
+        return EnvelopeKind.DEFENSE
+    raise ValueError(f"unknown envelope {raw!r}")
+
+
+# Hard deny in every envelope. YAML cannot enable these.
+NEVER_ACTIONS = frozenset(
+    {
+        "WEAPON",
+        "ARM",
+        "FIRE",
+        "FIRE_CONTROL",
+        "STRIKE",
+        "KILL",
+        "MUNITION",
+        "JAM",
+        "JAM_GNSS",
+        "SPOOF",
+        "SPOOF_GNSS",
+        "EW_ATTACK",
+        "JAMMER",
+        "GUIDANCE_INTENT",
+        "TARGET_LOCK_WEAPON",
+    }
+)
+
+EMERGENCY_MODES = frozenset({"RTL", "LAND", "SAFE_LAND"})
+REGISTRATION_CLASSES = frozenset({"uchet", "registraciya", "defense_hold"})
 
 
 @dataclass(frozen=True)
@@ -34,6 +76,7 @@ class Geofence:
 class MissionProfile:
     profile_id: str
     version: int
+    envelope: EnvelopeKind
     allowed_actions: frozenset[str]
     denied_actions: frozenset[str]
     allowed_models: frozenset[str]
@@ -42,12 +85,23 @@ class MissionProfile:
     max_agl_m: float | None
     expires_at: datetime | None
     content_hash: str
+    cop_radius_m: float
+    rid_required: bool
+    rid_broadcast: bool
+    emergency_termination: str
+    registration_class: str
 
 
 @dataclass
 class MissionPolicyGate:
     profile: MissionProfile
     _decisions: list[PolicyDecisionMsg] = field(default_factory=list)
+    _rid_age_s: float | None = None
+    _rid_monitored: bool = False
+
+    def set_rid_age(self, age_s: float | None) -> None:
+        self._rid_monitored = True
+        self._rid_age_s = age_s
 
     def allow_action(
         self,
@@ -64,7 +118,10 @@ class MissionPolicyGate:
         reason = ""
         allowed = True
         act = action.upper()
-        if act in self.profile.denied_actions:
+        if act in NEVER_ACTIONS:
+            allowed = False
+            reason = f"never:{act}"
+        elif act in self.profile.denied_actions:
             allowed = False
             reason = f"denied_actions:{act}"
         elif act not in self.profile.allowed_actions:
@@ -75,7 +132,7 @@ class MissionPolicyGate:
             if now > self.profile.expires_at:
                 allowed = False
                 reason = "profile_expired"
-        if allowed and not self.profile.geofence.contains(x, y, z):
+        if allowed and act in ("GOTO_XYZ", "EXPLORE_SECTOR", "INSPECT", "LOITER") and not self.profile.geofence.contains(x, y, z):
             allowed = False
             reason = "geofence"
         if allowed and self.profile.max_agl_m is not None and z > self.profile.max_agl_m:
@@ -88,6 +145,18 @@ class MissionPolicyGate:
         if allowed and self.profile.require_signed_models and model_id and not model_signed:
             allowed = False
             reason = "unsigned_model"
+        if (
+            allowed
+            and self._rid_monitored
+            and act in ("GOTO_XYZ", "EXPLORE_SECTOR", "INSPECT")
+            and self.profile.rid_required
+        ):
+            if self._rid_age_s is None:
+                allowed = False
+                reason = "rid_missing"
+            elif self._rid_age_s > 2.0:
+                allowed = False
+                reason = "rid_stale"
         dec = PolicyDecisionMsg(
             action=act,
             allowed=allowed,
@@ -122,12 +191,31 @@ def load_mission_profile(path: Path) -> MissionProfile:
     )
     allowed = frozenset(str(a).upper() for a in (raw.get("allowed_actions") or []))
     denied = frozenset(str(a).upper() for a in (raw.get("denied_actions") or []))
+    if allowed & NEVER_ACTIONS:
+        raise ValueError(f"profile {raw.get('profile_id')} lists NEVER_ACTIONS in allowed_actions")
     models = frozenset(str(m) for m in (raw.get("allowed_models") or []))
     content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
     max_agl = raw.get("max_agl_m")
+    envelope = parse_envelope(raw.get("envelope"))
+    term = str(raw.get("emergency_termination", "RTL")).upper()
+    if term not in EMERGENCY_MODES:
+        raise ValueError(f"emergency_termination must be one of {sorted(EMERGENCY_MODES)}")
+    reg = str(raw.get("registration_class", "uchet")).lower()
+    if reg not in REGISTRATION_CLASSES:
+        raise ValueError(f"registration_class must be one of {sorted(REGISTRATION_CLASSES)}")
+    rid_required = bool(raw.get("rid_required", envelope is EnvelopeKind.CIVIL))
+    rid_broadcast = bool(raw.get("rid_broadcast", envelope is EnvelopeKind.CIVIL))
+    if envelope is EnvelopeKind.CIVIL and not rid_broadcast:
+        raise ValueError("civil profile must broadcast Remote ID (ПП 1701 / ЭРА-ГЛОНАСС)")
+    cop_radius = float(raw.get("cop_radius_m", 5000.0 if envelope is EnvelopeKind.CIVIL else 50000.0))
+    if envelope is EnvelopeKind.CIVIL and cop_radius > 10_000.0:
+        raise ValueError("civil cop_radius_m max 10000")
+    if envelope is EnvelopeKind.DEFENSE and cop_radius > 50_000.0:
+        raise ValueError("defense cop_radius_m max 50000 (GSC territorial, not EO)")
     return MissionProfile(
         profile_id=str(raw["profile_id"]),
         version=int(raw.get("version", 1)),
+        envelope=envelope,
         allowed_actions=allowed,
         denied_actions=denied,
         allowed_models=models,
@@ -136,4 +224,9 @@ def load_mission_profile(path: Path) -> MissionProfile:
         max_agl_m=float(max_agl) if max_agl is not None else None,
         expires_at=_parse_expires(raw.get("expires_at")),
         content_hash=content_hash,
+        cop_radius_m=cop_radius,
+        rid_required=rid_required,
+        rid_broadcast=rid_broadcast,
+        emergency_termination=term,
+        registration_class=reg,
     )

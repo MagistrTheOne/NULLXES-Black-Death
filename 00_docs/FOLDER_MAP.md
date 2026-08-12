@@ -1,7 +1,7 @@
 # Назначение папок — NULLXES BLACK DEATH
 
 **Статус реализации (что есть / чего нет):** [`architecture/REPO_STATUS_MAP.md`](architecture/REPO_STATUS_MAP.md)  
-**DMI Ontology / Trace / Model Release / Mission Policy:** [`architecture/DMI_ONTOLOGY.md`](architecture/DMI_ONTOLOGY.md) · [`TRACE_SPEC.md`](architecture/TRACE_SPEC.md) · [`MODEL_RELEASE_SPEC.md`](architecture/MODEL_RELEASE_SPEC.md) · [`MISSION_POLICY_SPEC.md`](architecture/MISSION_POLICY_SPEC.md) · [`SEGMENTATION_LANES.md`](architecture/SEGMENTATION_LANES.md)
+**DMI Ontology / Trace / Model Release / Mission Policy / Envelopes:** [`architecture/DMI_ONTOLOGY.md`](architecture/DMI_ONTOLOGY.md) · [`TRACE_SPEC.md`](architecture/TRACE_SPEC.md) · [`MODEL_RELEASE_SPEC.md`](architecture/MODEL_RELEASE_SPEC.md) · [`MISSION_POLICY_SPEC.md`](architecture/MISSION_POLICY_SPEC.md) · [`MODE_ENVELOPES.md`](architecture/MODE_ENVELOPES.md) · [`SEGMENTATION_LANES.md`](architecture/SEGMENTATION_LANES.md)
 
 ## Корневые блоки
 
@@ -36,6 +36,7 @@
 | `perception/fusion/` | CERBER Multi-Sensor Fusion: EKF/UKF. |
 | `perception/slam/` | OpenVINS / ORB-SLAM3 где применимо. |
 | `planning/missions/` | Миссионные планы civil infrastructure. |
+| `mission_profiles/` | Runtime MissionProfile YAML. CIVIL in root; DEFENSE in `defense/`. |
 | `planning/trajectory/` | Траектории, коридоры, ограничения. |
 | `planning/behaviour/` | Flight-mode policy (`AlphaBT`) — degraded / RTB / loiter. |
 | `control/guidance/` | Guidance (внешний контур). |

@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from dmi.event_bus import EventFilter, fingerprint_health, fingerprint_intent
+from dmi.envelope import EnvelopeKind, profile_path_for
 from dmi.intent_bridge import intent_to_goal_gated
 from dmi.messages import (
     TOPIC_DMI_AGENT_STATUS,
@@ -22,7 +23,14 @@ from dmi.mission_policy import MissionPolicyGate, load_mission_profile
 from dmi.swarm_agent import SwarmAgent
 from dmi.swarm_health import health_to_factor
 from soft_bus.bus import SoftBus
-from soft_bus.messages import TOPIC_GOAL, TOPIC_POLICY_DECISION
+from soft_bus.messages import (
+    TOPIC_GOAL,
+    TOPIC_MISSION_ENVELOPE,
+    TOPIC_POLICY_DECISION,
+    TOPIC_RID_BROADCAST,
+    EnvelopeMsg,
+    RidBroadcastMsg,
+)
 
 
 def _default_profile() -> Path:
@@ -48,8 +56,27 @@ class DmiAgentSoftNode:
         self._soc = 1.0
         self._payload = 0.0
         self.gate = MissionPolicyGate(load_mission_profile(profile_path or _default_profile()))
+        self._rid_stamp: float | None = None
         bus.subscribe(TOPIC_DMI_TASK_OFFER, self._on_offer)
         bus.subscribe(TOPIC_DMI_WORLD_FACT, self._on_fact)
+        bus.subscribe(TOPIC_MISSION_ENVELOPE, self._on_envelope)
+        bus.subscribe(TOPIC_RID_BROADCAST, self._on_rid)
+
+    def _on_envelope(self, msg: EnvelopeMsg) -> None:
+        kind = EnvelopeKind.DEFENSE if msg.envelope == "defense" else EnvelopeKind.CIVIL
+        path = profile_path_for(msg.profile_id, kind)
+        if not path.is_file():
+            return
+        profile = load_mission_profile(path)
+        if profile.content_hash != msg.content_hash and msg.content_hash:
+            return
+        self.gate = MissionPolicyGate(profile)
+        if self._rid_stamp is not None:
+            self.gate.set_rid_age(max(0.0, time.time() - self._rid_stamp))
+
+    def _on_rid(self, msg: RidBroadcastMsg) -> None:
+        self._rid_stamp = msg.stamp_s or time.time()
+        self.gate.set_rid_age(0.0)
 
     def set_local_state(
         self,
@@ -72,6 +99,8 @@ class DmiAgentSoftNode:
         self.bus.publish(TOPIC_DMI_TASK_CLAIM, claim)
         if claim.kind.value == "ACCEPT" and self.agent.last_intent is not None:
             intent = self.agent.last_intent
+            if self._rid_stamp is not None:
+                self.gate.set_rid_age(max(0.0, now - self._rid_stamp))
             fp = fingerprint_intent(
                 intent.intent_id,
                 intent.kind.value,

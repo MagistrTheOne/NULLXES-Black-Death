@@ -1,5 +1,6 @@
 profile_id: perimeter.alert.v1
 version: 1
+envelope: civil
 expires_at: "2099-01-01T00:00:00Z"
 allowed_actions:
   - OBSERVE
@@ -25,3 +26,8 @@ geofence:
   zmin: 0
   zmax: 200
 max_agl_m: 150
+cop_radius_m: 5000
+rid_required: true
+rid_broadcast: true
+emergency_termination: RTL
+registration_class: uchet
