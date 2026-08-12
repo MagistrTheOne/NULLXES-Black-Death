@@ -78,6 +78,7 @@ CHASE запрещён в **обоих**. NEVER_ACTIONS (WEAPON, JAM, FIRE_CONTR
 | `/bd/gsc/territorial_track` | COP out |
 | `/bd/gnss/integrity` | onboard monitor |
 | `/bd/rid/broadcast` | onboard CIVIL |
+| `/bd/gsc/voice_cue` | GSC NULLXES TTS/SFX ([VOICE_PERSONA.md](VOICE_PERSONA.md)) |
 
 ## Код
 
@@ -86,4 +87,4 @@ CHASE запрещён в **обоих**. NEVER_ACTIONS (WEAPON, JAM, FIRE_CONTR
 - `dmi/territorial.py` — 30–50 km COP  
 - `dmi/gnss_integrity.py` — own-ship  
 - `dmi/rid_era.py` — ПП 1701 / ЭРА хук  
-- `ros2/nodes/envelope_soft.py` · `rid_soft.py` · `gnss_integrity_soft.py`
+- `ros2/nodes/envelope_soft.py` · `rid_soft.py` · `gnss_integrity_soft.py` · `voice_soft.py`

@@ -22,3 +22,4 @@ alwaysApply: true
 - ATLAS proposes; DMI owns exclusive TaskOffer / ACCEPT / REJECT. Never GuidanceIntent.
 - L0 remains swarm-blind and weapon-blind.
 - Mission envelope is **CIVIL** (boot) or **DEFENSE** (operator_ack). Same L0. 30–50 km is GSC territorial COP (Remote ID / ЭРА-ГЛОНАСС / GNSS), not CERBER EO. No munition bus, no jammer/spoof emitter.
+- GSC voice is **local ONNX TTS** (`nullxes_tts_v1`) with SAPI fallback. No cloud TTS. No Qwen/Llama/Gemini/GPT as a mouth.

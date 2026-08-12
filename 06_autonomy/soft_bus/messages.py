@@ -481,6 +481,16 @@ class RidBroadcastMsg:
 
 
 @dataclass
+class VoiceCueMsg:
+    text: str
+    sfx: str = ""
+    kind: str = ""
+    object_id: str = ""
+    envelope: str = "civil"
+    stamp_s: float = 0.0
+
+
+@dataclass
 class TrackTarget:
     """Civil chase/escort/deny target in ENU — presence geometry only (ADR-004)."""
 
@@ -542,3 +552,4 @@ TOPIC_TERRITORIAL_TRACK = "/bd/gsc/territorial_track"
 TOPIC_TERRITORIAL_INGEST = "/bd/gsc/territorial_ingest"
 TOPIC_GNSS_INTEGRITY = "/bd/gnss/integrity"
 TOPIC_RID_BROADCAST = "/bd/rid/broadcast"
+TOPIC_VOICE_CUE = "/bd/gsc/voice_cue"

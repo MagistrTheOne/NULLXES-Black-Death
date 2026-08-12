@@ -1,7 +1,7 @@
 # Назначение папок — NULLXES BLACK DEATH
 
 **Статус реализации (что есть / чего нет):** [`architecture/REPO_STATUS_MAP.md`](architecture/REPO_STATUS_MAP.md)  
-**DMI Ontology / Trace / Model Release / Mission Policy / Envelopes:** [`architecture/DMI_ONTOLOGY.md`](architecture/DMI_ONTOLOGY.md) · [`TRACE_SPEC.md`](architecture/TRACE_SPEC.md) · [`MODEL_RELEASE_SPEC.md`](architecture/MODEL_RELEASE_SPEC.md) · [`MISSION_POLICY_SPEC.md`](architecture/MISSION_POLICY_SPEC.md) · [`MODE_ENVELOPES.md`](architecture/MODE_ENVELOPES.md) · [`SEGMENTATION_LANES.md`](architecture/SEGMENTATION_LANES.md)
+**DMI Ontology / Trace / Model Release / Mission Policy / Envelopes / Voice:** [`architecture/DMI_ONTOLOGY.md`](architecture/DMI_ONTOLOGY.md) · [`TRACE_SPEC.md`](architecture/TRACE_SPEC.md) · [`MODEL_RELEASE_SPEC.md`](architecture/MODEL_RELEASE_SPEC.md) · [`MISSION_POLICY_SPEC.md`](architecture/MISSION_POLICY_SPEC.md) · [`MODE_ENVELOPES.md`](architecture/MODE_ENVELOPES.md) · [`VOICE_PERSONA.md`](architecture/VOICE_PERSONA.md) · [`SEGMENTATION_LANES.md`](architecture/SEGMENTATION_LANES.md)
 
 ## Корневые блоки
 
@@ -30,6 +30,7 @@
 | `core/health/` | Health monitoring агрегация для autonomy. |
 | `core/interfaces/` | Контракты между perception / planning / control / fault. |
 | `atlas/` | **NULLXES BLACK ATLAS** — GSC AI+coordinator (ALLOC ONNX → DMI). Not companion. |
+| `gsc/voice/` | GSC announcer (TTS/SFX). CIVIL/DEFENSE persona. Not L0. |
 | `perception/` | **NULLXES CERBER** — perception system (vision, detect, fusion, …). No LLM. |
 | `perception/vision/` | CERBER Vision + Detection: OpenCV + YOLO→ONNX Runtime. |
 | `perception/sensors/` | Драйверы/адаптеры сенсоров (не realtime HAL — тот в `05_avionics`). |

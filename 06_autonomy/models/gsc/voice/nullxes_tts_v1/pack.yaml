@@ -1,0 +1,21 @@
+pack_id: nullxes_tts_v1
+family: tts
+product_name: BLACK-GSC-TTS-01
+version: 0.1.0
+lang: [ru, en]
+onnx_layout: vits_22k_v1
+model_path: model.onnx
+sha256: pending
+runtime: ort
+precision: fp32
+hardware_target: gsc_x86
+release_channel: CANDIDATE
+companion_load: false
+cloud_tts: false
+required: false
+created_at: "2026-08-13T00:00:00Z"
+# Architecture corpse: VITS/Piper-style. Weights NULLXES. Not Qwen/Llama/Gemini/GPT/Ollama.
+forbidden_ids: [qwen, llama, gemini, gpt, ollama]
+providers:
+  - CPUExecutionProvider
+  - CUDAExecutionProvider

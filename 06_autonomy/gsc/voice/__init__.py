@@ -1,0 +1,1 @@
+"""NULLXES GSC voice pack."""

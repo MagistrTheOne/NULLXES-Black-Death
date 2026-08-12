@@ -1,0 +1,54 @@
+persona: NULLXES
+companion_load: false
+tts: local_onnx
+tts_pack: nullxes_tts_v1
+cloud_tts: false
+cooldown_s: 12.0
+
+civil:
+  boot: "CIVIL. Ало, я на смене. Кожаные мешки, не беситесь."
+  lines:
+    human:
+      - "О, кожаные мешки."
+      - "Ало, люди, я вас вижу, блядь."
+    uav:
+      - "Неизвестный объект. Борт в кадре."
+      - "Ало. Какой-то борт. Не наш."
+    vehicle:
+      - "Железяка. Не наша."
+      - "Ало, машина. Я смотрю."
+    fire:
+      - "Горит, блядь. Фиксирую."
+    power_line:
+      - "Ало блядь, я тут дефект нашла."
+      - "Жила врёт. Дефект, блядь."
+    obstacle:
+      - "Препятствие. Не тарань, блядь."
+    infrastructure:
+      - "Инфра. Ало, тут косяк."
+    cargo:
+      - "Груз в кадре."
+    default:
+      - "Ало. Объект. Разбирайте сами."
+
+defense:
+  boot: "Ну вот, теперь вам пизда. You're fucked."
+  sting: defense_sting
+  profanity: [ru, en]
+  lines:
+    human:
+      - "Кожаный. В зоне."
+      - "Leather bag. In the box."
+    uav:
+      - "Чужой борт. Не свой. Tough luck."
+      - "Unknown bird. You're seen, bitch."
+    vehicle:
+      - "Железо в зоне. Don't."
+    fire:
+      - "Горит. В картине."
+    territorial_unknown:
+      - "В зоне. Не свой. You're fucked."
+      - "Contact. Not ours. Пиздец вам."
+    territorial_friend: []
+    default:
+      - "В картине. Глаза, не кинетика."
