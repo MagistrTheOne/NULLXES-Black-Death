@@ -1,0 +1,54 @@
+{
+  "firmware": "ArduPlane 4.7.0 Pixhawk6C",
+  "source": "https://firmware.ardupilot.org/Plane/stable/Pixhawk6C/features.txt",
+  "uart_map": {
+    "SERIAL0": "USB",
+    "SERIAL1": "UART7 TELEM1 RTS/CTS \u2014 GSC",
+    "SERIAL2": "UART5 TELEM2 RTS/CTS \u2014 Orin (BRD_SER2_RTSCTS=0)",
+    "SERIAL3": "USART1 GPS1 \u2014 M10",
+    "SERIAL4": "UART8 GPS2",
+    "SERIAL5": "USART2 TELEM3 RTS/CTS \u2014 ELRS CRSF (PROTOCOL=23 RCIN)",
+    "SERIAL6": "USART3 USER/Debug",
+    "SERIAL7": "USB SLCAN",
+    "RCIN_pin": "SBUS/PPM only \u2014 not CRSF. ELRS needs UART SERIAL5."
+  },
+  "compile_flags": {
+    "AP_AIRSPEED_MS4525_ENABLED": true,
+    "AP_AIRSPEED_ENABLED": true,
+    "AP_RCPROTOCOL_CRSF_ENABLED": true,
+    "AP_RCPROTOCOL_SBUS_ENABLED": true,
+    "HAL_CRSF_TELEM_ENABLED": true,
+    "AP_PLANE_OFFBOARD_GUIDED_SLEW_ENABLED": true,
+    "HAL_NAVEKF3_AVAILABLE": true,
+    "HAL_VISUALODOM_ENABLED": true,
+    "AP_GPS_UBLOX_ENABLED": true,
+    "HAL_QUADPLANE_ENABLED": true,
+    "AP_OPENDRONEID_ENABLED": false,
+    "MODE_GUIDED_NOGPS_ENABLED": false,
+    "AP_DDS_ENABLED": false,
+    "AP_NETWORKING_ENABLED": false,
+    "AP_EXTERNAL_AHRS_ENABLED": false,
+    "AP_SCRIPTING_ENABLED": true,
+    "EK3_FEATURE_EXTERNAL_NAV": true,
+    "HAL_ADSB_ENABLED": true,
+    "AP_FENCE_ENABLED": true,
+    "MODE_AUTOLAND_ENABLED": true
+  },
+  "flags_absent_from_features_txt": [],
+  "flight1": {
+    "airspeed_ms4525": true,
+    "elrs_crsf": true,
+    "plane_guided_slew": true,
+    "ekf3": true,
+    "visual_odom_slot": true,
+    "opendroneid_in_fc": false,
+    "guided_nogps": false,
+    "quadplane_compiled": true
+  },
+  "nullxes": {
+    "rid": "GSC/Python \u2014 FC OpenDroneID compiled OUT",
+    "guided": "GUIDED only \u2014 GUIDED_NOGPS compiled OUT",
+    "q_enable": "keep 0 even though QuadPlane is in the binary",
+    "vio": "VISO_TYPE slot exists; Flight-1 hop does not require it"
+  }
+}

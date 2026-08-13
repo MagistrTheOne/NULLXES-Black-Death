@@ -2,6 +2,7 @@
 
 **Platform:** Skywalker X8 PNP + Pixhawk 6C + Orin NX 16GB  
 **BOM:** `00_docs/architecture/FLIGHT1_BOM_LOCK.md`  
+**Assembly (wiki filter):** `arduiplane/ASSEMBLY.md`  
 **Not:** Alpha 5×5. Not F405/F722. Not USB camera.
 
 ## Ground (props restrained)

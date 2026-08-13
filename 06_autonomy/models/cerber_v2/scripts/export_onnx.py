@@ -34,11 +34,16 @@ def main() -> int:
     args = p.parse_args()
 
     cfg = yaml.safe_load(args.train_config.read_text(encoding="utf-8"))
-    flight_cfg = CONFIGS / "detector_alpha_v2b.yaml"
-
-    out = REPO / "06_autonomy" / "models" / "onnx" / "detector_alpha_v2b.onnx"
-    # also copy flight yaml into models/configs for runtime VisionPipeline
-    runtime_cfg = REPO / "06_autonomy" / "models" / "configs" / "detector_alpha_v2b.yaml"
+    cfg_dir = args.train_config.resolve().parent
+    pack_cfg = Path(cfg.get("flight_config", "detector_alpha_v2b.yaml"))
+    if not pack_cfg.is_file():
+        pack_cfg = cfg_dir / Path(pack_cfg).name
+    flight_cfg = pack_cfg
+    onnx_rel = str(cfg.get("flight_onnx", "../../onnx/detector_alpha_v2b.onnx"))
+    out = Path(onnx_rel)
+    if not out.is_absolute():
+        out = (cfg_dir / onnx_rel).resolve()
+    runtime_cfg = REPO / "06_autonomy" / "models" / "configs" / flight_cfg.name
 
     weights = args.weights
     if not weights.is_file():
@@ -63,7 +68,7 @@ def main() -> int:
     base = {}
     if flight_cfg.is_file():
         base = yaml.safe_load(flight_cfg.read_text(encoding="utf-8")) or {}
-    base["model_path"] = "06_autonomy/models/onnx/detector_alpha_v2b.onnx"
+    base["model_path"] = f"06_autonomy/models/onnx/{out.name}"
     base["sha256"] = digest
     base["onnx_layout"] = "yolo_v8_raw"
     base["input_name"] = "images"

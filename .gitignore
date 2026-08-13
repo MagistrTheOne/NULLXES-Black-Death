@@ -94,6 +94,12 @@ Desktop.ini
 *.odb
 *.log
 
+# Local ArduPlane kit binaries / MSI extract (MANIFEST + parm + json stay in git)
+*.msi
+arduiplane/*.apj
+arduiplane/_mp_extract/
+arduiplane/_apm.pdef.json
+
 # Secrets
 .env
 *.pem

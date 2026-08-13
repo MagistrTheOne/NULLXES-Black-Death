@@ -21,6 +21,7 @@
 | `06_autonomy` | MIXED | SoftBus Flight-1 chain HAS_CODE; packs/VIO native/calib flight **pending**. |
 | `07_simulation` | MIXED | `cerber_studio` primary; lab DEPRECATED; Gazebo/AirSim/HIL twin BLOCKED. |
 | `08_prototypes` | DOC_ONLY | Practice / bench / build-order plans. |
+| `arduiplane` | MIXED | Plane 4.7.0 Pixhawk6C kit. APJ/MSI local; parm+verify in git. |
 | `09_manufacturing` | DOC_ONLY | Layup + assembly notes; qa/tooling empty. |
 | `10_tests` | MIXED | Unit HAS_CODE (~17); integ/HIL/flight BLOCKED/empty. |
 | `99_tools` | MIXED | L0 smoke + CI yaml; **not** wired under `.github/workflows`. |
@@ -34,6 +35,7 @@
 | Path | Status | Note |
 |------|--------|------|
 | `adr/ADR-001…005` | Accepted except **ADR-003 Proposed** | RT unsigned |
+| `architecture/ARCHITECTURE.md` | Surface map 2026-08-13 | Whole stack, no NDA |
 | `architecture/ONBOARD_PERCEPTION_RESEARCH_2026-08.md` | Current | Plane Guided, P0/P1 |
 | `architecture/DMI_ONTOLOGY.md` | Canon | WorldObject / Relations / Events |
 | `architecture/TRACE_SPEC.md` | Canon | trace_id Flight Recorder |
@@ -180,6 +182,10 @@ DMI      = DECIDE  (mission / swarm)
 ## `08_prototypes` — DOC_ONLY
 
 Practice airframe TEST_PLANs, avionics bench intent, scale build order. `subsystem_rigs/` EMPTY.
+
+## `arduiplane` — MIXED
+
+Local Flight-1 firmware kit. `pixhawk6c_x8.parm` + `MANIFEST.json` + `verify_firmware.py` in git. `arduplane.apj` / MSI gitignored. No FC required to verify.
 
 ---
 

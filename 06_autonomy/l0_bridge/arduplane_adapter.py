@@ -94,7 +94,7 @@ class ArduPlaneAdapter:
         stamp_s: float | None = None,
     ) -> MavlinkHealthMsg:
         now = stamp_s if stamp_s is not None else time.time()
-        guided_ok = mode.upper() in ("GUIDED", "GUIDED_NOGPS")
+        guided_ok = mode.upper() == "GUIDED"
         self._health = MavlinkHealthMsg(
             link_ok=True,
             mode=mode,

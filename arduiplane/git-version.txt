@@ -1,0 +1,7 @@
+commit 1511f27194f1dcc3728270883047bdf022b3fd53
+Author: George Zogopoulos <tailwhipx4@gmail.com>
+Date:   Tue Jul 14 12:24:35 2026 +0200
+
+    Plane: version to 4.7.0
+
+APMVERSION: ArduPlane V4.7.0

@@ -1,0 +1,71 @@
+# NULLXES Flight-1 · Skywalker X8 PNP · Pixhawk 6C · ArduPlane 4.7.0
+# Load in Mission Planner after flash. No hardware required to review.
+# Do not mix Copter params.
+
+# --- identity ---
+Q_ENABLE,0
+
+# --- elevon wing (PNP servos on MAIN OUT 1/2, throttle 3) ---
+SERVO1_FUNCTION,77
+SERVO2_FUNCTION,78
+SERVO3_FUNCTION,70
+
+# --- TELEM1 = GSC ---
+SERIAL1_PROTOCOL,2
+SERIAL1_BAUD,57
+
+# --- TELEM2 = Orin companion (Python) ---
+SERIAL2_PROTOCOL,2
+SERIAL2_BAUD,921
+BRD_SER2_RTSCTS,0
+
+# --- GPS1 = Holybro M10 ---
+SERIAL3_PROTOCOL,5
+SERIAL3_BAUD,230
+
+# --- TELEM3 = ELRS 2.4 CRSF (do not put ELRS on TELEM2 or RCIN) ---
+SERIAL5_PROTOCOL,23
+SERIAL5_OPTIONS,0
+RSSI_TYPE,3
+RC_OPTIONS,8704
+
+# --- airspeed I2C MS4525 / ASPD-4525 ---
+ARSPD_TYPE,1
+ARSPD_USE,1
+ARSPD_AUTOCAL,0
+
+# --- battery monitor (Holybro PM analog). VOLT_MULT/AMP_PERVLT from PM after first USB. ---
+BATT_MONITOR,4
+
+# --- failsafe: GCS/companion loss → RTL. RC always wins. ---
+FS_GCS_ENABL,1
+FS_LONG_ACTN,1
+FS_SHORT_ACTN,0
+THR_FAILSAFE,1
+FS_EKF_THRESH,0.8
+
+# --- Plane Guided from ArduPlaneAdapter (MISSION_ITEM_INT current=2) ---
+GUIDED_TIMEOUT,6
+TKOFF_THR_MINSPD,8
+AIRSPEED_MIN,12
+AIRSPEED_CRUISE,16
+AIRSPEED_MAX,22
+SCALING_SPEED,16
+NAVL1_PERIOD,16
+NAVL1_DAMPING,0.75
+PTCH_LIM_MAX_DEG,20
+PTCH_LIM_MIN_DEG,-15
+ROLL_LIMIT_DEG,45
+STALL_PREVENTION,1
+
+# --- TELEM2 companion streams (4.7: SRn → MAVn; USB=MAV1, TELEM1=MAV2, TELEM2=MAV3) ---
+MAV3_POSITION,10
+MAV3_EXTRA1,10
+MAV3_EXTRA2,5
+MAV3_EXT_STAT,5
+MAV3_RAW_SENS,10
+
+# --- arming: GPS lock is ARMING_SKIPCHK bit3; leave 0 = required. Bench: skip GPS only in MP, restore before hop. ---
+ARMING_REQUIRE,1
+ARMING_RUDDER,0
+ARMING_SKIPCHK,0

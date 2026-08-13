@@ -27,4 +27,4 @@
 - Autonomy FM: detect → isolate → reconfigure
 - Inner-loop живёт без high-level AI
 
-Детали ИИ: [`AUTONOMY_ARCHITECTURE.md`](AUTONOMY_ARCHITECTURE.md).
+Детали ИИ: [`AUTONOMY_ARCHITECTURE.md`](AUTONOMY_ARCHITECTURE.md). Поверхностная карта всей системы: [`ARCHITECTURE.md`](ARCHITECTURE.md).

@@ -1,6 +1,7 @@
 # Назначение папок — NULLXES BLACK DEATH
 
 **Статус реализации (что есть / чего нет):** [`architecture/REPO_STATUS_MAP.md`](architecture/REPO_STATUS_MAP.md)  
+**Поверхностная карта (без NDA):** [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md)  
 **DMI Ontology / Trace / Model Release / Mission Policy / Envelopes / Voice:** [`architecture/DMI_ONTOLOGY.md`](architecture/DMI_ONTOLOGY.md) · [`TRACE_SPEC.md`](architecture/TRACE_SPEC.md) · [`MODEL_RELEASE_SPEC.md`](architecture/MODEL_RELEASE_SPEC.md) · [`MISSION_POLICY_SPEC.md`](architecture/MISSION_POLICY_SPEC.md) · [`MODE_ENVELOPES.md`](architecture/MODE_ENVELOPES.md) · [`VOICE_PERSONA.md`](architecture/VOICE_PERSONA.md) · [`SEGMENTATION_LANES.md`](architecture/SEGMENTATION_LANES.md)
 
 ## Корневые блоки
@@ -16,6 +17,7 @@
 | `06_autonomy/` | **Главный блок.** Onboard ИИ: perception → fusion → planning → control + fault management. Без внешних API. |
 | `07_simulation/` | Цифровой двойник: Gazebo (WSL2), AirSim, сценарии, HIL. |
 | `08_prototypes/` | Масштабируемые модели, авионика-стенды, subsystem rigs. |
+| `arduiplane/` | Local ArduPlane 4.7.0 Pixhawk6C kit (flash/param). Binaries gitignored. |
 | `09_manufacturing/` | Композиты, оснастка, сборка, QA производства. |
 | `10_tests/` | Unit, integration, HIL, лётные/наземные испытания, regression. |
 | `99_tools/` | CI (GitHub Actions), colcon-обёртки, lint, утилиты. |
