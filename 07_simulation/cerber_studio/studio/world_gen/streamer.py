@@ -9,14 +9,14 @@ from panda3d.core import NodePath
 
 from ..config.paths import STUDIO_ROOT
 from .biomes import BiomeField
-from .geom import box, cone
+from .geom import box
 from .graph import WorldGraph, generate_graph
 from .landmarks import build_airfield, build_landmarks, build_powerlines
 from .roads import build_road_lines
 from .scatter import scatter_sector
 from .settlements import build_industrial, build_settlements
 from .terrain import attach_geomip, build_height_color
-from .water import build_rivers
+from .water import attach_water_plane, build_rivers
 from .lights import NightLights
 from .weather import AtmosphereState
 
@@ -45,15 +45,22 @@ class Sector:
         packs: dict,
         density: str,
         lod: str,
+        *,
+        scatter_now: bool = False,
     ) -> None:
         self.sx = sx
         self.sy = sy
         self.size = size
+        self.lod = lod
+        self.graph = graph
+        self.biomes = biomes
+        self.packs = packs
         self.root = parent.attachNewNode(f"{lod}_{sx}_{sy}")
         ox = sx * size
         oy = sy * size
+        self.origin = (ox, oy)
         self.root.setPos(ox, oy, 0)
-        img, cmap, step = build_height_color(graph, biomes, ox, oy, size, hf)
+        img, cmap, step = build_height_color(graph, biomes, ox, oy, size, hf, lod=lod)
         block = 16 if lod == "near" else 8 if lod == "mid" else 4
         self.terrain = attach_geomip(
             self.root,
@@ -67,8 +74,32 @@ class Sector:
         )
         self._fp = self.root.attachNewNode("focal")
         self.props = self.root.attachNewNode("props")
-        if density != "none":
-            scatter_sector(self.props, graph, biomes, ox, oy, size, sx, sy, packs, density)
+        self._pending_density = None if density == "none" else density
+        if scatter_now:
+            self.commit_props()
+
+    def commit_props(self) -> bool:
+        if not self._pending_density:
+            return False
+        ox, oy = self.origin
+        scatter_sector(
+            self.props,
+            self.graph,
+            self.biomes,
+            ox,
+            oy,
+            self.size,
+            self.sx,
+            self.sy,
+            self.packs,
+            self._pending_density,
+        )
+        try:
+            self.props.flattenStrong()
+        except Exception:
+            pass
+        self._pending_density = None
+        return True
 
     def update_focal(self, x: float, y: float, z: float) -> None:
         self._fp.setPos(x - self.sx * self.size, y - self.sy * self.size, z)
@@ -99,6 +130,10 @@ class WorldStreamer:
         self._infra = self.root.attachNewNode("graph_vis")
         self._horizon = self.root.attachNewNode("horizon")
         self.night: NightLights | None = None
+        self._water: NodePath | None = None
+        self._commit_q: list[Sector] = []
+        self._last_cx = None
+        self._last_cy = None
         self.active = False
         self.gen_ms = 0.0
         self.configure(seed, region_id)
@@ -111,6 +146,9 @@ class WorldStreamer:
         self.gen_ms = (time.perf_counter() - t0) * 1000.0
         self.biomes = BiomeField(self.graph)
         self._clear_tiles()
+        self._commit_q.clear()
+        self._last_cx = None
+        self._last_cy = None
         self._rebuild_graph_vis()
         self._rebuild_horizon()
 
@@ -128,7 +166,6 @@ class WorldStreamer:
                 continue
             try:
                 node = loader.loadModel(str(files[0]))
-                node.setLightOff(0)
                 self.packs[key] = node
             except Exception:
                 self.packs[key] = None
@@ -143,7 +180,6 @@ class WorldStreamer:
                     continue
                 try:
                     node = loader.loadModel(str(path))
-                    node.setLightOff(0)
                     self.packs[slot] = node
                 except Exception:
                     continue
@@ -164,6 +200,21 @@ class WorldStreamer:
         build_rivers(self._infra, self.graph, "near")
         build_settlements(self._infra, self.graph, self.packs)
         build_industrial(self._infra, self.graph)
+        if self._water is not None:
+            try:
+                self._water.removeNode()
+            except Exception:
+                pass
+            self._water = None
+        if self.graph.profile.water_enabled:
+            sx, sy, _, _ = self.graph.spawn()
+            self._water = attach_water_plane(
+                self.root,
+                origin=(sx, sy),
+                size=28000.0,
+                z=self.graph.profile.water_level,
+                color=self.graph.profile.water_rgb,
+            )
         if self.night is not None:
             self.night.root.removeNode()
         self.night = NightLights(self.root, self.graph)
@@ -171,20 +222,21 @@ class WorldStreamer:
     def _rebuild_horizon(self) -> None:
         self._horizon.removeNode()
         self._horizon = self.root.attachNewNode("horizon")
-        mesh = cone((0.34, 0.36, 0.38))
-        rock = box((0.32, 0.33, 0.34))
-        for i in range(16):
-            ang = i / 16.0 * math.tau
-            r = 42000.0 + (i % 3) * 4000.0
-            x = math.cos(ang) * r
-            y = math.sin(ang) * r
-            h = self.graph.sample_height(x * 0.4, y * 0.4)
+        pal = self.graph.profile.haze_rgb or self.graph.profile.lowland_rgb
+        col = (pal[0] * 0.55 + 0.18, pal[1] * 0.55 + 0.18, pal[2] * 0.55 + 0.22)
+        mesh = box(col)
+        segs = 36
+        radius = 12500.0
+        for i in range(segs):
+            ang = i / segs * math.tau
+            x = math.cos(ang) * radius
+            y = math.sin(ang) * radius
+            h = self.graph.sample_height(x, y)
             n = self._horizon.attachNewNode(mesh)
-            n.setPos(x, y, h + 80.0)
-            n.setScale(2800 + (i % 4) * 400, 2800, 420 + (i % 5) * 80)
-            b = self._horizon.attachNewNode(rock)
-            b.setPos(math.cos(ang + 0.2) * (r - 6000), math.sin(ang + 0.2) * (r - 6000), h + 40)
-            b.setScale(1800, 1400, 220)
+            n.setPos(x, y, max(6.0, h * 0.42))
+            n.setH(math.degrees(ang) + 90.0)
+            n.setScale(1100.0, 380.0, 22.0 + max(8.0, h * 0.16) + (i % 4) * 6.0)
+            n.setLightOff(0)
 
     def set_active(self, on: bool) -> None:
         self.active = on
@@ -195,9 +247,19 @@ class WorldStreamer:
         else:
             self.root.hide()
 
+    def _veg_density(self, lod_density: str) -> str:
+        veg = (self.graph.profile.veg_density or "full").lower()
+        if veg in ("none", "off"):
+            return "none"
+        if veg == "low":
+            return "sparse" if lod_density == "full" else "none"
+        if veg == "sparse":
+            return "sparse" if lod_density == "full" else "none"
+        return lod_density
+
     def ensure(self, x: float, y: float) -> None:
-        self._sync_ring(self.near, x, y, NEAR_M, NEAR_R, NEAR_HF, "full", "near")
-        self._sync_ring(self.mid, x, y, MID_M, MID_R, MID_HF, "sparse", "mid", skip_inner=1)
+        self._sync_ring(self.near, x, y, NEAR_M, NEAR_R, NEAR_HF, self._veg_density("full"), "near")
+        self._sync_ring(self.mid, x, y, MID_M, MID_R, MID_HF, self._veg_density("sparse"), "mid", skip_inner=1)
         self._sync_ring(self.far, x, y, FAR_M, FAR_R, FAR_HF, "none", "far", skip_inner=1)
 
     def _sync_ring(
@@ -223,9 +285,12 @@ class WorldStreamer:
         for key in list(bag):
             if key not in needed:
                 bag.pop(key).destroy()
+        cx = int(math.floor(x / size))
+        cy = int(math.floor(y / size))
         for key in needed:
             if key not in bag:
-                bag[key] = Sector(
+                scatter_now = lod == "near" and key == (cx, cy)
+                sec = Sector(
                     key[0],
                     key[1],
                     size,
@@ -236,12 +301,23 @@ class WorldStreamer:
                     self.packs,
                     density,
                     lod,
+                    scatter_now=scatter_now,
                 )
+                bag[key] = sec
+                if not scatter_now and density != "none":
+                    self._commit_q.append(sec)
 
     def update(self, x: float, y: float, z: float) -> None:
         if not self.active:
             return
-        self.ensure(x, y)
+        cx = int(math.floor(x / NEAR_M))
+        cy = int(math.floor(y / NEAR_M))
+        if self._last_cx != cx or self._last_cy != cy:
+            self.ensure(x, y)
+            self._last_cx = cx
+            self._last_cy = cy
+        if self._commit_q:
+            self._commit_q.pop(0).commit_props()
         for sec in self.near.values():
             sec.update_focal(x, y, z)
         if self.night is not None:

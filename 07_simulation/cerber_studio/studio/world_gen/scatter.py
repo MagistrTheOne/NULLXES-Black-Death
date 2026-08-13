@@ -23,7 +23,7 @@ def scatter_sector(
 ) -> None:
     if density == "none":
         return
-    step = 56.0 if density == "full" else 110.0
+    step = 56.0 if density == "full" else 110.0 if density == "sparse" else 160.0
     rng = sector_seed(graph.seed, graph.region_id, sx, sy)
     n = max(1, int(size_m / step))
     tree_g = cone((0.12, 0.22, 0.11))
@@ -41,7 +41,11 @@ def scatter_sector(
             local_x = wx - ox
             local_y = wy - oy
             cell = (ix + iy + rng) % 7
-            if kind == "forest" and cell <= (2 if density == "full" else 1):
+            if kind in ("tundra", "snow") and cell == 0:
+                rock = props.attachNewNode(rock_g)
+                rock.setPos(local_x, local_y, h + 0.25)
+                rock.setScale(0.55 + jitter * 0.3, 0.4, 0.28)
+            elif kind == "forest" and cell <= (2 if density == "full" else 1):
                 if packs.get("tree") is not None:
                     node = packs["tree"].copyTo(props)
                     node.setPos(local_x, local_y, h)

@@ -5,6 +5,8 @@ from __future__ import annotations
 import math
 
 from panda3d.core import (
+    AmbientLight,
+    DirectionalLight,
     Geom,
     GeomNode,
     GeomTriangles,
@@ -12,6 +14,7 @@ from panda3d.core import (
     GeomVertexFormat,
     GeomVertexWriter,
     NodePath,
+    PointLight,
     Vec4,
 )
 
@@ -153,20 +156,46 @@ def orbit_target(node: NodePath, phase: float, *, behaviour: str = "simple") -> 
 
 def attach_hangar(parent: NodePath) -> NodePath:
     root = parent.attachNewNode("hangar")
-    floor = root.attachNewNode(_box((0.10, 0.10, 0.11)))
-    floor.setScale(36, 18, 0.04)
-    floor.setPos(0, 0, 0)
-    plate = root.attachNewNode(_box((0.16, 0.16, 0.17)))
-    plate.setScale(4.5, 4.5, 0.03)
-    plate.setPos(0, 0, 0.05)
-    back = root.attachNewNode(_box((0.07, 0.07, 0.075)))
-    back.setScale(40, 0.4, 8)
-    back.setPos(0, 16, 4)
-    left = root.attachNewNode(_box((0.07, 0.07, 0.075)))
-    left.setScale(0.4, 18, 8)
-    left.setPos(-28, 2, 4)
-    right = root.attachNewNode(_box((0.07, 0.07, 0.075)))
-    right.setScale(0.4, 18, 8)
-    right.setPos(28, 2, 4)
+    floor = root.attachNewNode(_box((0.22, 0.22, 0.24)))
+    floor.setScale(10.0, 8.0, 0.04)
+    floor.setPos(0, 0.6, 0)
+    pedestal = root.attachNewNode(_box((0.32, 0.32, 0.34)))
+    pedestal.setScale(1.7, 1.7, 0.08)
+    pedestal.setPos(0, 0, 0.10)
+    back = root.attachNewNode(_box((0.09, 0.09, 0.10)))
+    back.setScale(11.0, 0.18, 3.6)
+    back.setPos(0, 6.4, 3.4)
+    panel_l = root.attachNewNode(_box((0.14, 0.14, 0.15)))
+    panel_l.setScale(0.12, 3.2, 2.4)
+    panel_l.setPos(-7.4, 2.2, 2.6)
+    panel_r = root.attachNewNode(_box((0.14, 0.14, 0.15)))
+    panel_r.setScale(0.12, 3.2, 2.4)
+    panel_r.setPos(7.4, 2.2, 2.6)
+    beam = root.attachNewNode(_box((0.18, 0.18, 0.19)))
+    beam.setScale(8.5, 0.08, 0.08)
+    beam.setPos(0, 5.8, 5.4)
+    anchor = root.attachNewNode("preview_anchor")
+    anchor.setPos(0.0, 0.0, 0.22)
+    key = PointLight("hangar_key")
+    key.setColor((1.15, 1.08, 1.0, 1))
+    key.setAttenuation((1.0, 0.012, 0.001))
+    kn = root.attachNewNode(key)
+    kn.setPos(3.2, -4.5, 5.4)
+    root.setLight(kn)
+    fill = PointLight("hangar_fill")
+    fill.setColor((0.42, 0.46, 0.52, 1))
+    fill.setAttenuation((1.0, 0.02, 0.002))
+    fn = root.attachNewNode(fill)
+    fn.setPos(-4.0, 3.5, 3.8)
+    root.setLight(fn)
+    rim = DirectionalLight("hangar_rim")
+    rim.setDirection((-0.2, 0.85, -0.25))
+    rim.setColor((0.55, 0.58, 0.62, 1))
+    rn = root.attachNewNode(rim)
+    root.setLight(rn)
+    amb = AmbientLight("hangar_amb")
+    amb.setColor((0.38, 0.40, 0.44, 1))
+    an = root.attachNewNode(amb)
+    root.setLight(an)
     return root
 

@@ -28,6 +28,30 @@ class VisualModel:
     up_axis: str = "Z"
     forward_axis: str = "Y"
     auto_normalize: bool = False
+    rotation: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    offset: tuple[float, float, float] = (0.0, 0.0, 0.0)
+
+
+@dataclass
+class RotorSpec:
+    node: str
+    axis: str = "Z"
+    direction: float = 1.0
+
+
+@dataclass
+class ControlSurfaceSpec:
+    name: str
+    node: str
+    source: str = "elevator"
+    gain: float = 1.0
+
+
+@dataclass
+class AnimationManifest:
+    rotors: list[RotorSpec] = field(default_factory=list)
+    propellers: list[RotorSpec] = field(default_factory=list)
+    control_surfaces: list[ControlSurfaceSpec] = field(default_factory=list)
 
 
 @dataclass
@@ -64,6 +88,7 @@ class AircraftDefinition:
     camera: CameraProfile = field(default_factory=CameraProfile)
     demo_flight: DemoFlightProfile = field(default_factory=DemoFlightProfile)
     meta: AircraftMetadata = field(default_factory=AircraftMetadata)
+    animation: AnimationManifest = field(default_factory=AnimationManifest)
     unconfigured: bool = False
     load_error: str = ""
 

@@ -14,8 +14,11 @@ from .definition import (
     AircraftClass,
     AircraftDefinition,
     AircraftMetadata,
+    AnimationManifest,
     CameraProfile,
+    ControlSurfaceSpec,
     DemoFlightProfile,
+    RotorSpec,
     VisualModel,
 )
 
@@ -43,6 +46,50 @@ def _vec3(raw, fallback: tuple[float, float, float]) -> tuple[float, float, floa
     if isinstance(raw, (list, tuple)) and len(raw) == 3:
         return float(raw[0]), float(raw[1]), float(raw[2])
     return fallback
+
+
+def _rotors(raw) -> list[RotorSpec]:
+    out: list[RotorSpec] = []
+    if not isinstance(raw, list):
+        return out
+    for item in raw:
+        if not isinstance(item, dict) or not item.get("node"):
+            continue
+        out.append(
+            RotorSpec(
+                node=str(item["node"]),
+                axis=str(item.get("axis", "Z")),
+                direction=float(item.get("direction", 1.0)),
+            )
+        )
+    return out
+
+
+def _surfaces(raw) -> list[ControlSurfaceSpec]:
+    out: list[ControlSurfaceSpec] = []
+    if not isinstance(raw, dict):
+        return out
+    for name, item in raw.items():
+        if not isinstance(item, dict) or not item.get("node"):
+            continue
+        out.append(
+            ControlSurfaceSpec(
+                name=str(name),
+                node=str(item["node"]),
+                source=str(item.get("source", "elevator")),
+                gain=float(item.get("gain", 1.0)),
+            )
+        )
+    return out
+
+
+def _animation(data: dict) -> AnimationManifest:
+    raw = data.get("animation") or {}
+    return AnimationManifest(
+        rotors=_rotors(raw.get("rotors")),
+        propellers=_rotors(raw.get("propellers")),
+        control_surfaces=_surfaces(raw.get("control_surfaces") or {}),
+    )
 
 
 def builtin_from_preset(key: str, **overrides) -> AircraftDefinition:
@@ -152,6 +199,8 @@ def from_folder(folder: Path) -> AircraftDefinition | None:
             up_axis=str(model.get("up_axis", "Z")),
             forward_axis=str(model.get("forward_axis", "Y")),
             auto_normalize=auto,
+            rotation=_vec3(model.get("rotation"), (0.0, 0.0, 0.0)),
+            offset=_vec3(model.get("offset"), (0.0, 0.0, 0.0)),
         ),
         camera=CameraProfile(
             chase_distance=float(cam.get("chase_distance", 8.0)),
@@ -173,6 +222,7 @@ def from_folder(folder: Path) -> AircraftDefinition | None:
             demo_params=True,
         ),
         unconfigured=unconfigured,
+        animation=_animation(data),
     )
 
 

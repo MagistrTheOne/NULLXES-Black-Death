@@ -23,10 +23,13 @@ from PySide6.QtWidgets import QLabel, QSizePolicy, QVBoxLayout, QWidget
 from direct.showbase.ShowBase import ShowBase
 
 from .activity import ActivityDirector
+from .aircraft.animation import VisualAnimator
 from .aircraft.definition import AircraftDefinition
-from .aircraft.loader import load_visual, to_wing_params
+from .aircraft.loader import frame_distance, load_visual, to_wing_params, visual_radius
 from .config.settings import DEFAULT_BINDINGS, UserSettings
 from .blackbox.recorder import FlightRecorder, blackbox_root, load_replay
+from .debug.profiler import FrameProfiler
+from .debug.world_debug import WorldDebugOverlay
 from .display import apply_panda_prc, apply_texture_quality, fog_density, view_distance_far
 from .dynamics import PHYSICS_DT, FlightPhase, preset
 from .input_map import bindings_map
@@ -37,6 +40,7 @@ from .training import TrainingState
 from .world import attach_hangar, attach_target, attach_wing, orbit_target
 from .world_gen import WorldStreamer, apply_atmosphere, apply_lighting, apply_sun, attach_haze, attach_sky
 from .world_gen.geom import box
+from .world_gen.region_preview import RegionPreview
 
 WIND_MPS = {"off": 0.0, "low": 1.2, "medium": 3.2, "high": 6.5}
 CAMERAS = ("chase", "nose", "orbit", "ground", "flyby", "free")
@@ -80,6 +84,10 @@ class StudioEngine(ShowBase):
         self.world.set_active(False)
         self.hangar = attach_hangar(self.render)
         self.hangar.hide()
+        self.hangar_anchor = self.hangar.find("preview_anchor")
+        if self.hangar_anchor.isEmpty():
+            self.hangar_anchor = self.hangar.attachNewNode("preview_anchor")
+            self.hangar_anchor.setPos(0, 0, 0.22)
 
         self.params = preset("ar_wing")
         self.dynamics = make_backend(cfg.simulation.backend, self.params)
@@ -95,6 +103,7 @@ class StudioEngine(ShowBase):
         self.render_fps = 0.0
         self._assist_yaw_fn: Callable[[], float] | None = None
         self.scene_mode = "flight"
+        self.runtime_scope = "menu"
         self.paused = False
         self.input_enabled = True
         self.target_visible = True
@@ -130,6 +139,19 @@ class StudioEngine(ShowBase):
         self.hangar_parked: list = []
         self.hangar_index = 0
         self.hangar_line_active = False
+        self.preview_radius = 1.6
+        self.animator = VisualAnimator()
+        self.profiler = FrameProfiler()
+        self.world_debug = WorldDebugOverlay(self.render)
+        self.region_preview = RegionPreview(self.render)
+        self.debug_perf = False
+        self.debug_world = False
+        self._world_acc = 0.0
+        self._act_acc = 0.0
+        self._atmo_acc = 0.0
+        self._disc_acc = 0.0
+        self._sky_acc = 0.0
+        self._cerber_busy = False
         self.operator_tab = False
         self.hud_layer = str(cfg.hud.layer or cfg.hud.preset or "flight")
         self.activity = ActivityDirector(self.render, self.world.graph)
@@ -189,25 +211,44 @@ class StudioEngine(ShowBase):
             return
         self.scene_mode = mode
         if mode == "hangar":
+            self.runtime_scope = "menu"
             self.hangar.show()
             self.world.set_active(False)
+            self.region_preview.hide()
             self.sky.hide()
             self.target.hide()
             self.setBackgroundColor(0.07, 0.075, 0.08, 1.0)
-            self._alight.setColor((0.42, 0.42, 0.44, 1))
+            self._alight.setColor((0.28, 0.29, 0.31, 1))
             self.render.clearFog()
             self.auto_orbit = True
             self.preview_heading = 28.0
-            self.preview_pitch = 14.0
-            if self.definition is not None:
-                self.preview_dist = float(self.definition.camera.chase_distance)
+            self.preview_pitch = 12.0
             self.hangar_line_active = False
-            self.ego.show()
             self.activity.root.hide()
+            self.animator.hangar = True
+            self.animator.rpm = 0.0
             for node in self.hangar_parked:
                 node.hide()
-        else:
+            if not self.ego.isEmpty():
+                self.ego.wrtReparentTo(self.hangar_anchor)
+                self.ego.setPos(0, 0, 0)
+                self.ego.setHpr(0, 0, 0)
+                self.ego.show()
+            self._fit_hangar_camera()
+        elif mode == "region":
+            self.runtime_scope = "preview"
             self.hangar.hide()
+            self.world.set_active(False)
+            self.activity.root.hide()
+            self.ego.hide()
+            self.target.hide()
+            self.sky.show()
+            self.region_preview.show()
+            self.animator.hangar = True
+        else:
+            self.runtime_scope = "replay" if self.replay_active else "flight"
+            self.hangar.hide()
+            self.region_preview.hide()
             self.sky.show()
             self.world.set_active(True)
             self.activity.root.show()
@@ -215,15 +256,20 @@ class StudioEngine(ShowBase):
             self._apply_sky()
             if self.target_visible:
                 self.target.show()
-            pal = self.world.atmosphere
+            else:
+                self.target.hide()
             self.setBackgroundColor(0.70, 0.76, 0.82, 1.0)
-            self.ego.show()
+            if not self.ego.isEmpty():
+                self.ego.wrtReparentTo(self.render)
+                self.ego.show()
+            self.animator.hangar = False
 
     def prepare_world(self) -> None:
         sess = self.settings.session
         self.world.configure(int(sess.world_seed), sess.region_id or "forest")
         preset = sess.weather or self.world.graph.profile.sky_preset or "clear"
         self.world.atmosphere.apply_preset(preset)
+        self.world.atmosphere.temperature_c = float(self.world.graph.profile.temperature_c)
         self.world.atmosphere.time_flow = sess.time_flow or "1x"
         self.world.load_packs(self.loader)
         self.world.set_active(True)
@@ -269,21 +315,36 @@ class StudioEngine(ShowBase):
 
     def preview_region(self, region_id: str) -> None:
         self.settings.session.region_id = region_id
-        self.world.configure(int(self.settings.session.world_seed), region_id)
-        self.world.set_active(True)
+        self.world.set_active(False)
+        self.activity.root.hide()
         self.hangar.hide()
-        self.sky.show()
         self.ego.hide()
         self.target.hide()
+        self.sky.show()
+        dens = fog_density(self.settings.graphics.view_distance)
+        profile = None
+        try:
+            from .world_gen.world_profile import load_profile
+
+            profile = load_profile(region_id)
+            self.world.atmosphere.apply_preset(profile.sky_preset or "clear")
+            self.world.atmosphere.temperature_c = float(profile.temperature_c)
+        except Exception:
+            self.world.atmosphere.apply_preset("clear")
         self.render.setFog(self._fog)
-        self._apply_sky()
-        sx, sy, gz, _ = self.world.spawn()
-        self.world.ensure(sx, sy)
-        self.activity.root.hide()
+        self._apply_sky(rebuild=True)
+        self.region_preview.rebuild(int(self.settings.session.world_seed), region_id, self.loader)
         self.camera.reparentTo(self.render)
-        self.camera.setPos(sx, sy - 420.0, gz + 220.0)
-        self.camera.lookAt(sx, sy, gz)
+        eye, look = self.region_preview.camera_pose(0.0)
+        self.camera.setPos(eye)
+        self.camera.lookAt(look)
         self.scene_mode = "region"
+        self.runtime_scope = "preview"
+
+    def exit_region_preview(self) -> None:
+        self.region_preview.hide()
+        if self.scene_mode == "region":
+            self.set_scene_mode("hangar")
 
     def apply_definition(self, defn: AircraftDefinition) -> str:
         pos = self.dynamics.position()
@@ -303,13 +364,20 @@ class StudioEngine(ShowBase):
             self.dynamics.state.throttle = thr
             self.dynamics.control.throttle = thr
             self.dynamics.state.speed = spd
-        self.ego, err = load_visual(self.loader, self.render, defn)
+        parent = self.hangar_anchor if self.scene_mode == "hangar" else self.render
+        self.ego, err, self.animator = load_visual(self.loader, parent, defn)
         self.load_error = err
+        self.animator.hangar = self.scene_mode != "flight"
         nx, ny, nz = defn.camera.nose_offset
         self.nose_np = self.ego.attachNewNode("nose_cam_mount")
         self.nose_np.setPos(nx, ny, nz)
-        self.preview_dist = float(defn.camera.chase_distance)
         self._attach_nav_lights()
+        if self.scene_mode == "hangar":
+            self.ego.setPos(0, 0, 0)
+            self.ego.setHpr(0, 0, 0)
+            self._fit_hangar_camera()
+        else:
+            self.preview_dist = float(defn.camera.chase_distance)
         return err
 
     def apply_target_definition(self, defn: AircraftDefinition | None) -> str:
@@ -321,7 +389,7 @@ class StudioEngine(ShowBase):
             self.target = attach_target(self.render)
             self.target_load_error = ""
         else:
-            self.target, err = load_visual(self.loader, self.render, defn)
+            self.target, err, _anim = load_visual(self.loader, self.render, defn)
             self.target_load_error = err
             self.target.setScale(self.target.getScale()[0] * 0.85)
         self.target.setPos(pos)
@@ -414,56 +482,82 @@ class StudioEngine(ShowBase):
         dt = now - self._last_t
         self._last_t = now
         self.render_fps = 1.0 / dt if dt > 1e-6 else 0.0
+        self.profiler.begin_frame()
         if self.scene_mode == "hangar":
-            return self._step_hangar(dt)
-        if self.scene_mode == "region":
-            self.taskMgr.step()
-            self.last_display_rgb = self._grab_rgb()
-            return self.last_display_rgb
-        if self.replay_active and not self.paused:
+            rgb = self._step_hangar(dt)
+        elif self.scene_mode == "region":
+            rgb = self._step_region(dt)
+        elif self.replay_active and not self.paused:
+            self.runtime_scope = "replay"
             self._step_replay(dt)
+            self.taskMgr.step()
+            rgb = self._grab_rgb()
+            self.last_display_rgb = rgb
         elif not self.paused:
+            self.runtime_scope = "flight"
             self.runtime.begin_frame()
-            self._step_flight(dt)
+            with self.profiler.span("update"):
+                self._step_flight(dt)
             self.runtime.end_frame()
             self._collect_runtime()
+            self.taskMgr.step()
+            rgb = self._grab_rgb()
+            self.last_display_rgb = rgb
         else:
-            self._apply_flight_camera(dt)
+            self.taskMgr.step()
+            rgb = self._grab_rgb()
+            self.last_display_rgb = rgb
+        self.profiler.end_frame(dt=dt)
+        if self.debug_perf or self.profiler.enabled:
+            st = self.world.stats()
+            self.profiler.refresh_snap(
+                self.render,
+                sectors=int(st["sectors"]),
+                props=int(st["props"]),
+                entities=sum(self.activity.lod_counts().values()),
+            )
+        return self.last_display_rgb
+
+    def _step_region(self, dt: float) -> np.ndarray:
+        eye, look = self.region_preview.camera_pose(dt)
+        self.camera.reparentTo(self.render)
+        self.camera.setPos(eye)
+        self.camera.lookAt(look)
+        self.sky.setPos(eye)
         self.taskMgr.step()
         self.last_display_rgb = self._grab_rgb()
         return self.last_display_rgb
 
+    def _fit_hangar_camera(self) -> None:
+        if self.ego.isEmpty():
+            return
+        self.preview_radius = max(0.4, visual_radius(self.ego))
+        aspect = self.win_w / max(1, self.win_h)
+        dist = frame_distance(self.preview_radius, self._fov, 0.55, aspect)
+        self.preview_dist = float(np.clip(dist, 2.6, 16.0))
+
     def _step_hangar(self, dt: float) -> np.ndarray:
-        if self.hangar_line_active and self.hangar_parked:
-            idx = max(0, min(len(self.hangar_parked) - 1, self.hangar_index))
-            target = self.hangar_parked[idx]
-            tx, ty, tz = target.getPos()
-            if self.auto_orbit and not self._drag:
-                self.preview_heading += dt * 10.0
-            h = math.radians(self.preview_heading)
-            p = math.radians(self.preview_pitch)
-            dist = self.preview_dist
-            cx = tx + dist * math.sin(h) * math.cos(p)
-            cy = ty - dist * math.cos(h) * math.cos(p)
-            cz = tz + dist * math.sin(p)
-            self.camera.reparentTo(self.render)
-            self.camera.setPos(cx, cy, max(0.4, cz))
-            self.camera.lookAt(tx, ty, tz)
-            self.ego.hide()
-        else:
-            if self.auto_orbit and not self._drag:
-                self.preview_heading += dt * 10.0
-            self.ego.setPos(0, 0, 1.15)
-            self.ego.setHpr(0, 0, 0)
-            h = math.radians(self.preview_heading)
-            p = math.radians(self.preview_pitch)
-            dist = self.preview_dist
-            cx = dist * math.sin(h) * math.cos(p)
-            cy = -dist * math.cos(h) * math.cos(p)
-            cz = 1.15 + dist * math.sin(p)
-            self.camera.reparentTo(self.render)
-            self.camera.setPos(cx, cy, max(0.4, cz))
-            self.camera.lookAt(0, 0, 1.15)
+        if self.auto_orbit and not self._drag:
+            self.preview_heading += dt * 10.0
+        self.ego.show()
+        self.ego.setPos(0, 0, 0)
+        self.ego.setHpr(0, 0, 0)
+        self.target.hide()
+        for node in self.hangar_parked:
+            node.hide()
+        h = math.radians(self.preview_heading)
+        p = math.radians(self.preview_pitch)
+        dist = self.preview_dist
+        look_z = self.preview_radius * 0.42
+        cx = dist * math.sin(h) * math.cos(p)
+        cy = -dist * math.cos(h) * math.cos(p)
+        cz = look_z + dist * math.sin(p)
+        self.camera.reparentTo(self.render)
+        ax, ay, az = self.hangar_anchor.getPos(self.render)
+        self.camera.setPos(ax + cx, ay + cy, max(az + 0.35, az + cz))
+        self.camera.lookAt(ax, ay, az + look_z)
+        self.animator.hangar = True
+        self.animator.rpm = 0.0
         self.taskMgr.step()
         self.last_display_rgb = self._grab_rgb()
         return self.last_display_rgb
@@ -510,6 +604,7 @@ class StudioEngine(ShowBase):
         graph = self.world.graph
         af = graph.airfields[0] if graph.airfields else None
         runway_yaw = af.yaw if af is not None else 0.0
+        t_phys = time.perf_counter()
         while self._phys_acc >= PHYSICS_DT and steps < 8:
             self._pose_prev = self._pose_curr
             gz = self.world.ground_z(self.dynamics.state.x, self.dynamics.state.y)
@@ -542,16 +637,23 @@ class StudioEngine(ShowBase):
         if self._phys_acc >= PHYSICS_DT:
             self.runtime.phys_misses += 1
             self._phys_acc = 0.0
+        self.profiler.add_ms("physics", (time.perf_counter() - t_phys) * 1000.0)
 
-        self.world.atmosphere.step_clock(dt)
-        clock = self.world.atmosphere.clock_h
-        if abs(clock - self._tod_clock) >= 0.25:
-            self._apply_sky(rebuild=True)
-        else:
-            self._apply_sky(rebuild=False)
+        self._atmo_acc += dt
+        if self._atmo_acc >= 0.12:
+            self.world.atmosphere.step_clock(self._atmo_acc)
+            clock = self.world.atmosphere.clock_h
+            rebuild = abs(clock - self._tod_clock) >= 0.55
+            t_at = time.perf_counter()
+            self._apply_sky(rebuild=rebuild)
+            self.profiler.add_ms("atmosphere", (time.perf_counter() - t_at) * 1000.0)
+            self._atmo_acc = 0.0
 
         alpha = float(np.clip(1.0 - (self._phys_acc / PHYSICS_DT), 0.0, 1.0))
         self._sync_ego(alpha)
+        self.animator.hangar = False
+        self.animator.set_throttle(float(self.dynamics.state.throttle))
+        self.animator.step(dt)
         if self.target_visible:
             self.target.show()
             self.target_phase += dt * 0.35
@@ -559,11 +661,24 @@ class StudioEngine(ShowBase):
         else:
             self.target.hide()
         x, y, z = self.dynamics.position()
-        self.world.update(x, y, z)
-        self.activity.update(dt, (x, y), self.world.ground_z)
+        self._world_acc += dt
+        if self._world_acc >= 0.05:
+            t_w = time.perf_counter()
+            self.world.update(x, y, z)
+            self.profiler.add_ms("world", (time.perf_counter() - t_w) * 1000.0)
+            self._world_acc = 0.0
+        self._act_acc += dt
+        if self._act_acc >= 0.04:
+            t_a = time.perf_counter()
+            self.activity.update(self._act_acc, (x, y), self.world.ground_z)
+            self.profiler.add_ms("activity", (time.perf_counter() - t_a) * 1000.0)
+            self._act_acc = 0.0
         self._sync_nav_lights()
         self._emit_flight_events()
-        self._scan_landmarks()
+        self._disc_acc += dt
+        if self._disc_acc >= 0.25:
+            self._scan_landmarks()
+            self._disc_acc = 0.0
         self.training.update(
             phase=self.dynamics.state.phase,
             throttle=self.dynamics.state.throttle,
@@ -654,14 +769,9 @@ class StudioEngine(ShowBase):
         self.sky.setPos(self._cam_pos)
 
     def sample_cerber_bgr(self) -> np.ndarray:
-        if self.camera_mode == "nose" and hasattr(self, "last_display_rgb"):
+        if hasattr(self, "last_display_rgb") and self.last_display_rgb is not None:
             return self.last_display_rgb[:, :, ::-1].copy()
-        self.camera.reparentTo(self.nose_np)
-        self.camera.setPos(0, 0, 0)
-        self.camera.setHpr(0, 0, 0)
-        self.graphicsEngine.renderFrame()
-        rgb = self._grab_rgb()
-        return rgb[:, :, ::-1].copy()
+        return np.zeros((self.win_h, self.win_w, 3), dtype=np.uint8)
 
     def _grab_rgb(self) -> np.ndarray:
         if not self.color_tex.hasRamImage():
@@ -694,16 +804,15 @@ class StudioEngine(ShowBase):
         self.preview_pitch = float(np.clip(self.preview_pitch + dy * 0.25 * sensitivity, -8.0, 72.0))
 
     def hangar_zoom(self, delta: float) -> None:
-        self.preview_dist = float(np.clip(self.preview_dist * (0.9 if delta > 0 else 1.1), 2.5, 24.0))
+        lo = max(2.2, self.preview_dist * 0.35)
+        hi = min(22.0, max(8.0, self.preview_dist * 2.4))
+        self.preview_dist = float(np.clip(self.preview_dist * (0.9 if delta > 0 else 1.1), lo, hi))
 
     def reset_preview(self) -> None:
         self.auto_orbit = True
         self.preview_heading = 28.0
-        self.preview_pitch = 14.0
-        if self.definition is not None:
-            self.preview_dist = float(self.definition.camera.chase_distance)
-        else:
-            self.preview_dist = 8.0
+        self.preview_pitch = 12.0
+        self._fit_hangar_camera()
 
     @property
     def vehicle(self):
@@ -800,21 +909,22 @@ class StudioEngine(ShowBase):
         if self.replay_i >= len(self.replay_poses) - 1:
             self.replay_active = False
 
-    def rebuild_hangar_line(self, definitions: list) -> None:
+    def rebuild_hangar_line(self, definitions: list | None = None) -> None:
         for node in self.hangar_parked:
             try:
                 node.removeNode()
             except Exception:
                 pass
         self.hangar_parked = []
-        n = max(1, len(definitions))
-        span = (n - 1) * 9.0
-        for i, defn in enumerate(definitions):
-            node, _err = load_visual(self.loader, self.hangar, defn)
-            node.setPos(i * 9.0 - span * 0.5, 0.0, 1.15)
-            self.hangar_parked.append(node)
-        self.hangar_index = 0
-        self.hangar_line_active = True
+        self.hangar_line_active = False
+        if not self.target.isEmpty():
+            self.target.hide()
+        if not self.ego.isEmpty():
+            self.ego.wrtReparentTo(self.hangar_anchor)
+            self.ego.setPos(0, 0, 0)
+            self.ego.setHpr(0, 0, 0)
+            self.ego.show()
+        self._fit_hangar_camera()
 
     def _attach_nav_lights(self) -> None:
         prev = getattr(self, "_nav_root", None)
@@ -922,12 +1032,31 @@ class StudioEngine(ShowBase):
         folder = blackbox_root() / "stills"
         folder.mkdir(parents=True, exist_ok=True)
         path = folder / time.strftime("still_%Y%m%d_%H%M%S.png")
+        return self.screenshot_to(path)
+
+    def screenshot_to(self, path) -> str:
+        from pathlib import Path
+
+        dest = Path(path)
+        dest.parent.mkdir(parents=True, exist_ok=True)
         tex = self.win.getScreenshot()
         if tex:
             from panda3d.core import Filename
 
-            tex.write(Filename.fromOsSpecific(str(path)))
-        return str(path)
+            tex.write(Filename.fromOsSpecific(str(dest)))
+        return str(dest)
+
+    def toggle_perf(self) -> bool:
+        self.debug_perf = not self.debug_perf
+        self.profiler.enabled = self.debug_perf
+        return self.debug_perf
+
+    def toggle_world_debug(self) -> bool:
+        on = self.world_debug.toggle()
+        self.debug_world = on
+        if on:
+            self.world_debug.rebuild(self.world)
+        return on
 
     def enter_cinematic(self) -> None:
         self.cinematic = True
@@ -957,6 +1086,14 @@ class ViewportWidget(QWidget):
         self.label = QLabel(self)
         self.label.setAlignment(Qt.AlignCenter)
         self.label.setStyleSheet("background:#111;")
+        self.perf_overlay = QLabel(self)
+        self.perf_overlay.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        self.perf_overlay.setStyleSheet(
+            "QLabel { color:#D8D8D8; background:rgba(8,8,10,170); font-family:Consolas,'Courier New'; "
+            "font-size:12px; padding:10px 12px; }"
+        )
+        self.perf_overlay.hide()
+        self.perf_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.label)
@@ -1004,14 +1141,32 @@ class ViewportWidget(QWidget):
                 Qt.SmoothTransformation,
             )
         )
+        if self.engine.debug_perf:
+            self.perf_overlay.setText(self.engine.profiler.overlay(self.engine.runtime_scope))
+            self.perf_overlay.adjustSize()
+            self.perf_overlay.move(16, 16)
+            self.perf_overlay.show()
+            self.perf_overlay.raise_()
+        else:
+            self.perf_overlay.hide()
         self._frame_i += 1
         if (
             self._frame_cb is not None
             and self.engine.scene_mode == "flight"
+            and self.engine.runtime_scope == "flight"
             and not self.engine.paused
             and self._frame_i % self._frame_every == 0
         ):
-            self._frame_cb(self.engine.sample_cerber_bgr())
+            if self.engine._cerber_busy:
+                pass
+            else:
+                t0 = time.perf_counter()
+                self.engine._cerber_busy = True
+                try:
+                    self._frame_cb(self.engine.sample_cerber_bgr())
+                finally:
+                    self.engine._cerber_busy = False
+                    self.engine.profiler.add_ms("cerber", (time.perf_counter() - t0) * 1000.0)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if self._apply_key(event, True):

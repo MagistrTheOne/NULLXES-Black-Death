@@ -30,7 +30,7 @@ def _vram_mb() -> float:
 
         out = subprocess.check_output(
             ["nvidia-smi", "--query-compute-apps=used_memory", "--format=csv,noheader,nounits"],
-            timeout=1.5,
+            timeout=0.25,
             stderr=subprocess.DEVNULL,
             text=True,
         )

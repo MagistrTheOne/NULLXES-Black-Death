@@ -18,3 +18,23 @@ airfield_count: 1
 road_width: 6.0
 fog_density: 0.00028
 sky_preset: clear
+terrain:
+  height_profile:
+    micro_gain: 2.0
+    micro_scale: 420.0
+  material_profile:
+    id: steppe
+    label: PLAIN
+    snow_alt: 180.0
+    lowland: [0.36, 0.40, 0.22]
+    slope: [0.40, 0.36, 0.28]
+    highland: [0.44, 0.40, 0.30]
+    snow: [0.86, 0.88, 0.90]
+atmosphere:
+  haze: [0.74, 0.78, 0.80]
+  sky: clear
+  temperature: 18
+vegetation:
+  density: sparse
+water:
+  enabled: false

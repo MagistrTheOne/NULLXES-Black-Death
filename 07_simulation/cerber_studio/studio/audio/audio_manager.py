@@ -125,6 +125,11 @@ class MusicDirector:
             log.warning("music load failed %s: %s", path, exc)
             return False
 
+    def play_index(self, index: int, volume: float) -> None:
+        if not self.tracks or index < 0 or index >= len(self.tracks):
+            return
+        self.load_and_play(self.tracks[index], volume)
+
     def play(self, volume: float, ctx: dict | None = None) -> None:
         pick = self.pick_mix(ctx or {}) if ctx else None
         if pick is None:
@@ -184,6 +189,12 @@ class AudioManager:
         self.music.scan()
         if self._mixer and not self._settings.muted and not self._music_busy():
             self.music.play(self._music_vol())
+
+    def play_slot(self, index: int) -> None:
+        if self._settings.muted:
+            return
+        self._ensure_mixer()
+        self.music.play_index(index, self._music_vol())
 
     def apply(self, settings: AudioSettings) -> None:
         self._settings = settings

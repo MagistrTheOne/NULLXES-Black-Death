@@ -108,6 +108,17 @@ def palette_for(atmos: AtmosphereState) -> dict:
     vis = max(1.0, atmos.visibility_km)
     fog_boost = max(0.0, min(1.0, 1.0 - vis / 40.0))
     pal["haze"] = _lerp(pal["haze"], over["haze"], fog_boost)
+    if atmos.temperature_c < 0.0:
+        cold = {
+            "zenith": (0.40, 0.52, 0.64),
+            "horizon": (0.78, 0.84, 0.88),
+            "haze": (0.70, 0.78, 0.84),
+            "ambient": (0.46, 0.50, 0.56, 1),
+            "sun": (0.86, 0.90, 0.96, 1),
+            "bg": (0.70, 0.78, 0.84, 1),
+        }
+        t = min(1.0, abs(atmos.temperature_c) / 14.0)
+        pal = {k: _lerp(pal[k], cold[k], t) for k in pal}
     return pal
 
 

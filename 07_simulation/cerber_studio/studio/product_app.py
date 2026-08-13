@@ -230,6 +230,15 @@ class ProductWindow(QWidget):
         self.set_view.open_logs.connect(self._open_logs)
         self.set_view.language.connect(self._set_language)
         self.set_view.tracks_dropped.connect(self._import_tracks)
+        self.set_view.live_audio.connect(self._live_audio)
+        self.set_view.play_slot.connect(self._play_audio_slot)
+
+    def _live_audio(self) -> None:
+        self.audio.apply(self.settings.audio)
+
+    def _play_audio_slot(self, index: int) -> None:
+        self.audio.apply(self.settings.audio)
+        self.audio.play_slot(index)
 
     def _set_language(self, code: str) -> None:
         chosen = set_lang(code)
@@ -914,6 +923,13 @@ class ProductWindow(QWidget):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         key = event.key()
+        if key == Qt.Key_F3:
+            on = self.viewport.engine.toggle_perf()
+            self.viewport.perf_overlay.setVisible(on)
+            return
+        if key == Qt.Key_F2:
+            self.viewport.engine.toggle_world_debug()
+            return
         if key == Qt.Key_Escape:
             if self.map_view.isVisible():
                 self.map_view.hide()
@@ -930,9 +946,13 @@ class ProductWindow(QWidget):
             if self.state == AppState.PAUSED:
                 self._set_state(AppState.SIMULATION)
                 return
-            if self.state in (AppState.AIRCRAFT_SELECT, AppState.MISSION_SELECT, AppState.SETTINGS):
+            if self.state in (AppState.AIRCRAFT_SELECT, AppState.MISSION_SELECT, AppState.SETTINGS, AppState.REGION_SELECT):
                 if self.state == AppState.SETTINGS:
                     self.set_view._on_back()
+                    return
+                if self.state == AppState.REGION_SELECT:
+                    self.viewport.engine.exit_region_preview()
+                    self._set_state(AppState.AIRCRAFT_SELECT)
                     return
                 self._set_state(AppState.MAIN_MENU)
                 return

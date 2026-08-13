@@ -8,13 +8,33 @@ ridge_gain: 16.0
 continent_scale: 16000.0
 mountain_scale: 3200.0
 ridge_scale: 1000.0
-forest_weight: 0.08
+forest_weight: 0.02
 rock_weight: 0.40
-grass_weight: 0.52
+grass_weight: 0.10
 river_threshold: 20.0
 river_count_bias: 0.8
 settlement_count: 2
 airfield_count: 1
 road_width: 5.0
-fog_density: 0.00055
+fog_density: 0.00062
 sky_preset: overcast
+terrain:
+  height_profile:
+    micro_gain: 5.0
+    micro_scale: 240.0
+  material_profile:
+    id: arctic
+    label: TUNDRA
+    snow_alt: 48.0
+    lowland: [0.72, 0.76, 0.80]
+    slope: [0.40, 0.38, 0.36]
+    highland: [0.82, 0.85, 0.88]
+    snow: [0.90, 0.92, 0.94]
+atmosphere:
+  haze: [0.70, 0.78, 0.84]
+  sky: overcast
+  temperature: -14
+vegetation:
+  density: low
+water:
+  enabled: false

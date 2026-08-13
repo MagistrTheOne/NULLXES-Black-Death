@@ -18,3 +18,23 @@ airfield_count: 1
 road_width: 8.0
 fog_density: 0.00050
 sky_preset: overcast
+terrain:
+  height_profile:
+    micro_gain: 2.5
+    micro_scale: 360.0
+  material_profile:
+    id: industrial
+    label: YARD
+    snow_alt: 180.0
+    lowland: [0.28, 0.28, 0.24]
+    slope: [0.34, 0.32, 0.28]
+    highland: [0.36, 0.34, 0.30]
+    snow: [0.78, 0.78, 0.76]
+atmosphere:
+  haze: [0.52, 0.54, 0.56]
+  sky: overcast
+  temperature: 10
+vegetation:
+  density: low
+water:
+  enabled: false

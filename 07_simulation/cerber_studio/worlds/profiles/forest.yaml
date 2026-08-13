@@ -18,3 +18,23 @@ airfield_count: 1
 road_width: 6.0
 fog_density: 0.00040
 sky_preset: clear
+terrain:
+  height_profile:
+    micro_gain: 4.0
+    micro_scale: 260.0
+  material_profile:
+    id: temperate
+    label: FOREST
+    snow_alt: 150.0
+    lowland: [0.20, 0.32, 0.14]
+    slope: [0.36, 0.34, 0.30]
+    highland: [0.40, 0.38, 0.34]
+    snow: [0.86, 0.88, 0.90]
+atmosphere:
+  haze: [0.66, 0.74, 0.78]
+  sky: clear
+  temperature: 12
+vegetation:
+  density: full
+water:
+  enabled: false

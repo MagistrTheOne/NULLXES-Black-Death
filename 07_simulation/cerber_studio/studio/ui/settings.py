@@ -62,6 +62,8 @@ def _slider(value: int) -> QSlider:
 
 
 class SettingsView(QWidget):
+    live_audio = Signal()
+    play_slot = Signal(int)
     closed = Signal()
     applied = Signal()
     reset_settings = Signal()
@@ -255,7 +257,30 @@ class SettingsView(QWidget):
         note.setWordWrap(True)
         self.audio_note = note
         f.addRow(note)
+        self.mute.stateChanged.connect(self._live_audio)
+        for sl in (
+            self.vol_master,
+            self.vol_music,
+            self.vol_engine,
+            self.vol_wind,
+            self.vol_env,
+            self.vol_ui,
+            self.vol_warn,
+        ):
+            sl.valueChanged.connect(self._live_audio)
+        self.playlist.itemClicked.connect(self._play_slot_item)
         self.pages.addWidget(w)
+
+    def _live_audio(self, *_args) -> None:
+        self.collect()
+        self.live_audio.emit()
+
+    def _play_slot_item(self, item) -> None:
+        row = self.playlist.row(item)
+        if row < 0:
+            return
+        self.collect()
+        self.play_slot.emit(int(row))
 
     def refresh_playlist(self) -> None:
         tracks = scan_playlist()

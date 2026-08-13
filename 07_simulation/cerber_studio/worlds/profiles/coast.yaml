@@ -18,3 +18,25 @@ airfield_count: 1
 road_width: 6.5
 fog_density: 0.00036
 sky_preset: clear
+terrain:
+  height_profile:
+    micro_gain: 3.0
+    micro_scale: 320.0
+  material_profile:
+    id: coast
+    label: COASTLINE
+    snow_alt: 160.0
+    lowland: [0.28, 0.38, 0.18]
+    slope: [0.40, 0.36, 0.30]
+    highland: [0.46, 0.44, 0.40]
+    snow: [0.86, 0.88, 0.90]
+atmosphere:
+  haze: [0.72, 0.80, 0.86]
+  sky: clear
+  temperature: 14
+vegetation:
+  density: full
+water:
+  enabled: true
+  level: 5.2
+  color: [0.08, 0.20, 0.28]

@@ -9,7 +9,7 @@ from ..config.paths import STUDIO_ROOT
 from ..world_gen.env_packs import scan_packs
 from ..world_gen.graph import CACHE_VER
 
-GENERATOR_VERSION = 3
+GENERATOR_VERSION = 4
 GRAPH_VERSION = int(CACHE_VER)
 BACKEND_VERSION = 2
 FORMAT_VERSION = 1

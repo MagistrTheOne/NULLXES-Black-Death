@@ -13,7 +13,7 @@ from panda3d.core import PerlinNoise2
 from ..config.paths import user_dir
 from .world_profile import WorldProfile, load_profile
 
-CACHE_VER = 5
+CACHE_VER = 6
 EXTENT_M = 80000.0
 GRID_N = 81
 CELL_M = EXTENT_M / (GRID_N - 1)
@@ -200,13 +200,18 @@ class _Noise:
         self.r = PerlinNoise2(s * 0.007 + 3.1, s * 0.004 + 0.6)
         self.r.setScale(profile.ridge_scale)
         self.v = PerlinNoise2(s * 0.01 + 8.0, s * 0.009 + 4.2)
-        self.v.setScale(90)
+        self.v.setScale(profile.micro_scale)
 
     def raw(self, x: float, y: float, profile: WorldProfile) -> float:
         h = profile.base_height
         h += profile.mountain_gain * (self.c.noise(x, y) * 0.5 + 0.5) ** 1.35
         h += profile.hill_gain * self.m.noise(x, y)
         h += profile.ridge_gain * self.r.noise(x, y)
+        h += profile.micro_gain * self.v.noise(x, y)
+        if profile.water_enabled:
+            basin = self.c.noise(x + 9000.0, y - 4200.0)
+            if basin < 0.08:
+                h = min(h, profile.water_level - 2.4 + basin * 18.0)
         return h
 
 

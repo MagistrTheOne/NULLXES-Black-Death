@@ -18,3 +18,23 @@ airfield_count: 1
 road_width: 5.5
 fog_density: 0.00048
 sky_preset: clear
+terrain:
+  height_profile:
+    micro_gain: 7.0
+    micro_scale: 180.0
+  material_profile:
+    id: highlands
+    label: RIDGE
+    snow_alt: 110.0
+    lowland: [0.22, 0.30, 0.16]
+    slope: [0.40, 0.38, 0.34]
+    highland: [0.48, 0.46, 0.42]
+    snow: [0.88, 0.90, 0.92]
+atmosphere:
+  haze: [0.64, 0.72, 0.80]
+  sky: clear
+  temperature: 6
+vegetation:
+  density: sparse
+water:
+  enabled: false
