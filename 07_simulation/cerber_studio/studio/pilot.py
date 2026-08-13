@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from ..config.paths import user_dir
+from .config.paths import user_dir
 
 
 def record_path() -> Path:
