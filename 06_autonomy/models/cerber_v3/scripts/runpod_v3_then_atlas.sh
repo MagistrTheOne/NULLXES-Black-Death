@@ -68,8 +68,12 @@ fi
 
 python "$V2/scripts/export_onnx.py" --weights "$BEST" --train-config "$V3/configs/train.yaml"
 
-echo "=== ATLAS-ALLOC (same GPU) ==="
-bash "$ATLAS/scripts/runpod_alloc.sh"
+echo "=== ATLAS-ALLOC (optional chain) ==="
+if [[ "${ATLAS_ON_THIS_POD:-0}" == "1" ]]; then
+  bash "$ATLAS/scripts/runpod_alloc.sh"
+else
+  echo "ATLAS skipped — run 06_autonomy/models/atlas/scripts/runpod_alloc.sh on the ALLOC pod"
+fi
 
 echo "=== DONE — copy home, do not git add onnx ==="
 echo "CERBER  06_autonomy/models/onnx/detector_alpha_v3.onnx"

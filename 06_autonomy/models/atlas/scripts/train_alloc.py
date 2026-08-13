@@ -51,17 +51,20 @@ def main() -> None:
     p.add_argument("--out", type=Path, required=True)
     args = p.parse_args()
     cfg = yaml.safe_load(args.config.read_text(encoding="utf-8"))
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"device={device}")
     model = BipartiteAlloc(
         agent_dim=int(cfg["agent_dim"]),
         sector_dim=int(cfg["sector_dim"]),
         hidden=int(cfg["hidden"]),
-    )
+    ).to(device)
     agents, sectors, scores = _synth(
         int(cfg["samples"]),
         int(cfg["n_agents"]),
         int(cfg["n_sectors"]),
         float(cfg["max_distance_m"]),
     )
+    agents, sectors, scores = agents.to(device), sectors.to(device), scores.to(device)
     opt = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
     loss_fn = torch.nn.MSELoss()
     model.train()
