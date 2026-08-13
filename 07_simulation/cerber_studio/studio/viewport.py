@@ -654,7 +654,9 @@ class StudioEngine(ShowBase):
         alpha = float(np.clip(1.0 - (self._phys_acc / PHYSICS_DT), 0.0, 1.0))
         self._sync_ego(alpha)
         self.animator.hangar = False
+        ctrl = self.dynamics.control
         self.animator.set_throttle(float(self.dynamics.state.throttle))
+        self.animator.set_controls(ctrl.pitch, ctrl.roll, ctrl.yaw)
         self.animator.step(dt)
         if self.target_visible:
             self.target.show()

@@ -50,6 +50,8 @@ class ControlSurfaceSpec:
     node: str
     source: str = "elevator"
     gain: float = 1.0
+    axis: str = "Y"
+    max_deg: float = 22.0
 
 
 @dataclass

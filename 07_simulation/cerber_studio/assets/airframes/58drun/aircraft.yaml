@@ -1,8 +1,8 @@
 id: 58drun
 name: 58DRUN
-class: custom
-manufacturer: ""
-configuration: user_glb
+class: multirotor
+manufacturer: the_Thorminator
+configuration: quadrotor
 model:
   file: 58drun.glb
   auto_normalize: true
@@ -10,11 +10,27 @@ model:
   up_axis: Z
   forward_axis: Y
 camera:
-  chase_distance: 8.0
-  chase_height: 2.0
+  chase_distance: 5.5
+  chase_height: 1.6
 demo:
-  mass_kg: 4.0
-  cruise_speed_mps: 18.0
-  stall_speed_mps: 10.0
-  max_speed_mps: 35.0
-  turn_rate_deg: 75.0
+  mass_kg: 0.25
+  cruise_speed_mps: 10.0
+  stall_speed_mps: 4.0
+  max_speed_mps: 18.0
+  turn_rate_deg: 90.0
+animation:
+  rotors:
+    - {node: Propellor_Lowpoly, axis: Z, direction: 1.0}
+  control_surfaces:
+    frontwing:
+      node: Frontwing_Lowpoly
+      source: elevator
+      axis: Y
+      gain: 1.0
+      max_deg: 18.0
+    backwing:
+      node: Backwing_Lowpoly
+      source: elevator
+      axis: Y
+      gain: -1.0
+      max_deg: 18.0

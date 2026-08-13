@@ -1,7 +1,9 @@
+# 3DHaupt "Drone Design" — props fused into helicopter_box mesh, no rotor nodes.
+# Clip helicopter_boxAction is Blender leftover, not flight. Do not auto-play.
 id: basedrone
 name: BaseDrone
 class: custom
-manufacturer: ""
+manufacturer: 3DHaupt
 configuration: user_glb
 model:
   file: basedrone.glb
@@ -18,3 +20,5 @@ demo:
   stall_speed_mps: 10.0
   max_speed_mps: 35.0
   turn_rate_deg: 75.0
+animation:
+  flight_clip: ""

@@ -78,6 +78,8 @@ def _surfaces(raw) -> list[ControlSurfaceSpec]:
                 node=str(item["node"]),
                 source=str(item.get("source", "elevator")),
                 gain=float(item.get("gain", 1.0)),
+                axis=str(item.get("axis", "Y")),
+                max_deg=float(item.get("max_deg", 22.0)),
             )
         )
     return out
