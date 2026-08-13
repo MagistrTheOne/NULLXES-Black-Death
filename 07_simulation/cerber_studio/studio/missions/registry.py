@@ -33,6 +33,15 @@ class MissionDefinition:
     description: str
     waypoints: list[Waypoint] = field(default_factory=list)
     demo: bool = True
+    region: str = ""
+    time: str = ""
+    weather: str = ""
+    objectives: list = field(default_factory=list)
+    clearance: str = ""
+    challenge: bool = False
+    assist: bool | None = None
+    wind: str = ""
+    unlock: str = ""
 
 
 def _wp(raw: dict) -> Waypoint:
@@ -63,6 +72,15 @@ def _from_yaml(path: Path) -> MissionDefinition | None:
         description=str(data.get("description") or ""),
         waypoints=wps,
         demo=bool(data.get("demo", True)),
+        region=str(data.get("region") or data.get("environment") or ""),
+        time=str(data.get("time") or ""),
+        weather=str(data.get("weather") or ""),
+        objectives=list(data.get("objectives") or []),
+        clearance=str(data.get("clearance") or ""),
+        challenge=bool(data.get("challenge", False)),
+        assist=data.get("assist"),
+        wind=str(data.get("wind") or ""),
+        unlock=str(data.get("unlock") or ""),
     )
 
 

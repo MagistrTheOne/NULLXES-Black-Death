@@ -1,0 +1,15 @@
+id: dusk_return
+name: DUSK RETURN
+type: operations
+environment: forest
+target: false
+duration_s: 720
+description: Sunset cruise along the valley road, return to airfield, land clean.
+demo: true
+region: forest
+time: sunset
+weather: clear
+objectives: [launch, reach_zone, return, land]
+waypoints:
+  - {x: 0, y: 1200, z: 90, radius_m: 80}
+  - {x: -400, y: 600, z: 60, radius_m: 70}

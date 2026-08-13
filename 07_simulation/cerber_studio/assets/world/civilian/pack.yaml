@@ -1,0 +1,14 @@
+id: civilian_ru_01
+category: civilian
+biomes: [forest, steppe, coast]
+props:
+  house_a:
+    file: house_a.glb
+    weight: 0.45
+    lod: true
+  farm_a:
+    file: farm_a.glb
+    weight: 0.25
+  warehouse_c:
+    file: warehouse_c.glb
+    weight: 0.2

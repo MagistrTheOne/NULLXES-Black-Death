@@ -51,19 +51,22 @@ QLabel#Brand {
   color: #F4F4F4;
   font-weight: 600;
   letter-spacing: 4px;
+  background: transparent;
 }
 QLabel#Muted {
   color: #8A8A8E;
+  background: transparent;
 }
 QLabel#Title {
   color: #F2F2F2;
   font-weight: 500;
+  background: transparent;
 }
 QPushButton#MenuBtn {
   background: rgba(18,18,20,160);
   border: 1px solid rgba(255,255,255,22);
   color: #F0F0F0;
-  text-align: left;
+  text-align: center;
   padding: 14px 22px;
 }
 QPushButton#MenuBtn:hover {

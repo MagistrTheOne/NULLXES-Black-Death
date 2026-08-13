@@ -84,7 +84,11 @@ def framebuffer_size(window_w: int, window_h: int, settings: UserSettings) -> tu
 
 
 def view_distance_far(quality: str) -> float:
-    return {"low": 800.0, "medium": 1400.0, "high": 2500.0}.get(quality, 2000.0)
+    return {"low": 18000.0, "medium": 36000.0, "high": 62000.0, "ultra": 88000.0}.get(quality, 50000.0)
+
+
+def fog_density(quality: str) -> float:
+    return {"low": 0.00018, "medium": 0.00010, "high": 0.000048, "ultra": 0.000028}.get(quality, 0.00008)
 
 
 def apply_panda_prc(settings: UserSettings, *, width: int, height: int) -> None:
@@ -103,6 +107,7 @@ def apply_panda_prc(settings: UserSettings, *, width: int, height: int) -> None:
     if msaa >= 2:
         loadPrcFileData("", "framebuffer-multisample 1")
         loadPrcFileData("", f"multisamples {int(msaa)}")
+    apply_texture_quality(settings.graphics.texture_quality)
     _PRC_DONE = True
 
 
@@ -117,18 +122,16 @@ def timer_interval_ms(settings: UserSettings, refresh_hz: float) -> int:
 
 
 def apply_texture_quality(quality: str) -> None:
-    from panda3d.core import SamplerState, Texture
-
     q = (quality or "high").lower()
     if q == "low":
-        Texture.setDefaultMinfilter(SamplerState.FTLinear)
-        Texture.setDefaultMagfilter(SamplerState.FTLinear)
-        Texture.setDefaultAnisotropicDegree(1)
+        loadPrcFileData("", "texture-minfilter linear")
+        loadPrcFileData("", "texture-magfilter linear")
+        loadPrcFileData("", "texture-anisotropic-degree 1")
     elif q == "medium":
-        Texture.setDefaultMinfilter(SamplerState.FTLinearMipmapLinear)
-        Texture.setDefaultMagfilter(SamplerState.FTLinear)
-        Texture.setDefaultAnisotropicDegree(4)
+        loadPrcFileData("", "texture-minfilter linear_mipmap_linear")
+        loadPrcFileData("", "texture-magfilter linear")
+        loadPrcFileData("", "texture-anisotropic-degree 4")
     else:
-        Texture.setDefaultMinfilter(SamplerState.FTLinearMipmapLinear)
-        Texture.setDefaultMagfilter(SamplerState.FTLinear)
-        Texture.setDefaultAnisotropicDegree(8)
+        loadPrcFileData("", "texture-minfilter linear_mipmap_linear")
+        loadPrcFileData("", "texture-magfilter linear")
+        loadPrcFileData("", "texture-anisotropic-degree 8")

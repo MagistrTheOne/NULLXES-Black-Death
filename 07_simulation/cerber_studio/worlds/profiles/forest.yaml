@@ -1,0 +1,20 @@
+id: forest
+name: NORTHERN FOREST
+seed_salt: 11
+base_height: 16.0
+mountain_gain: 78.0
+hill_gain: 24.0
+ridge_gain: 10.0
+continent_scale: 17000.0
+mountain_scale: 3800.0
+ridge_scale: 1200.0
+forest_weight: 0.68
+rock_weight: 0.14
+grass_weight: 0.18
+river_threshold: 16.0
+river_count_bias: 1.15
+settlement_count: 4
+airfield_count: 1
+road_width: 6.0
+fog_density: 0.00040
+sky_preset: clear

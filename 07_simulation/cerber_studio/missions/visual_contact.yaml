@@ -1,0 +1,15 @@
+id: visual_contact
+name: VISUAL CONTACT
+type: operations
+environment: mountains
+target: true
+duration_s: 900
+description: Launch, reach zone, acquire and hold CERBER track, return, land.
+demo: true
+region: mountains
+time: sunset
+weather: clear
+objectives: [launch, reach_zone, acquire_target, maintain_track, return, land]
+waypoints:
+  - {x: 400, y: 900, z: 80, radius_m: 60}
+  - {x: 200, y: 1400, z: 70, radius_m: 50}

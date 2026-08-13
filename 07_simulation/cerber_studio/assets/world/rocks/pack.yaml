@@ -1,0 +1,11 @@
+id: granite_01
+category: rocks
+biomes: [mountains, desert, arctic, coast]
+props:
+  boulder_a:
+    file: boulder_a.glb
+    weight: 0.5
+    lod: true
+  cliff_a:
+    file: cliff_a.glb
+    weight: 0.3

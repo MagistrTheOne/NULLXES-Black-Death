@@ -1,0 +1,10 @@
+id: civilian_01
+category: civilian
+biomes: [forest, steppe, coast, mountains]
+props:
+  house_a:
+    file: house_a.glb
+    weight: 0.5
+  farm_a:
+    file: farm_a.glb
+    weight: 0.3

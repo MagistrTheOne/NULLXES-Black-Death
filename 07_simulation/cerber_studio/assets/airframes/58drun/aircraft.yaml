@@ -1,0 +1,20 @@
+id: 58drun
+name: 58DRUN
+class: custom
+manufacturer: ""
+configuration: user_glb
+model:
+  file: 58drun.glb
+  auto_normalize: true
+  scale: 1.0
+  up_axis: Z
+  forward_axis: Y
+camera:
+  chase_distance: 8.0
+  chase_height: 2.0
+demo:
+  mass_kg: 4.0
+  cruise_speed_mps: 18.0
+  stall_speed_mps: 10.0
+  max_speed_mps: 35.0
+  turn_rate_deg: 75.0

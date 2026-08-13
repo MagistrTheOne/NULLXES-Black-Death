@@ -1,6 +1,6 @@
 # NULLXES CERBER Studio
 
-**Status:** Product v1.1 — engineering IDE + demonstration shell (virtual world)  
+**Status:** Product v1.1 — NULLXES BLACKBOX demonstration shell + CERBER engineering IDE  
 **Code:** `07_simulation/cerber_studio/`  
 **Not:** Unity · Unreal · Godot · digital twin · HIL
 

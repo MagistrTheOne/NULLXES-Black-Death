@@ -54,7 +54,7 @@ class CameraPanel(QWidget):
         box = QGroupBox("CAMERA")
         fl = QFormLayout(box)
         self.combo = QComboBox()
-        self.combo.addItems(["nose", "chase"])
+        self.combo.addItems(["chase", "nose", "free"])
         self.combo.currentTextChanged.connect(self.mode_changed.emit)
         fl.addRow("View", self.combo)
         lay.addWidget(box)

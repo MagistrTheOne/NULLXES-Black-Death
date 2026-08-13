@@ -1,0 +1,14 @@
+id: no_assist
+name: NO ASSIST
+type: challenge
+environment: mountains
+target: false
+duration_s: 500
+description: Full manual. Stall recovery and clean landing.
+demo: true
+region: mountains
+time: clear
+weather: clear
+objectives: [launch, land]
+challenge: true
+assist: false

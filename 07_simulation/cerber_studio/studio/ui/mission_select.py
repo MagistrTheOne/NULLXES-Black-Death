@@ -6,8 +6,21 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QPushButton, QVBoxLayout, QWidget
 
 from ..config.settings import UserSettings
+from ..i18n import t
 from ..missions.registry import MissionDefinition
 from .theme import scale_px
+
+
+def _mission_name(m: MissionDefinition) -> str:
+    key = f"mission_{m.id}"
+    label = t(key)
+    return label if label != key else m.name
+
+
+def _mission_desc(m: MissionDefinition) -> str:
+    key = f"mission_desc_{m.id}"
+    label = t(key)
+    return label if label != key else m.description
 
 
 class MissionSelectView(QWidget):
@@ -18,14 +31,15 @@ class MissionSelectView(QWidget):
         super().__init__(parent)
         self.settings = settings
         self.missions: list[MissionDefinition] = []
+        self._current_id = ""
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         root = QHBoxLayout(self)
         root.setContentsMargins(56, 48, 56, 48)
         left = QVBoxLayout()
         head = QHBoxLayout()
-        self.heading = QLabel("MISSION")
+        self.heading = QLabel("")
         self.heading.setObjectName("Title")
-        self.back_btn = QPushButton("BACK")
+        self.back_btn = QPushButton("")
         self.back_btn.setObjectName("GhostBtn")
         self.back_btn.clicked.connect(self.back.emit)
         head.addWidget(self.heading)
@@ -45,9 +59,9 @@ class MissionSelectView(QWidget):
         self.desc = QLabel("")
         self.desc.setObjectName("Muted")
         self.desc.setWordWrap(True)
-        self.note = QLabel("Demo mission. Not ArduPlane Mission Protocol.")
+        self.note = QLabel("")
         self.note.setObjectName("Muted")
-        self.btn = QPushButton("START MISSION")
+        self.btn = QPushButton("")
         self.btn.setObjectName("PrimaryBtn")
         self.btn.clicked.connect(self.selected.emit)
         right.addWidget(self.name)
@@ -58,7 +72,16 @@ class MissionSelectView(QWidget):
         right.addWidget(self.note)
         right.addWidget(self.btn, 0, Qt.AlignLeft)
         root.addLayout(right, 1)
+        self.retranslate()
         self.relayout()
+
+    def retranslate(self) -> None:
+        self.heading.setText(t("mission"))
+        self.back_btn.setText(t("back"))
+        self.btn.setText(t("start_mission"))
+        self.note.setText(t("demo_mission"))
+        if self.missions:
+            self.set_missions(self.missions, self._current_id)
 
     def relayout(self) -> None:
         s = self.settings
@@ -69,14 +92,18 @@ class MissionSelectView(QWidget):
 
     def set_missions(self, items: list[MissionDefinition], current_id: str) -> None:
         self.missions = items
+        self._current_id = current_id
+        self.list.blockSignals(True)
         self.list.clear()
         idx = 0
         for i, m in enumerate(items):
-            self.list.addItem(QListWidgetItem(m.name))
+            self.list.addItem(QListWidgetItem(_mission_name(m)))
             if m.id == current_id:
                 idx = i
+        self.list.blockSignals(False)
         if items:
             self.list.setCurrentRow(idx)
+            self._on_row(idx)
 
     def current(self) -> MissionDefinition | None:
         row = self.list.currentRow()
@@ -88,13 +115,14 @@ class MissionSelectView(QWidget):
         if not (0 <= row < len(self.missions)):
             return
         m = self.missions[row]
-        dur = "Open" if m.duration_s <= 0 else f"{m.duration_s}s"
-        tgt = "Yes" if m.target else "No"
-        self.name.setText(m.name)
+        self._current_id = m.id
+        dur = t("open") if m.duration_s <= 0 else f"{m.duration_s}s"
+        tgt = t("yes") if m.target else t("no")
+        self.name.setText(_mission_name(m))
         self.meta.setText(
-            f"Type          {m.type.replace('_', ' ').upper()}\n"
-            f"Environment   {m.environment.upper()}\n"
-            f"Target        {tgt}\n"
-            f"Duration      {dur}"
+            f"{t('type')}          {m.type.replace('_', ' ').upper()}\n"
+            f"{t('environment')}   {m.environment.upper()}\n"
+            f"{t('target')}        {tgt}\n"
+            f"{t('duration')}      {dur}"
         )
-        self.desc.setText(m.description)
+        self.desc.setText(_mission_desc(m))

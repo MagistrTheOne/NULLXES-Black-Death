@@ -1,0 +1,9 @@
+id: flight_training
+name: FLIGHT TRAINING
+type: free_flight
+environment: open
+target: false
+duration_s: 0
+description: First flight. Camera, throttle, launch, then free handling. Demo — not ArduPlane.
+demo: true
+training: true

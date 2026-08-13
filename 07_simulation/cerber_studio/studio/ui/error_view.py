@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
 from ..config.settings import UserSettings
+from ..i18n import t
 from .theme import scale_px
 
 
@@ -25,9 +26,9 @@ class ErrorView(QWidget):
         self.body = QLabel("")
         self.body.setObjectName("Muted")
         self.body.setWordWrap(True)
-        self.btn_fb = QPushButton("USE FALLBACK MODEL")
+        self.btn_fb = QPushButton("")
         self.btn_fb.setObjectName("PrimaryBtn")
-        self.btn_back = QPushButton("RETURN TO AIRCRAFT SELECTION")
+        self.btn_back = QPushButton("")
         self.btn_back.setObjectName("GhostBtn")
         self.btn_fb.clicked.connect(self.fallback.emit)
         self.btn_back.clicked.connect(self.back.emit)
@@ -37,6 +38,11 @@ class ErrorView(QWidget):
         lay.addWidget(self.btn_fb, 0, Qt.AlignLeft)
         lay.addWidget(self.btn_back, 0, Qt.AlignLeft)
         lay.addStretch(2)
+        self.retranslate()
+
+    def retranslate(self) -> None:
+        self.btn_fb.setText(t("use_fallback"))
+        self.btn_back.setText(t("return_aircraft"))
 
     def show_error(self, title: str, body: str, *, fallback: bool) -> None:
         self.title.setText(title)

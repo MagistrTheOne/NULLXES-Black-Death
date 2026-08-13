@@ -1,0 +1,14 @@
+id: forest_eu_01
+category: vegetation
+biomes: [forest, mountains, coast]
+props:
+  pine_a:
+    file: vegetation/pine_a.glb
+    weight: 0.5
+    lod: true
+  birch_a:
+    file: vegetation/birch_a.glb
+    weight: 0.3
+  bush_a:
+    file: vegetation/bush_a.glb
+    weight: 0.2

@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 
 from ..aircraft.definition import AircraftDefinition
 from ..config.settings import UserSettings
+from ..i18n import t
 from .theme import scale_px
 
 
@@ -99,7 +100,23 @@ class AircraftSelectView(QWidget):
         bottom.addStretch(1)
         bottom.addWidget(self.btn_select)
         root.addLayout(bottom)
+        self._slot = "ego"
+        self._ego_name = "—"
+        self._tgt_name = "—"
+        self._defn: AircraftDefinition | None = None
+        self.retranslate()
         self.relayout()
+
+    def retranslate(self) -> None:
+        self.heading.setText(t("hangar"))
+        self.back_btn.setText(t("back"))
+        self.btn_prev.setText(t("prev"))
+        self.btn_next.setText(t("next"))
+        self.btn_reset.setText(t("configure"))
+        self.btn_select.setText(t("fly"))
+        self.set_slot(self._slot, self._ego_name, self._tgt_name)
+        if self._defn is not None:
+            self.show_aircraft(self._defn)
 
     def relayout(self) -> None:
         s = self.settings
@@ -110,27 +127,36 @@ class AircraftSelectView(QWidget):
         self.warn.setStyleSheet(f"font-size:{scale_px(self, s, 12)}px; color:#C4C4C4;")
 
     def set_slot(self, slot: str, ego_name: str, tgt_name: str) -> None:
+        self._slot = slot
+        self._ego_name = ego_name
+        self._tgt_name = tgt_name
         self.ego_name.setText(ego_name)
         self.tgt_name.setText(tgt_name)
-        self.btn_ego.setText("EGO AIRCRAFT" + ("  ●" if slot == "ego" else ""))
-        self.btn_tgt.setText("TARGET" + ("  ●" if slot == "target" else ""))
+        mark = "  ●"
+        self.btn_ego.setText(t("ego") + (mark if slot == "ego" else ""))
+        self.btn_tgt.setText(t("target") + (mark if slot == "target" else ""))
 
     def show_aircraft(self, defn: AircraftDefinition) -> None:
+        self._defn = defn
         self.name.setText(defn.name)
-        self.klass.setText(defn.class_label)
-        demo = "  ·  demo parameters" if defn.demo_flight.is_demo else ""
+        class_key = f"class_{defn.class_.value}"
+        klass = t(class_key)
+        if klass == class_key:
+            klass = defn.class_label
+        self.klass.setText(klass)
+        demo = f"  ·  {t('demo_params')}" if defn.demo_flight.is_demo else ""
         self.stats.setText(
-            f"Mass         {defn.demo_flight.mass_kg:.1f} kg{demo}\n"
-            f"Cruise       {defn.demo_flight.cruise_speed_mps:.0f} m/s\n"
-            f"Stall        {defn.demo_flight.stall_speed_mps:.0f} m/s\n"
-            f"Max          {defn.demo_flight.max_speed_mps:.0f} m/s\n"
-            f"Class        {defn.class_label}"
+            f"{t('mass')}         {defn.demo_flight.mass_kg:.1f} kg{demo}\n"
+            f"{t('cruise')}       {defn.demo_flight.cruise_speed_mps:.0f} m/s\n"
+            f"{t('stall')}        {defn.demo_flight.stall_speed_mps:.0f} m/s\n"
+            f"{t('max')}          {defn.demo_flight.max_speed_mps:.0f} m/s\n"
+            f"{t('class')}        {klass}"
         )
         bits = []
         if defn.unconfigured:
-            bits.append("UNCONFIGURED MODEL")
+            bits.append(t("unconfigured"))
         if not defn.playable_ego:
-            bits.append("NOT A PLAYABLE EGO — generic fixed-wing profile")
+            bits.append(t("not_playable_ego"))
         if defn.meta.source == "models":
-            bits.append("User GLB")
+            bits.append(t("user_glb"))
         self.warn.setText("  ·  ".join(bits))

@@ -32,8 +32,12 @@ class OverlayHost(QWidget):
     def __init__(self, viewport: QWidget, parent=None) -> None:
         super().__init__(parent)
         self.viewport = viewport
+        self.forward_empty = False
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.setAutoFillBackground(False)
+
+    def set_forward_empty(self, on: bool) -> None:
+        self.forward_empty = on
 
     def _over_interactive(self, pos) -> bool:
         child = self.childAt(pos)
@@ -45,26 +49,24 @@ class OverlayHost(QWidget):
         return False
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        if not self._over_interactive(event.position().toPoint()):
+        if self.forward_empty and not self._over_interactive(event.position().toPoint()):
             self.viewport.mousePressEvent(event)
             return
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        if not self._over_interactive(event.position().toPoint()):
+        if self.forward_empty and not self._over_interactive(event.position().toPoint()):
             self.viewport.mouseMoveEvent(event)
             return
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        self.viewport.mouseReleaseEvent(event)
+        if self.forward_empty:
+            self.viewport.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
 
     def wheelEvent(self, event: QWheelEvent) -> None:
-        if not self._over_interactive(event.position().toPoint()):
+        if self.forward_empty and not self._over_interactive(event.position().toPoint()):
             self.viewport.wheelEvent(event)
             return
         super().wheelEvent(event)
-
-    def event(self, event: QEvent) -> bool:
-        return super().event(event)

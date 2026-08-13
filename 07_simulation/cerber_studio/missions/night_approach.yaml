@@ -1,0 +1,15 @@
+id: night_approach
+name: NIGHT APPROACH
+type: challenge
+environment: industrial
+target: false
+duration_s: 700
+description: Night visual approach. FOLLOW clearance required.
+demo: true
+region: industrial
+time: night
+weather: night
+clearance: night
+objectives: [launch, return, land]
+challenge: true
+assist: false

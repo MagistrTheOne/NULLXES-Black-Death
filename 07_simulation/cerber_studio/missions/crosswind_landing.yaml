@@ -1,0 +1,16 @@
+id: crosswind_landing
+name: CROSSWIND LANDING
+type: challenge
+environment: coast
+target: false
+duration_s: 600
+description: Certified crosswind landing. Assist off. Clean touchdown.
+demo: true
+region: coast
+time: clear
+weather: storm
+clearance: ""
+objectives: [launch, return, land]
+challenge: true
+assist: false
+wind: high

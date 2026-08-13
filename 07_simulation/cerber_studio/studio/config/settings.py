@@ -29,10 +29,10 @@ DEFAULT_BINDINGS: dict[str, str] = {
     "roll_left": "A",
     "roll_right": "D",
     "yaw_left": "Q",
-    "yaw_right": "E",
+    "yaw_right": "X",
     "throttle_up": "Shift",
     "throttle_down": "Ctrl",
-    "launch": "Space",
+    "launch": "E",
     "reset": "R",
     "mode_manual": "1",
     "mode_assist": "2",
@@ -76,9 +76,10 @@ class GraphicsSettings:
 @dataclass
 class AudioSettings:
     master: float = 0.8
+    music: float = 0.75
     engine: float = 0.8
     wind: float = 0.7
-    environment: float = 0.6
+    environment: float = 0.65
     ui: float = 0.7
     warning: float = 0.85
     muted: bool = False
@@ -86,13 +87,15 @@ class AudioSettings:
 
 @dataclass
 class HudSettings:
-    preset: str = "operator"  # clean | operator | engineering
+    preset: str = "flight"  # clean | flight | operator | engineering
+    layer: str = "flight"
     hud: bool = True
     minimal: bool = False
     fps: bool = False
     telemetry: bool = True
     cerber_tracks: bool = True
     target_boxes: bool = True
+    operator_tab: bool = False
     mission_path: bool = True
     debug_labels: bool = False
     reticle: bool = True
@@ -119,17 +122,24 @@ class SimulationSettings:
     ground_collision: bool = True
     target_behaviour: str = "simple"  # static | simple | evasive
     speed: float = 1.0  # 0.5 | 1.0 | 2.0
+    launch_assist: bool = True
+    backend: str = "arcade"
 
 
 @dataclass
 class SessionMemory:
-    aircraft_id: str = "skywalker_x8"
+    aircraft_id: str = "58drun"
     target_id: str = "basedrone"
     mission_id: str = "free_flight"
+    region_id: str = "forest"
+    world_seed: int = 1947
+    weather: str = "clear"
+    time_flow: str = "1x"
 
 
 @dataclass
 class UserSettings:
+    language: str = "ru"
     display: DisplaySettings = field(default_factory=DisplaySettings)
     graphics: GraphicsSettings = field(default_factory=GraphicsSettings)
     audio: AudioSettings = field(default_factory=AudioSettings)
@@ -152,6 +162,9 @@ class UserSettings:
         ctrl_raw = merged["controls"]
         bindings = dict(DEFAULT_BINDINGS)
         bindings.update(ctrl_raw.get("bindings") or {})
+        if str(bindings.get("launch", "")).upper() == "SPACE" and str(bindings.get("yaw_right", "")).upper() == "E":
+            bindings["launch"] = "E"
+            bindings["yaw_right"] = "X"
         controls = ControlSettings(
             sensitivity=float(ctrl_raw.get("sensitivity", 1.0)),
             camera_sensitivity=float(ctrl_raw.get("camera_sensitivity", 1.0)),
@@ -159,6 +172,7 @@ class UserSettings:
             bindings=bindings,
         )
         sim = SimulationSettings(**{k: merged["simulation"][k] for k in SimulationSettings().__dict__})
+        sim.launch_assist = bool(getattr(sim, "launch_assist", True))
         sess = SessionMemory(**{k: merged["session"][k] for k in SessionMemory().__dict__})
         gfx.render_scale = float(max(0.5, min(1.5, gfx.render_scale)))
         if disp.fov not in FOV_VALUES:
@@ -169,8 +183,12 @@ class UserSettings:
             disp.mode = "borderless"
         if not isinstance(disp.resolution, list) or len(disp.resolution) != 2:
             disp.resolution = [1920, 1080]
+        lang = str(merged.get("language") or "ru").lower()
+        if lang not in ("ru", "en"):
+            lang = "ru"
         apply_hud_preset(hud, hud.preset, overwrite=False)
         return cls(
+            language=lang,
             display=disp,
             graphics=gfx,
             audio=audio,
@@ -203,8 +221,10 @@ class UserSettings:
 
 
 def apply_hud_preset(hud: HudSettings, preset: str, *, overwrite: bool) -> None:
-    name = (preset or "operator").lower()
+    name = (preset or "flight").lower()
     hud.preset = name
+    hud.layer = name
+    hud.operator_tab = name == "operator"
     if name == "clean":
         flags = dict(
             hud=True,
@@ -216,6 +236,23 @@ def apply_hud_preset(hud: HudSettings, preset: str, *, overwrite: bool) -> None:
             mission_path=False,
             debug_labels=False,
             reticle=True,
+            flight_vector=False,
+            altitude=True,
+            speed=True,
+            throttle=True,
+            mode=True,
+        )
+    elif name == "flight":
+        flags = dict(
+            hud=True,
+            minimal=False,
+            fps=False,
+            telemetry=True,
+            cerber_tracks=False,
+            target_boxes=False,
+            mission_path=False,
+            debug_labels=False,
+            reticle=False,
             flight_vector=False,
             altitude=True,
             speed=True,

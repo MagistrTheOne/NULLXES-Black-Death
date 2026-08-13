@@ -6,3 +6,5 @@ target: true
 duration_s: 0
 description: CERBER FOLLOW / ASSIST against a live target. Demo mission — not ArduPlane.
 demo: true
+unlock: night_watch
+objectives: [launch, acquire_target, maintain_track, land]

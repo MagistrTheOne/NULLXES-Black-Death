@@ -1,0 +1,19 @@
+tracks:
+  Neon Highway:
+    regions: [forest, coast, industrial, steppe]
+    tod: [clear, sunset]
+    weather: [clear, overcast]
+    intensity: [cruise]
+    mission: [free_flight, flight_training]
+  Velvet Thunder:
+    regions: [mountains, industrial, desert, arctic]
+    tod: [night, sunset, overcast]
+    weather: [storm, rain, fog, overcast, clear]
+    intensity: [pursuit, cruise]
+    mission: [target_follow, visual_contact]
+  menu-theme:
+    regions: [forest, mountains, coast, desert, industrial, arctic, steppe]
+    tod: [clear, sunset, night, overcast]
+    weather: [clear, fog]
+    intensity: [cruise]
+    mission: [free_flight]

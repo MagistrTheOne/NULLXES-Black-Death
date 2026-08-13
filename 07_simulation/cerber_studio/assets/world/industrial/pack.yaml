@@ -1,0 +1,14 @@
+id: industrial_ru_01
+category: industrial
+biomes: [steppe, industrial, desert]
+props:
+  warehouse_a:
+    file: warehouse_a.glb
+    weight: 0.4
+    lod: true
+  warehouse_b:
+    file: warehouse_b.glb
+    weight: 0.2
+  tank_a:
+    file: tank_a.glb
+    weight: 0.25

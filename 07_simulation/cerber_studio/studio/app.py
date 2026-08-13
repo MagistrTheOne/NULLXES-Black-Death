@@ -112,6 +112,9 @@ class StudioWindow(QMainWindow):
 
         self.viewport.set_frame_callback(self._on_frame, every=3)
         self.viewport.setFocus()
+        self.viewport.engine.set_scene_mode("flight")
+        self.viewport.engine.prepare_world()
+        self.viewport.engine.spawn_ready()
 
         self._ui_timer = QTimer(self)
         self._ui_timer.timeout.connect(self._poll)

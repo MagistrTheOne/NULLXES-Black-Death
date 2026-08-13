@@ -1,6 +1,6 @@
 # NULLXES CERBER Studio v1.1
 
-**Engineering IDE** + **product demonstration shell** for CERBER perception in a virtual world.  
+**NULLXES BLACKBOX** product shell + **CERBER Studio** engineering IDE.  
 **Not** Unity/Unreal/Godot · **not** digital twin · **not** HIL.
 
 Canon: [`00_docs/architecture/CERBER_STUDIO.md`](../../00_docs/architecture/CERBER_STUDIO.md)

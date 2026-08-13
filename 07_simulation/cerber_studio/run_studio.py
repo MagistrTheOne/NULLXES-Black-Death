@@ -19,8 +19,8 @@ if str(ROOT) not in sys.path:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="NULLXES CERBER Studio")
-    ap.add_argument("--demo", action="store_true", help="product UI, borderless Full HD")
+    ap = argparse.ArgumentParser(description="NULLXES BLACKBOX")
+    ap.add_argument("--demo", action="store_true", help="BLACKBOX product UI, borderless Full HD")
     ap.add_argument("--engineering", action="store_true", help="engineering IDE (default)")
     args = ap.parse_args()
     demo = bool(args.demo) and not bool(args.engineering)
@@ -28,10 +28,12 @@ def main() -> int:
     from PySide6.QtWidgets import QApplication
 
     from studio.config.settings import UserSettings
+    from studio.i18n import set_lang
 
     app = QApplication(sys.argv)
-    app.setApplicationName("NULLXES CERBER Studio")
+    app.setApplicationName("NULLXES BLACKBOX")
     settings = UserSettings.load()
+    set_lang(settings.language)
 
     if demo:
         from studio.product_app import ProductWindow, configure_product_logging

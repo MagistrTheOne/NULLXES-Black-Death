@@ -126,6 +126,10 @@ def from_folder(folder: Path) -> AircraftDefinition | None:
         candidate = folder / str(rel)
         if candidate.is_file():
             path = candidate
+        else:
+            alt = MODELS_DIR / Path(str(rel)).name
+            if alt.is_file():
+                path = alt
     if path is None:
         path = model_file
 
@@ -143,7 +147,7 @@ def from_folder(folder: Path) -> AircraftDefinition | None:
         class_=class_,
         visual=VisualModel(
             path=path,
-            procedural_key=str(proc) if proc else ("ar_wing" if path is None else None),
+            procedural_key=str(proc) if proc else None,
             scale=float(model.get("scale", 1.0)),
             up_axis=str(model.get("up_axis", "Z")),
             forward_axis=str(model.get("forward_axis", "Y")),
@@ -179,24 +183,12 @@ class AircraftRegistry:
     def scan(self) -> list[AircraftDefinition]:
         found: dict[str, AircraftDefinition] = {}
 
-        found["skywalker_x8"] = builtin_from_preset(
-            "ar_wing",
-            id="skywalker_x8",
-            name="Skywalker X8",
-            class_=AircraftClass.FLYING_WING,
-        )
-        found["skywalker_x8"].meta.manufacturer = "Skywalker"
-        found["skywalker_x8"].meta.configuration = "flying_wing"
-
-        found["ar_wing_pro"] = builtin_from_preset("ar_wing")
-        found["reptile_s800"] = builtin_from_preset("s800")
-
         if AIRFRAMES_DIR.is_dir():
             for folder in sorted(AIRFRAMES_DIR.iterdir()):
                 if not folder.is_dir():
                     continue
                 defn = from_folder(folder)
-                if defn is None:
+                if defn is None or defn.visual.path is None or not defn.visual.path.is_file():
                     continue
                 found[defn.id] = defn
 
@@ -218,7 +210,7 @@ class AircraftRegistry:
                 found[defn.id] = defn
 
         self.items = list(found.values())
-        self.items.sort(key=lambda d: (d.meta.source != "builtin", d.unconfigured, d.name.lower()))
+        self.items.sort(key=lambda d: d.name.lower())
         return self.items
 
     def get(self, ident: str) -> AircraftDefinition | None:
@@ -233,4 +225,6 @@ class AircraftRegistry:
             return hit
         if self.items:
             return self.items[0]
-        return builtin_from_preset("ar_wing")
+        raise FileNotFoundError(
+            "No aircraft GLB found. Put models in repo models/ or assets/airframes/*/aircraft.glb"
+        )

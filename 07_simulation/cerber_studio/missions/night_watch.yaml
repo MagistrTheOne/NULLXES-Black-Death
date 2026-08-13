@@ -1,0 +1,15 @@
+id: night_watch
+name: NIGHT WATCH
+type: operations
+environment: industrial
+target: true
+duration_s: 800
+description: Night track over industrial. Locked until FOLLOW clearance.
+demo: true
+region: industrial
+time: night
+weather: overcast
+clearance: night
+objectives: [launch, acquire_target, maintain_track, return, land]
+waypoints:
+  - {x: 300, y: 800, z: 70, radius_m: 50}

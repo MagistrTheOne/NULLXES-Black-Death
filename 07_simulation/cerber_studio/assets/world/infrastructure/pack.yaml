@@ -1,0 +1,14 @@
+id: infra_01
+category: infrastructure
+biomes: [all, industrial, steppe]
+props:
+  tower_a:
+    file: tower_a.glb
+    weight: 0.3
+    lod: true
+  pylon_a:
+    file: pylon_a.glb
+    weight: 0.4
+  bridge_a:
+    file: bridge_a.glb
+    weight: 0.2

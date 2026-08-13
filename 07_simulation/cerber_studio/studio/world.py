@@ -154,19 +154,19 @@ def orbit_target(node: NodePath, phase: float, *, behaviour: str = "simple") -> 
 def attach_hangar(parent: NodePath) -> NodePath:
     root = parent.attachNewNode("hangar")
     floor = root.attachNewNode(_box((0.10, 0.10, 0.11)))
-    floor.setScale(18, 18, 0.04)
+    floor.setScale(36, 18, 0.04)
     floor.setPos(0, 0, 0)
     plate = root.attachNewNode(_box((0.16, 0.16, 0.17)))
     plate.setScale(4.5, 4.5, 0.03)
     plate.setPos(0, 0, 0.05)
     back = root.attachNewNode(_box((0.07, 0.07, 0.075)))
-    back.setScale(22, 0.4, 8)
+    back.setScale(40, 0.4, 8)
     back.setPos(0, 16, 4)
     left = root.attachNewNode(_box((0.07, 0.07, 0.075)))
     left.setScale(0.4, 18, 8)
-    left.setPos(-14, 2, 4)
+    left.setPos(-28, 2, 4)
     right = root.attachNewNode(_box((0.07, 0.07, 0.075)))
     right.setScale(0.4, 18, 8)
-    right.setPos(14, 2, 4)
+    right.setPos(28, 2, 4)
     return root
 

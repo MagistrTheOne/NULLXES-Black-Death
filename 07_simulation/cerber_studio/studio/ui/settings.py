@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -18,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..audio.playlist import AUDIO_EXTS, SLOT_COUNT, scan_playlist
 from ..config.settings import (
     DEFAULT_BINDINGS,
     FOV_VALUES,
@@ -27,9 +31,18 @@ from ..config.settings import (
     apply_hud_preset,
 )
 from ..display import supported_resolutions
+from ..i18n import lang, t
 from .theme import scale_px
 
-CATS = ("DISPLAY", "GRAPHICS", "AUDIO", "CONTROLS", "HUD", "SIMULATION", "SYSTEM")
+CAT_KEYS = (
+    "cat_display",
+    "cat_graphics",
+    "cat_audio",
+    "cat_controls",
+    "cat_hud",
+    "cat_simulation",
+    "cat_system",
+)
 
 
 def _combo(items: list[str], current: str) -> QComboBox:
@@ -54,17 +67,20 @@ class SettingsView(QWidget):
     reset_settings = Signal()
     reset_window = Signal()
     open_logs = Signal()
+    language = Signal(str)
+    tracks_dropped = Signal(list)
 
     def __init__(self, settings: UserSettings, parent=None) -> None:
         super().__init__(parent)
         self.settings = settings
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setAcceptDrops(True)
         root = QVBoxLayout(self)
         root.setContentsMargins(48, 36, 48, 36)
         head = QHBoxLayout()
-        self.heading = QLabel("SETTINGS")
+        self.heading = QLabel("")
         self.heading.setObjectName("Title")
-        self.back = QPushButton("BACK")
+        self.back = QPushButton("")
         self.back.setObjectName("GhostBtn")
         self.back.clicked.connect(self._on_back)
         head.addWidget(self.heading)
@@ -74,8 +90,8 @@ class SettingsView(QWidget):
 
         body = QHBoxLayout()
         self.nav = QListWidget()
-        for name in CATS:
-            self.nav.addItem(QListWidgetItem(name))
+        for key in CAT_KEYS:
+            self.nav.addItem(QListWidgetItem(t(key)))
         self.pages = QStackedWidget()
         self.nav.currentRowChanged.connect(self.pages.setCurrentIndex)
         body.addWidget(self.nav, 0)
@@ -90,7 +106,42 @@ class SettingsView(QWidget):
         self._build_sim()
         self._build_system()
         self.nav.setCurrentRow(0)
+        self.retranslate()
         self.relayout()
+
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:
+        if self._audio_urls(event.mimeData()):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent) -> None:
+        paths = self._audio_urls(event.mimeData())
+        if paths:
+            self.tracks_dropped.emit(paths)
+            event.acceptProposedAction()
+
+    def _audio_urls(self, mime) -> list[str]:
+        if mime is None or not mime.hasUrls():
+            return []
+        out: list[str] = []
+        for url in mime.urls():
+            path = Path(url.toLocalFile())
+            if path.suffix.lower() in AUDIO_EXTS and path.is_file():
+                out.append(str(path))
+        return out
+
+    def retranslate(self) -> None:
+        self.heading.setText(t("settings"))
+        self.back.setText(t("back"))
+        for i, key in enumerate(CAT_KEYS):
+            item = self.nav.item(i)
+            if item is not None:
+                item.setText(t(key))
+        self.mute.setText(t("mute_all"))
+        self.slot_label.setText(t("music_slots"))
+        self.lang_lab.setText(t("language"))
+        self.launch_assist.setText(t("launch_assist"))
+        self.refresh_playlist()
+        self._sync_lang_box()
 
     def relayout(self) -> None:
         s = self.settings
@@ -158,7 +209,7 @@ class SettingsView(QWidget):
         f.addRow("Anti-Aliasing", self.msaa)
         f.addRow("Texture Quality", self.tex)
         f.addRow("View Distance", self.view)
-        note = QLabel("MSAA applies on next launch. Shadows / terrain tessellation / FX are not in this renderer.")
+        note = QLabel("MSAA applies on next launch. View distance drives fog and far clip. Terrain LOD follows the aircraft.")
         note.setObjectName("Muted")
         note.setWordWrap(True)
         f.addRow(note)
@@ -177,26 +228,45 @@ class SettingsView(QWidget):
         w = QWidget()
         f = QFormLayout(w)
         a = self.settings.audio
-        self.mute = QCheckBox("MUTE ALL")
+        self.mute = QCheckBox("")
         self.mute.setChecked(a.muted)
         self.vol_master = _slider(int(a.master * 100))
+        self.vol_music = _slider(int(getattr(a, "music", 0.75) * 100))
         self.vol_engine = _slider(int(a.engine * 100))
         self.vol_wind = _slider(int(a.wind * 100))
         self.vol_env = _slider(int(a.environment * 100))
         self.vol_ui = _slider(int(a.ui * 100))
         self.vol_warn = _slider(int(a.warning * 100))
+        self.slot_label = QLabel("")
+        self.playlist = QListWidget()
+        self.playlist.setMinimumHeight(180)
         f.addRow(self.mute)
         f.addRow("Master", self.vol_master)
+        f.addRow("Music", self.vol_music)
         f.addRow("Engine / Propeller", self.vol_engine)
         f.addRow("Wind", self.vol_wind)
-        f.addRow("Environment", self.vol_env)
+        f.addRow("Environment / Storm", self.vol_env)
         f.addRow("UI", self.vol_ui)
         f.addRow("Warning", self.vol_warn)
-        note = QLabel("Electric fixed-wing: propeller + motor + airspeed wind. Mute stops playback.")
+        f.addRow(self.slot_label)
+        f.addRow(self.playlist)
+        note = QLabel("")
         note.setObjectName("Muted")
         note.setWordWrap(True)
+        self.audio_note = note
         f.addRow(note)
         self.pages.addWidget(w)
+
+    def refresh_playlist(self) -> None:
+        tracks = scan_playlist()
+        self.playlist.clear()
+        n = max(SLOT_COUNT, len(tracks) + 1)
+        for i in range(n):
+            if i < len(tracks):
+                self.playlist.addItem(QListWidgetItem(f"{i + 1:02d}  {tracks[i].stem}"))
+            else:
+                self.playlist.addItem(QListWidgetItem(f"{i + 1:02d}  {t('empty_slot')}"))
+        self.audio_note.setText(t("drop_music"))
 
     def _build_controls(self) -> None:
         w = QWidget()
@@ -285,6 +355,8 @@ class SettingsView(QWidget):
         self.fail.setChecked(s.failures)
         self.gcol = QCheckBox("Ground Collision")
         self.gcol.setChecked(s.ground_collision)
+        self.launch_assist = QCheckBox("")
+        self.launch_assist.setChecked(bool(getattr(s, "launch_assist", True)))
         self.tbeh = _combo(["static", "simple", "evasive"], s.target_behaviour)
         speed_map = {0.5: "0.5×", 1.0: "1×", 2.0: "2×"}
         self.sspeed = _combo(["0.5×", "1×", "2×"], speed_map.get(s.speed, "1×"))
@@ -292,6 +364,7 @@ class SettingsView(QWidget):
         f.addRow("Wind", self.wind)
         f.addRow(self.fail)
         f.addRow(self.gcol)
+        f.addRow(self.launch_assist)
         f.addRow("Target Behaviour", self.tbeh)
         f.addRow("Simulation Speed", self.sspeed)
         note = QLabel("Demo simulator only. Values are stored with the run when a recorder is attached.")
@@ -300,9 +373,27 @@ class SettingsView(QWidget):
         f.addRow(note)
         self.pages.addWidget(w)
 
+    def _sync_lang_box(self) -> None:
+        self.lang_box.blockSignals(True)
+        idx = self.lang_box.findData(lang())
+        if idx >= 0:
+            self.lang_box.setCurrentIndex(idx)
+        self.lang_box.blockSignals(False)
+
+    def _on_lang(self) -> None:
+        code = self.lang_box.currentData()
+        if code:
+            self.language.emit(str(code))
+
     def _build_system(self) -> None:
         w = QWidget()
         f = QFormLayout(w)
+        self.lang_lab = QLabel("")
+        self.lang_box = QComboBox()
+        self.lang_box.addItem("Русский", "ru")
+        self.lang_box.addItem("English", "en")
+        self.lang_box.currentIndexChanged.connect(self._on_lang)
+        f.addRow(self.lang_lab, self.lang_box)
         self.sys_cerber = QLabel("—")
         self.sys_ort = QLabel("—")
         self.sys_gpu = QLabel("—")
@@ -367,6 +458,7 @@ class SettingsView(QWidget):
         a = self.settings.audio
         a.muted = self.mute.isChecked()
         a.master = self.vol_master.value() / 100.0
+        a.music = self.vol_music.value() / 100.0
         a.engine = self.vol_engine.value() / 100.0
         a.wind = self.vol_wind.value() / 100.0
         a.environment = self.vol_env.value() / 100.0
@@ -385,5 +477,9 @@ class SettingsView(QWidget):
         s.wind = self.wind.currentText()
         s.failures = self.fail.isChecked()
         s.ground_collision = self.gcol.isChecked()
+        s.launch_assist = self.launch_assist.isChecked()
         s.target_behaviour = self.tbeh.currentText()
         s.speed = {"0.5×": 0.5, "1×": 1.0, "2×": 2.0}[self.sspeed.currentText()]
+        code = self.lang_box.currentData()
+        if code:
+            self.settings.language = str(code)
