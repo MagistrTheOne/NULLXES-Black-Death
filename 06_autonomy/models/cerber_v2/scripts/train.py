@@ -107,6 +107,16 @@ def main() -> int:
         train_kw["amp"] = bool(cfg["amp"])
     if "cache" in cfg:
         train_kw["cache"] = cfg["cache"]
+    if "lr0" in cfg:
+        train_kw["lr0"] = float(cfg["lr0"])
+    if "lrf" in cfg:
+        train_kw["lrf"] = float(cfg["lrf"])
+    if "patience" in cfg:
+        train_kw["patience"] = int(cfg["patience"])
+    if "close_mosaic" in cfg:
+        train_kw["close_mosaic"] = int(cfg["close_mosaic"])
+    if "cos_lr" in cfg:
+        train_kw["cos_lr"] = bool(cfg["cos_lr"])
     model = YOLO(str(weights))
     results = model.train(**train_kw)
     best = Path(results.save_dir) / "weights" / "best.pt"

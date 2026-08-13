@@ -1,0 +1,18 @@
+# CERBER V3 UAV recovery FT. Init = v3-power best. Do not overwrite v2b.
+project: cerber-detect
+run_name: v3-uav
+base_weights: runs/detect/cerber-detect/v3-power/weights/best.pt
+hub_fallback: MagistrTheOne/CERBER-CV-v2
+data_yaml: data.yaml
+imgsz: 1280
+epochs: 20
+batch: 12
+lr0: 0.002
+lrf: 0.01
+patience: 8
+device: 0
+workers: 8
+export_imgsz: 640
+export_opset: 17
+flight_config: configs/detector_alpha_v3.yaml
+flight_onnx: ../../onnx/detector_alpha_v3.onnx
