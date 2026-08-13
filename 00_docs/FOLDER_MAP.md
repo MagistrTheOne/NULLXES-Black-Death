@@ -15,7 +15,7 @@
 | `04_propulsion_energy/` | Распределённая тяга, накопители, power distribution, тепловой контур. |
 | `05_avionics/` | Авионика: hardware, драйверы, realtime FSW (C++ only), шины, синхронизация времени. |
 | `06_autonomy/` | **Главный блок.** Onboard ИИ: perception → fusion → planning → control + fault management. Без внешних API. |
-| `07_simulation/` | Цифровой двойник: Gazebo (WSL2), AirSim, сценарии, HIL. |
+| `07_simulation/` | CERBER Studio (vision IDE) + `bd_sim/` S1 arcade. Gazebo/AirSim twin BLOCKED. |
 | `08_prototypes/` | Масштабируемые модели, авионика-стенды, subsystem rigs. |
 | `arduiplane/` | Local ArduPlane 4.7.0 Pixhawk6C kit (flash/param). Binaries gitignored. |
 | `09_manufacturing/` | Композиты, оснастка, сборка, QA производства. |

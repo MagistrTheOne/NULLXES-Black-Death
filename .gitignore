@@ -84,6 +84,8 @@ Desktop.ini
 .DS_Store
 
 # Sim / CFD / FEA dumps
+*.glb
+*.gltf
 *.vtk
 *.vtu
 *.msh

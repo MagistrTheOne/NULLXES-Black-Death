@@ -1,0 +1,5 @@
+# Drop Maga's glTF/GLB next to this file. Gitignores *.glb/*.gltf.
+ego: x8.glb
+target: target.glb
+scale: 1.0
+up_axis: z

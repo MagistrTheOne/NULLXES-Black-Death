@@ -1,0 +1,26 @@
+# Demo mission — executed by DemoPilot / ArcadeEnergy. NOT ArduPlane L0.
+name: demo_patrol
+timeout_s: 180
+bounds_m: 400
+waypoints:
+  - kind: goto_xyz
+    x: 80.0
+    y: 120.0
+    z: 40.0
+    radius_m: 18.0
+  - kind: loiter
+    x: 80.0
+    y: 120.0
+    z: 40.0
+    radius_m: 35.0
+    duration_s: 12.0
+  - kind: explore_sector
+    x: -40.0
+    y: 90.0
+    z: 35.0
+    radius_m: 22.0
+  - kind: goto_xyz
+    x: 0.0
+    y: 40.0
+    z: 25.0
+    radius_m: 18.0

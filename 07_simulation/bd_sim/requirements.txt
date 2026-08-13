@@ -1,0 +1,10 @@
+# NULLXES BD Flight Sim S1 — host demo (not flight image, not twin)
+PySide6>=6.6
+panda3d>=1.10.14
+panda3d-gltf>=1.2
+pyzmq>=25.0
+numpy>=1.26,<3
+opencv-python>=4.8,<5
+PyYAML>=6.0
+onnxruntime>=1.17,<2
+msgpack>=1.0

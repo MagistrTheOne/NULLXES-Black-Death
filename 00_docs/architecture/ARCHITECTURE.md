@@ -105,7 +105,7 @@ Train (after pod up): [CERBER_V3_ATLAS_RUNPOD.md](CERBER_V3_ATLAS_RUNPOD.md).
 | `00_docs/` | canon |
 | `05_avionics/` | C++ L0 lib (not Flight-1 path) |
 | `06_autonomy/` | CERBER / POSEIDON / DMI / ATLAS / SoftBus |
-| `07_simulation/` | cerber_studio |
+| `07_simulation/` | cerber_studio (vision IDE) · **bd_sim S1 arcade** |
 | `08_prototypes/` | practice / X8 test plan |
 | `arduiplane/` | Plane 4.7.0 kit |
 | `10_tests/` | unit |
