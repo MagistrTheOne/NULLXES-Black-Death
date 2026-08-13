@@ -61,16 +61,17 @@ class FlightRecorder:
         self._events.write(json.dumps(row) + "\n")
         self._events.flush()
 
-    def tick(self, dt: float, sample: dict) -> None:
+    def tick(self, dt: float, sample: dict) -> bool:
         if not self.active or self._pose is None:
-            return
+            return False
         self._acc += dt
         step = 1.0 / HZ
         if self._acc < step:
-            return
+            return False
         self._acc -= step
         self.meta["t"] = float(sample.get("t", 0.0))
         self._pose.write(json.dumps(sample) + "\n")
+        return True
 
     def close(self) -> None:
         if self._pose is not None:

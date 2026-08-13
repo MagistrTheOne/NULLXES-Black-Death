@@ -106,14 +106,30 @@ class SimulationSession:
         self.director.failed = False
         if self.mission is not None:
             self.director.load(self.mission)
+        from .sim.world_contract import aircraft_profile_hash, build_contract
+
+        clock = self.engine.world.atmosphere.time_of_day_h
+        hh = int(clock) % 24
+        mm = int((clock % 1.0) * 60)
+        contract = build_contract(
+            seed=int(self.engine.settings.session.world_seed),
+            region=str(self.engine.settings.session.region_id or ""),
+            aircraft_id=self.aircraft.id if self.aircraft else "",
+            profile_hash=aircraft_profile_hash(self.aircraft) if self.aircraft else "",
+            dynamics_backend=getattr(self.engine.dynamics, "name", "arcade"),
+            initial_time=f"{hh:02d}:{mm:02d}",
+            time_flow=str(self.engine.world.atmosphere.time_flow),
+        )
+        self.engine.blackbox_contract = contract
         meta = {
             "aircraft": self.aircraft.id if self.aircraft else "",
             "mission": self.mission.id if self.mission else "",
             "region": self.engine.settings.session.region_id,
             "seed": self.engine.settings.session.world_seed,
             "weather": self.engine.settings.session.weather,
+            **contract,
         }
-        self.flight_dir = self.engine.recorder.start(meta)
+        self.flight_dir = self.engine.blackbox.start(meta)
         if self.mission is not None and self.mission.id == "flight_training":
             self.engine.training.start(self.engine.dynamics.state.yaw_deg)
         else:
@@ -188,12 +204,12 @@ class SimulationSession:
                 tid = int(res.tracks[0].track_id)
                 if self.last_track_id is None:
                     st = self.engine.dynamics.state
-                    self.engine.recorder.event("CERBER_ACQUIRE", {"id": tid}, t=float(st.flight_time))
+                    self.engine.blackbox.event("CERBER_ACQUIRE", {"id": tid}, t=float(st.flight_time))
                 self.last_track_id = tid
             else:
                 if self.last_track_id is not None:
                     st = self.engine.dynamics.state
-                    self.engine.recorder.event("CERBER_LOST", {"id": self.last_track_id}, t=float(st.flight_time))
+                    self.engine.blackbox.event("CERBER_LOST", {"id": self.last_track_id}, t=float(st.flight_time))
                 self.last_track_id = None
         if self.worker is not None and self.worker.poll() is not None:
             err = ""
@@ -233,15 +249,15 @@ class SimulationSession:
         t = float(self.engine.dynamics.state.flight_time)
         for title in self.engine.discovered_now:
             if self.pilot.discover(title):
-                self.engine.recorder.event("DISCOVER", {"title": title}, t=t)
+                self.engine.blackbox.event("DISCOVER", {"title": title}, t=t)
 
     def finish_flight(self) -> None:
         if self._end_logged:
             return
         self._end_logged = True
         st = self.engine.dynamics.state
-        self.engine.recorder.event("COMPLETE", {"grade": st.landing_grade, "km": st.distance_m / 1000.0}, t=float(st.flight_time))
-        self.engine.recorder.close()
+        self.engine.blackbox.event("COMPLETE", {"grade": st.landing_grade, "km": st.distance_m / 1000.0}, t=float(st.flight_time))
+        self.engine.blackbox.close()
         self.pilot.apply_flight(
             time_s=st.flight_time,
             distance_m=st.distance_m,
@@ -256,7 +272,7 @@ class SimulationSession:
             self.pilot.save()
 
     def teardown(self) -> None:
-        self.engine.recorder.close()
+        self.engine.blackbox.close()
         self.stop_worker()
         if self.frame_pub is not None:
             self.frame_pub.close()

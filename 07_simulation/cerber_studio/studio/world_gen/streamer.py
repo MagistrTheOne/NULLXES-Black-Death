@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import time
 
 from panda3d.core import NodePath
 
@@ -75,6 +76,14 @@ class Sector:
         self.terrain.update()
 
     def destroy(self) -> None:
+        try:
+            self.props.removeNode()
+        except Exception:
+            pass
+        try:
+            self.terrain = None
+        except Exception:
+            pass
         self.root.removeNode()
 
 
@@ -91,12 +100,15 @@ class WorldStreamer:
         self._horizon = self.root.attachNewNode("horizon")
         self.night: NightLights | None = None
         self.active = False
+        self.gen_ms = 0.0
         self.configure(seed, region_id)
 
     def configure(self, seed: int, region_id: str) -> None:
         self.seed = int(seed)
         self.region_id = region_id or "forest"
+        t0 = time.perf_counter()
         self.graph = generate_graph(self.seed, self.region_id)
+        self.gen_ms = (time.perf_counter() - t0) * 1000.0
         self.biomes = BiomeField(self.graph)
         self._clear_tiles()
         self._rebuild_graph_vis()
@@ -242,6 +254,20 @@ class WorldStreamer:
         if dist > PHYS_RADIUS:
             return self.graph.sample_height(x, y)
         return self.graph.sample_height(x, y)
+
+    def stats(self) -> dict:
+        props = 0
+        for bag in (self.near, self.mid, self.far):
+            for sec in bag.values():
+                props += max(0, sec.props.getNumChildren())
+        return {
+            "sectors": len(self.near) + len(self.mid) + len(self.far),
+            "near": len(self.near),
+            "mid": len(self.mid),
+            "far": len(self.far),
+            "props": props,
+            "gen_ms": self.gen_ms,
+        }
 
     def spawn(self) -> tuple[float, float, float, float]:
         return self.graph.spawn()

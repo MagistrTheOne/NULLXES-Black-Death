@@ -66,6 +66,7 @@ class Actor:
     yaw: float = 0.0
     lod: str = "abstract"
     node: NodePath | None = None
+    uid: str = ""
 
 
 class ActivityDirector:
@@ -80,6 +81,7 @@ class ActivityDirector:
         self._train = box((0.28, 0.18, 0.16))
         self._dot = box((0.35, 0.35, 0.32))
         self._build(graph)
+        self._stamp_ids()
 
     def rebuild(self, graph: WorldGraph, parent: NodePath) -> None:
         for a in self.actors:
@@ -90,6 +92,14 @@ class ActivityDirector:
         self.graph = graph
         self.root = parent.attachNewNode("activity")
         self._build(graph)
+        self._stamp_ids()
+
+    def _stamp_ids(self) -> None:
+        seen: set[str] = set()
+        for i, a in enumerate(self.actors):
+            a.uid = f"{a.kind}_{i}"
+            seen.add(a.uid)
+        self.duplicate_ids = 0
 
     def clear(self) -> None:
         self.rebuild(self.graph, self.root.getParent())
@@ -207,10 +217,20 @@ class ActivityDirector:
                 a.node.hide()
         return events
 
+    def lod_counts(self) -> dict[str, int]:
+        out = {"active": 0, "simplified": 0, "kinematic": 0, "abstract": 0}
+        for a in self.actors:
+            out[a.lod] = out.get(a.lod, 0) + 1
+        return out
+
+    def duplicate_count(self) -> int:
+        ids = [a.uid for a in self.actors]
+        return len(ids) - len(set(ids))
+
     def snapshot(self) -> list[dict]:
         out = []
         for a in self.actors:
             if a.lod == "abstract":
                 continue
-            out.append({"kind": a.kind, "x": a.x, "y": a.y, "z": a.z, "lod": a.lod})
+            out.append({"id": a.uid, "kind": a.kind, "x": a.x, "y": a.y, "z": a.z, "lod": a.lod})
         return out

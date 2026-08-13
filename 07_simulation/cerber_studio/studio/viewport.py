@@ -30,6 +30,8 @@ from .blackbox.recorder import FlightRecorder, blackbox_root, load_replay
 from .display import apply_panda_prc, apply_texture_quality, fog_density, view_distance_far
 from .dynamics import PHYSICS_DT, FlightPhase, preset
 from .input_map import bindings_map
+from .sim.metrics import RuntimeMetrics
+from .sim.vehicle import ControlInput
 from .sim_backend import make_backend
 from .training import TrainingState
 from .world import attach_hangar, attach_target, attach_wing, orbit_target
@@ -118,7 +120,7 @@ class StudioEngine(ShowBase):
         self.training = TrainingState()
         self._pose_prev = (0.0, 0.0, 0.6, 0.0, 0.0, 0.0)
         self._pose_curr = self._pose_prev
-        self.recorder = FlightRecorder()
+        self.blackbox = FlightRecorder()
         self.replay_active = False
         self.replay_poses: list[dict] = []
         self.replay_i = 0
@@ -142,6 +144,10 @@ class StudioEngine(ShowBase):
         self._prev_overspeed = False
         self._prev_lights = False
         self.discovered_now: list[str] = []
+        self.runtime = RuntimeMetrics()
+        self.soak_cmd: ControlInput | None = None
+        self.replay_warning = ""
+        self.blackbox_contract: dict = {}
 
         nose = (0.0, 0.35, 0.12)
         self.nose_np = self.ego.attachNewNode("nose_cam_mount")
@@ -223,6 +229,7 @@ class StudioEngine(ShowBase):
         self.world.set_active(True)
         self.activity.rebuild(self.world.graph, self.render)
         self.activity.root.show()
+        self.runtime.world_gen_ms = float(self.world.gen_ms)
         sx, sy, _, _ = self.world.spawn()
         self.world.ensure(sx, sy)
         self._apply_sky(rebuild=True)
@@ -416,7 +423,10 @@ class StudioEngine(ShowBase):
         if self.replay_active and not self.paused:
             self._step_replay(dt)
         elif not self.paused:
+            self.runtime.begin_frame()
             self._step_flight(dt)
+            self.runtime.end_frame()
+            self._collect_runtime()
         else:
             self._apply_flight_camera(dt)
         self.taskMgr.step()
@@ -467,10 +477,18 @@ class StudioEngine(ShowBase):
         roll = self._axis("roll_right", "roll_left")
         yaw = self._axis("yaw_right", "yaw_left")
         thr = self._axis("throttle_up", "throttle_down")
-        if not self.input_enabled:
+        if self.soak_cmd is not None:
+            pitch, roll, yaw, thr = self.soak_cmd.pitch, self.soak_cmd.roll, self.soak_cmd.yaw, self.soak_cmd.throttle
+            if self.soak_cmd.mode:
+                mode_override = self.soak_cmd.mode
+            else:
+                mode_override = None
+        else:
+            mode_override = None
+        if not self.input_enabled and self.soak_cmd is None:
             pitch = roll = yaw = thr = 0.0
         assist = 0.0
-        mode = self.flight_mode
+        mode = mode_override or self.flight_mode
         if mode == "FOLLOW":
             mode = "PURSUIT"
         airborne = self.dynamics.state.phase.value in (
@@ -517,9 +535,13 @@ class StudioEngine(ShowBase):
             self._pose_curr = (s.x, s.y, s.z, s.yaw_deg, s.pitch_deg, s.roll_deg)
             self._phys_acc -= PHYSICS_DT
             steps += 1
+            self.runtime.phys_steps += 1
             self._trail.append((s.x, s.y, s.z))
             if len(self._trail) > 240:
                 self._trail = self._trail[-240:]
+        if self._phys_acc >= PHYSICS_DT:
+            self.runtime.phys_misses += 1
+            self._phys_acc = 0.0
 
         self.world.atmosphere.step_clock(dt)
         clock = self.world.atmosphere.clock_h
@@ -683,31 +705,60 @@ class StudioEngine(ShowBase):
         else:
             self.preview_dist = 8.0
 
+    @property
+    def vehicle(self):
+        return self.dynamics.vehicle_state()
+
+    def _collect_runtime(self) -> None:
+        st = self.world.stats()
+        self.runtime.sectors_loaded = int(st["sectors"])
+        self.runtime.props_active = int(st["props"])
+        self.runtime.activity_lod = self.activity.lod_counts()
+        self.runtime.duplicate_activity = self.activity.duplicate_count()
+        self.runtime.discovered = list(self.discovered_now)
+        v = self.vehicle
+        self.runtime.last_phase = v.flight_phase
+        if v.flight_phase == "CRASHED":
+            self.runtime.crashed = True
+        if any(not math.isfinite(x) for x in (*v.position, v.airspeed, v.vertical_speed)):
+            self.runtime.spiral = True
+        if abs(v.z) > 12000.0 or v.airspeed > 220.0:
+            self.runtime.spiral = True
+        if self.runtime.frames % 45 == 0:
+            self.runtime.sample_memory(sectors=self.runtime.sectors_loaded)
+
     def record_sample(self) -> dict:
-        s = self.dynamics.state
+        v = self.vehicle
         cam = self.camera.getPos()
         return {
-            "t": s.flight_time,
-            "x": s.x,
-            "y": s.y,
-            "z": s.z,
-            "yaw": s.yaw_deg,
-            "pitch": s.pitch_deg,
-            "roll": s.roll_deg,
-            "speed": s.speed,
-            "throttle": s.throttle,
-            "phase": s.phase.value,
+            "t": v.timestamp,
+            "x": v.x,
+            "y": v.y,
+            "z": v.z,
+            "yaw": v.heading,
+            "pitch": v.pitch,
+            "roll": v.roll,
+            "speed": v.airspeed,
+            "groundspeed": v.groundspeed,
+            "throttle": v.throttle,
+            "phase": v.flight_phase,
             "camera": self.camera_mode,
             "cam": [float(cam.getX()), float(cam.getY()), float(cam.getZ())],
             "weather": self.world.atmosphere.preset,
             "tod": self.world.atmosphere.time_of_day_h,
-            "agl": s.agl,
+            "agl": v.altitude_agl,
+            "vs": v.vertical_speed,
+            "frame": "blackbox_enu_v1",
         }
 
     def start_replay(self, folder) -> None:
         from pathlib import Path
 
+        from .sim.world_contract import mismatch_reasons
+
         meta, poses, events = load_replay(Path(folder))
+        reasons = mismatch_reasons(meta, self.blackbox_contract or meta)
+        self.replay_warning = "; ".join(reasons)
         self.replay_poses = poses
         self.replay_events = events
         self.replay_i = 0
@@ -799,21 +850,21 @@ class StudioEngine(ShowBase):
         t = float(s.flight_time)
         if phase != self._prev_phase:
             if phase == "LAUNCH":
-                self.recorder.event("LAUNCH", t=t)
+                self.blackbox.event("LAUNCH", t=t)
             elif phase in ("TOUCHDOWN", "STOPPED"):
-                self.recorder.event("LANDING", {"grade": s.landing_grade, "vz": float(s.vz)}, t=t)
+                self.blackbox.event("LANDING", {"grade": s.landing_grade, "vz": float(s.vz)}, t=t)
             elif phase == "CRASHED":
-                self.recorder.event("CRASH", {"vz": float(s.vz)}, t=t)
+                self.blackbox.event("CRASH", {"vz": float(s.vz)}, t=t)
             self._prev_phase = phase
         if s.stalling and not self._prev_stall:
-            self.recorder.event("STALL", t=t)
+            self.blackbox.event("STALL", t=t)
         self._prev_stall = bool(s.stalling)
         if s.overspeed and not self._prev_overspeed:
-            self.recorder.event("OVERSPEED", t=t)
+            self.blackbox.event("OVERSPEED", t=t)
         self._prev_overspeed = bool(s.overspeed)
         lights = self.world.atmosphere.lights_on
         if lights != self._prev_lights:
-            self.recorder.event(
+            self.blackbox.event(
                 "WEATHER",
                 {"lights": lights, "clock": self.world.atmosphere.clock_h, "preset": self.world.atmosphere.preset},
                 t=t,
@@ -892,7 +943,7 @@ class StudioEngine(ShowBase):
         self._apply_sky(rebuild=True)
 
     def close_engine(self) -> None:
-        self.recorder.close()
+        self.blackbox.close()
         ShowBase.destroy(self)
 
 

@@ -744,13 +744,15 @@ class ProductWindow(QWidget):
         if self.state == AppState.SIMULATION and not eng.paused and not eng.replay_active:
             self.session.tick_ops(0.05)
             self.session.tick_discovery()
-        if self.state == AppState.SIMULATION and eng.recorder.active and not eng.replay_active:
+        if self.state == AppState.SIMULATION and eng.blackbox.active and not eng.replay_active:
             sample = eng.record_sample()
             sample["music"] = self.audio.current_track_name()
             sample["cerber"] = [
                 {"id": int(t.track_id), "name": str(getattr(t, "name", ""))} for t in self.session.last_tracks
             ]
-            eng.recorder.tick(0.05, sample)
+            if eng.blackbox.tick(0.05, sample):
+                eng.runtime.recorder_writes += 1
+            eng.runtime.recorder_expected = int(st.flight_time * 20)
             if st.phase.value in ("STOPPED", "CRASHED") and (st.landing_grade or st.phase.value == "CRASHED"):
                 self.session.finish_flight()
                 mission = self.session.mission
@@ -792,7 +794,7 @@ class ProductWindow(QWidget):
                 mission_name=op_label or (mission.name if mission is not None else ""),
                 debug=self.session.health.detail if self.settings.hud.debug_labels else "",
                 phase=st.phase.value if hasattr(st.phase, "value") else str(st.phase),
-                cue=self._launch_cue(eng),
+                cue=eng.replay_warning or self._launch_cue(eng),
                 training=eng.training.label(),
                 hint=t(eng.training.hint_key()) if eng.training.active else "",
                 hdg=st.yaw_deg,
