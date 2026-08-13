@@ -41,6 +41,10 @@ def _ensure_splits(root: Path) -> None:
 
 
 def run_visdrone(root: Path) -> None:
+    n_vd = len(list((root / "images" / "train").glob("vd_*")))
+    if n_vd >= 6000:
+        print(f"skip VisDrone already merged train={n_vd}")
+        return
     prep = REPO / "06_autonomy" / "models" / "scripts" / "prepare_cerber_data.py"
     cmd = [
         sys.executable,
@@ -57,12 +61,17 @@ def run_visdrone(root: Path) -> None:
 
 def run_seraphim(root: Path, full: bool, token: str | None) -> None:
     merge = REPO / "06_autonomy" / "models" / "scripts" / "merge_uav_seraphim.py"
+    src = root / "sources" / "seraphim_uav"
     cmd = [sys.executable, str(merge), "--root", str(root), "--max-train", "20000"]
     if full:
         cmd.append("--full")
+    if (src / "train").is_dir() or (src / "test").is_dir():
+        cmd.append("--skip-download")
+        print(f"seraphim skip-download src={src}")
     if token:
-        cmd.extend(["--hf-token", token])
-    print(" ", " ".join(cmd[:-2] if token else cmd), ("--hf-token ***" if token else ""))
+        os.environ["HF_TOKEN"] = token
+        os.environ.setdefault("HUGGING_FACE_HUB_TOKEN", token)
+    print(" ", " ".join(cmd))
     rc = subprocess.call(cmd)
     if rc != 0:
         raise RuntimeError(f"merge_uav_seraphim failed rc={rc}")
@@ -76,10 +85,11 @@ def run_hf_extras(root: Path, token: str | None, skip_dl: bool) -> None:
         str(root),
     ]
     if token:
-        cmd.extend(["--hf-token", token])
+        os.environ["HF_TOKEN"] = token
+        os.environ.setdefault("HUGGING_FACE_HUB_TOKEN", token)
     if skip_dl:
         cmd.append("--skip-download")
-    print(" ", " ".join(c if c != token else "***" for c in cmd))
+    print(" ", " ".join(cmd))
     rc = subprocess.call(cmd, cwd=str(SCRIPTS))
     if rc != 0:
         print(f"WARN: HF extras rc={rc} (continuing)")

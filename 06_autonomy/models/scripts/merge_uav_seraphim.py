@@ -24,11 +24,21 @@ CERBER_UAV = 2
 
 def _unzip_batches(split_dir: Path) -> None:
     """Seraphim ships YOLO trees as batch_*.zip under images/ and labels/."""
+    _img = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
     for sub in ("images", "labels"):
         d = split_dir / sub
         if not d.is_dir():
             continue
-        for zpath in sorted(d.glob("*.zip")):
+        n_out = sum(
+            1
+            for p in d.rglob("*")
+            if p.is_file() and (p.suffix.lower() in _img or p.suffix.lower() == ".txt")
+        )
+        zips = sorted(d.glob("*.zip"))
+        if n_out >= 1000 and zips:
+            print(f"  skip unzip {d} already={n_out}")
+            continue
+        for zpath in zips:
             print(f"  unzip {zpath}")
             with zipfile.ZipFile(zpath, "r") as zf:
                 zf.extractall(d)
