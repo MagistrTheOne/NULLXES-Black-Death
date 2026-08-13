@@ -65,20 +65,26 @@ class AircraftPanel(QWidget):
     preset_changed = Signal(str)
     mode_changed = Signal(str)
 
-    def __init__(self) -> None:
+    def __init__(self, registry=None) -> None:
         super().__init__()
         lay = QVBoxLayout(self)
         box = QGroupBox("AIRCRAFT")
         fl = QFormLayout(box)
         self.preset = QComboBox()
-        for key, p in PRESETS.items():
-            self.preset.addItem(p.title, key)
-        self.preset.setCurrentIndex(1 if "ar_wing" in PRESETS else 0)
+        if registry is not None:
+            for defn in registry.items:
+                mark = "  [UNCONFIGURED]" if defn.unconfigured else ""
+                self.preset.addItem(defn.name + mark, defn.id)
+        else:
+            for key, p in PRESETS.items():
+                self.preset.addItem(p.title, key)
+            if self.preset.count() > 1:
+                self.preset.setCurrentIndex(1)
         self.preset.currentIndexChanged.connect(self._emit_preset)
         self.flight = QComboBox()
-        self.flight.addItems(["MANUAL", "ASSIST", "PURSUIT"])
+        self.flight.addItems(["MANUAL", "ASSIST", "PURSUIT", "MISSION"])
         self.flight.currentTextChanged.connect(self.mode_changed.emit)
-        fl.addRow("Preset", self.preset)
+        fl.addRow("Aircraft", self.preset)
         fl.addRow("Mode", self.flight)
         self.telem = QLabel("SPD —  ALT —  THR —")
         fl.addRow(self.telem)

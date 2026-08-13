@@ -136,11 +136,37 @@ def attach_ground(parent: NodePath) -> None:
     strip.setPos(0, 40, 0.06)
 
 
-def orbit_target(node: NodePath, phase: float) -> None:
-    r = 28.0
-    x = 20 + r * math.cos(phase)
+def orbit_target(node: NodePath, phase: float, *, behaviour: str = "simple") -> None:
+    if behaviour == "static":
+        node.setPos(24.0, 48.0, 18.0)
+        node.setH(90.0)
+        return
+    speed = 0.55 if behaviour == "evasive" else 0.35
+    r = 36.0 if behaviour == "evasive" else 28.0
+    z_amp = 6.0 if behaviour == "evasive" else 3.0
+    x = 20 + r * math.cos(phase * (1.4 if behaviour == "evasive" else 1.0))
     y = 50 + r * math.sin(phase)
-    z = 18 + 3 * math.sin(phase * 2)
+    z = 18 + z_amp * math.sin(phase * 2)
     node.setPos(x, y, z)
-    node.setH(-math.degrees(phase) + 90)
+    node.setH(-math.degrees(phase * speed / 0.35) + 90)
+
+
+def attach_hangar(parent: NodePath) -> NodePath:
+    root = parent.attachNewNode("hangar")
+    floor = root.attachNewNode(_box((0.10, 0.10, 0.11)))
+    floor.setScale(18, 18, 0.04)
+    floor.setPos(0, 0, 0)
+    plate = root.attachNewNode(_box((0.16, 0.16, 0.17)))
+    plate.setScale(4.5, 4.5, 0.03)
+    plate.setPos(0, 0, 0.05)
+    back = root.attachNewNode(_box((0.07, 0.07, 0.075)))
+    back.setScale(22, 0.4, 8)
+    back.setPos(0, 16, 4)
+    left = root.attachNewNode(_box((0.07, 0.07, 0.075)))
+    left.setScale(0.4, 18, 8)
+    left.setPos(-14, 2, 4)
+    right = root.attachNewNode(_box((0.07, 0.07, 0.075)))
+    right.setScale(0.4, 18, 8)
+    right.setPos(14, 2, 4)
+    return root
 

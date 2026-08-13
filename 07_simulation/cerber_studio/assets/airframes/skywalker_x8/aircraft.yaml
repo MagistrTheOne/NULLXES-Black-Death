@@ -1,0 +1,24 @@
+id: skywalker_x8
+name: Skywalker X8
+manufacturer: Skywalker
+class: flying_wing
+configuration: flying_wing
+
+model:
+  procedural: ar_wing
+  file: aircraft.glb
+  scale: 1.0
+  up_axis: Z
+  forward_axis: Y
+
+camera:
+  chase_distance: 8.0
+  chase_height: 2.0
+  nose_offset: [0.0, 1.2, 0.1]
+
+demo:
+  mass_kg: 4.0
+  cruise_speed_mps: 18
+  stall_speed_mps: 10
+  max_speed_mps: 35
+  turn_rate_deg: 75

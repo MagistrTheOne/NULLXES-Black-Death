@@ -1,6 +1,7 @@
 # NULLXES CERBER Studio v1 — host IDE (not flight image)
 PySide6>=6.6
 panda3d>=1.10.14
+panda3d-gltf>=1.2
 pyzmq>=25.0
 numpy>=1.26,<3
 opencv-python>=4.8,<5

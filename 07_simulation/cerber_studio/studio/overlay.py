@@ -8,6 +8,28 @@ import numpy as np
 from .ipc import Detection, TrackRow, VisionHealth
 
 
+def draw_boxes(
+    bgr: np.ndarray,
+    detections: list[Detection],
+) -> np.ndarray:
+    frame = bgr.copy()
+    for d in detections:
+        x1, y1, x2, y2 = int(d.x1), int(d.y1), int(d.x2), int(d.y2)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (220, 220, 220), 1)
+        if d.track_id >= 0:
+            cv2.putText(
+                frame,
+                f"{d.track_id:02d}",
+                (x1, max(14, y1 - 4)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.45,
+                (240, 240, 240),
+                1,
+                cv2.LINE_AA,
+            )
+    return frame
+
+
 def draw_overlay(
     bgr: np.ndarray,
     detections: list[Detection],

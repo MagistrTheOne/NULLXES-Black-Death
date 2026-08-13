@@ -1,0 +1,8 @@
+id: free_flight
+name: FREE FLIGHT
+type: free_flight
+environment: open
+target: false
+duration_s: 0
+description: Open airspace. No assigned target. Demo mission — not ArduPlane.
+demo: true

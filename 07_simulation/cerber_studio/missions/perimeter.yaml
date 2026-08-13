@@ -1,0 +1,13 @@
+id: perimeter
+name: PERIMETER
+type: perimeter
+environment: open
+target: true
+duration_s: 180
+description: Circuit around the field with a live target present. Demo mission — not ArduPlane.
+demo: true
+waypoints:
+  - {kind: goto_xyz, x: 80.0, y: 40.0, z: 28.0, radius_m: 18.0}
+  - {kind: goto_xyz, x: 80.0, y: 140.0, z: 32.0, radius_m: 18.0}
+  - {kind: goto_xyz, x: -40.0, y: 140.0, z: 32.0, radius_m: 18.0}
+  - {kind: goto_xyz, x: -40.0, y: 40.0, z: 28.0, radius_m: 18.0}

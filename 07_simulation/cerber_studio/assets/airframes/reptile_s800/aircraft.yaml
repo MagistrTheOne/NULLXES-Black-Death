@@ -1,0 +1,24 @@
+id: reptile_s800
+name: Reptile S800
+manufacturer: Reptile
+class: flying_wing
+configuration: flying_wing
+
+model:
+  procedural: s800
+  file: aircraft.glb
+  scale: 1.0
+  up_axis: Z
+  forward_axis: Y
+
+camera:
+  chase_distance: 7.0
+  chase_height: 1.8
+  nose_offset: [0.0, 0.35, 0.12]
+
+demo:
+  mass_kg: 3.6
+  cruise_speed_mps: 16
+  stall_speed_mps: 9
+  max_speed_mps: 28
+  turn_rate_deg: 95

@@ -1,0 +1,24 @@
+id: ar_wing_pro
+name: AR Wing Pro
+manufacturer: SonicModell
+class: flying_wing
+configuration: flying_wing
+
+model:
+  procedural: ar_wing
+  file: aircraft.glb
+  scale: 1.35
+  up_axis: Z
+  forward_axis: Y
+
+camera:
+  chase_distance: 8.5
+  chase_height: 2.2
+  nose_offset: [0.0, 0.4, 0.12]
+
+demo:
+  mass_kg: 5.2
+  cruise_speed_mps: 20
+  stall_speed_mps: 11
+  max_speed_mps: 34
+  turn_rate_deg: 75

@@ -27,6 +27,7 @@ from .ipc import (
     VisionHealth,
 )
 from .overlay import draw_overlay
+from .aircraft.registry import AircraftRegistry
 from .panels import (
     AircraftPanel,
     CameraPanel,
@@ -51,9 +52,13 @@ class StudioWindow(QMainWindow):
         self.viewport = ViewportWidget(self)
         self.setCentralWidget(self.viewport)
 
+        self.registry = AircraftRegistry()
+        self.registry.scan()
+        self.viewport.engine._registry = self.registry
+
         self.world = WorldPanel()
         self.camera = CameraPanel()
-        self.aircraft = AircraftPanel()
+        self.aircraft = AircraftPanel(self.registry)
         self.cerber = CerberPanel()
         self.tracks = TracksPanel()
         self.logs = LogsPanel()
@@ -99,6 +104,11 @@ class StudioWindow(QMainWindow):
         QShortcut(QKeySequence("1"), self, activated=lambda: self._set_mode("MANUAL"))
         QShortcut(QKeySequence("2"), self, activated=lambda: self._set_mode("ASSIST"))
         QShortcut(QKeySequence("3"), self, activated=lambda: self._set_mode("PURSUIT"))
+        QShortcut(QKeySequence("4"), self, activated=lambda: self._set_mode("MISSION"))
+
+        key = self.aircraft.preset.currentData()
+        if key:
+            self.viewport.engine.set_aircraft(str(key))
 
         self.viewport.set_frame_callback(self._on_frame, every=3)
         self.viewport.setFocus()

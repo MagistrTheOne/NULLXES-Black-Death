@@ -78,16 +78,26 @@ class ArcadeDynamics:
         yaw_cmd: float,
         throttle_cmd: float,
         assist_yaw: float = 0.0,
+        wind_xy: tuple[float, float] = (0.0, 0.0),
+        sim_speed: float = 1.0,
+        ground_collision: bool = True,
+        difficulty: str = "standard",
+        fail_throttle: bool = False,
     ) -> PoseState:
-        dt = float(max(1e-4, min(0.05, dt)))
+        dt = float(max(1e-4, min(0.05, dt))) * float(max(0.25, min(2.0, sim_speed)))
         p = self.params
         s = self.state
+        diff = (difficulty or "standard").lower()
+        turn_mul = {"arcade": 1.25, "strict": 0.72}.get(diff, 1.0)
+        sink_mul = {"arcade": 0.7, "strict": 1.35}.get(diff, 1.0)
 
         s.throttle = float(np.clip(s.throttle + throttle_cmd * dt * 0.7, 0.05, 1.0))
+        if fail_throttle:
+            s.throttle = float(max(0.05, s.throttle * (1.0 - 0.35 * dt)))
         target_spd = 6.0 + s.throttle * (p.max_speed - 6.0)
         s.speed += (target_spd - s.speed) * min(1.0, 2.4 * dt)
 
-        rate = p.turn_rate_deg * dt
+        rate = p.turn_rate_deg * turn_mul * dt
         s.pitch_deg = float(np.clip(s.pitch_deg + pitch_cmd * rate, -55.0, 55.0))
         s.roll_deg = float(np.clip(s.roll_deg + roll_cmd * rate, -70.0, 70.0))
         yaw_input = yaw_cmd + assist_yaw
@@ -108,16 +118,21 @@ class ArcadeDynamics:
             dtype=np.float64,
         )
         lift_factor = 0.85 + 0.35 * s.throttle
-        sink = -9.81 * (1.0 - min(1.0, lift_factor * (s.speed / p.max_speed)))
+        sink = -9.81 * (1.0 - min(1.0, lift_factor * (s.speed / p.max_speed))) * sink_mul
         vel = forward * s.speed
-        s.x += float(vel[0] * dt)
-        s.y += float(vel[1] * dt)
+        s.x += float(vel[0] * dt + wind_xy[0] * dt)
+        s.y += float(vel[1] * dt + wind_xy[1] * dt)
         s.z += float(vel[2] * dt + sink * dt * 0.35)
 
-        if s.z < 2.0:
-            s.z = 2.0
-            s.pitch_deg = max(s.pitch_deg, -8.0)
-            s.speed *= 0.92
+        if ground_collision:
+            if s.z < 2.0:
+                s.z = 2.0
+                s.pitch_deg = max(s.pitch_deg, -8.0)
+                s.speed *= 0.92
+        elif s.z < 0.15:
+            s.z = 0.15
+            s.speed *= 0.4
+            s.pitch_deg = 0.0
 
         return s
 

@@ -1,0 +1,8 @@
+id: target_follow
+name: TARGET FOLLOW
+type: target_follow
+environment: open
+target: true
+duration_s: 0
+description: CERBER FOLLOW / ASSIST against a live target. Demo mission — not ArduPlane.
+demo: true

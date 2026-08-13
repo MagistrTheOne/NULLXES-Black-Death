@@ -1,0 +1,12 @@
+id: sector_explore
+name: SECTOR EXPLORE
+type: sector_explore
+environment: open
+target: true
+duration_s: 150
+description: Sweep a sector, then loiter. Demo mission — not ArduPlane.
+demo: true
+waypoints:
+  - {kind: goto_xyz, x: 20.0, y: 90.0, z: 30.0, radius_m: 20.0}
+  - {kind: explore_sector, x: -40.0, y: 110.0, z: 35.0, radius_m: 28.0}
+  - {kind: loiter, x: 0.0, y: 80.0, z: 28.0, radius_m: 30.0}
