@@ -33,8 +33,8 @@ bash 06_autonomy/models/atlas/scripts/runpod_alloc.sh
 
 Script: synth teacher → `alloc_v1.pth` → `model.onnx` → sha256 → val argmax-match vs teacher.
 
-**Gate CANDIDATE:** onnx exists, sha printed.  
-**Gate STABLE:** val match ≥ 0.90 and p95 `plan()` ≤ 10 ms CPU. Until then `runtime.py` does not load the pack (`release_channel: CANDIDATE`, `sha256: pending`).
+**Gate CANDIDATE (L1, 2026-08-13):** `model.onnx` sha `5be276669affd2c2a33429f9f0592eb432f0a7dda0638cbe6a5c42f084e501c6`, val_argmax_match **0.9716** (gate 0.90). Weights stay out of git.  
+**Gate STABLE:** onnx on GSC at pack path + p95 `plan()` ≤ 10 ms CPU + ORT path in `planner.py`. Until then `runtime.py` does not load (`release_channel: CANDIDATE`).
 
 Download home: `/workspace/atlas/model.onnx` + sha. Weights stay out of git.
 
@@ -51,7 +51,7 @@ python 06_autonomy/models/atlas/scripts/export_alloc.py \
   --out     /workspace/atlas/model.onnx
 ```
 
-Config now: N=16, M=32, hidden=32, samples=2048, epochs=40.
+Config: N=16, M=32, hidden=64, pairwise Δxy, CE-only, samples=4096, epochs=40 (early-stop at gate).
 
 ---
 

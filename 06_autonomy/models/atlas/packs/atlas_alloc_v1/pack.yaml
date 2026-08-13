@@ -3,17 +3,17 @@ family: alloc
 product_name: BLACK-ATLAS-ALLOC-01
 version: 0.1.0
 dataset: atlas-mission-score-teacher-v1
-dataset_hash: pending
+dataset_hash: synth_v1_seed0_4096_0a71e29
 onnx_layout: atlas_bipartite_v1
 model_path: model.onnx
-sha256: pending
+sha256: 5be276669affd2c2a33429f9f0592eb432f0a7dda0638cbe6a5c42f084e501c6
 input_size: [16, 32]
 runtime: ort
 precision: fp32
 hardware_target: gsc_x86
-validation_status: pending
+validation_status: passed
 release_channel: CANDIDATE
-created_at: "2026-08-13T00:00:00Z"
+created_at: "2026-08-13T13:44:00Z"
 budget_ms: 10
 required: false
 companion_load: false
