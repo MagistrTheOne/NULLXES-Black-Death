@@ -17,7 +17,12 @@ class AircraftClass(str, Enum):
     CUSTOM = "custom"
 
 
-PLAYABLE_EGO = {AircraftClass.FIXED_WING, AircraftClass.FLYING_WING, AircraftClass.CUSTOM}
+PLAYABLE_EGO = {
+    AircraftClass.FIXED_WING,
+    AircraftClass.FLYING_WING,
+    AircraftClass.MULTIROTOR,
+    AircraftClass.CUSTOM,
+}
 
 
 @dataclass
@@ -52,6 +57,8 @@ class AnimationManifest:
     rotors: list[RotorSpec] = field(default_factory=list)
     propellers: list[RotorSpec] = field(default_factory=list)
     control_surfaces: list[ControlSurfaceSpec] = field(default_factory=list)
+    flight_clip: str = ""
+    hangar_clip: str = ""
 
 
 @dataclass

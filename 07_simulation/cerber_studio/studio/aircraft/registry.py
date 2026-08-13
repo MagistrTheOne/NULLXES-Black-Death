@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-from ..config.paths import AIRFRAMES_DIR, MODELS_DIR
+from ..config.paths import AIRFRAMES_DIR, BBOX_DIR, MODELS_DIR
 from ..dynamics import PRESETS
 from .definition import (
     AircraftClass,
@@ -89,7 +89,26 @@ def _animation(data: dict) -> AnimationManifest:
         rotors=_rotors(raw.get("rotors")),
         propellers=_rotors(raw.get("propellers")),
         control_surfaces=_surfaces(raw.get("control_surfaces") or {}),
+        flight_clip=str(raw.get("flight_clip") or ""),
+        hangar_clip=str(raw.get("hangar_clip") or ""),
     )
+
+
+def _resolve_model_path(folder: Path, rel: str | None, fallback: Path | None) -> Path | None:
+    candidates: list[Path] = []
+    if rel:
+        raw = Path(str(rel))
+        candidates.append(folder / raw)
+        candidates.append(MODELS_DIR / raw.name)
+        candidates.append(BBOX_DIR / raw.name)
+        if raw.is_absolute():
+            candidates.append(raw)
+    if fallback is not None:
+        candidates.append(fallback)
+    for path in candidates:
+        if path.is_file():
+            return path
+    return None
 
 
 def builtin_from_preset(key: str, **overrides) -> AircraftDefinition:
@@ -167,18 +186,7 @@ def from_folder(folder: Path) -> AircraftDefinition | None:
     name = str(data.get("name") or folder.name.replace("_", " ").title())
     class_ = _parse_class(data.get("class"), AircraftClass.FLYING_WING)
     model = data.get("model") or {}
-    rel = model.get("file")
-    path = None
-    if rel:
-        candidate = folder / str(rel)
-        if candidate.is_file():
-            path = candidate
-        else:
-            alt = MODELS_DIR / Path(str(rel)).name
-            if alt.is_file():
-                path = alt
-    if path is None:
-        path = model_file
+    path = _resolve_model_path(folder, model.get("file"), model_file)
 
     proc = model.get("procedural")
     auto = False

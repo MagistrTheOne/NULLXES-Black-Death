@@ -227,6 +227,7 @@ class StudioEngine(ShowBase):
             self.activity.root.hide()
             self.animator.hangar = True
             self.animator.rpm = 0.0
+            self.animator.step(0.0)
             for node in self.hangar_parked:
                 node.hide()
             if not self.ego.isEmpty():
@@ -558,6 +559,7 @@ class StudioEngine(ShowBase):
         self.camera.lookAt(ax, ay, az + look_z)
         self.animator.hangar = True
         self.animator.rpm = 0.0
+        self.animator.step(dt)
         self.taskMgr.step()
         self.last_display_rgb = self._grab_rgb()
         return self.last_display_rgb
