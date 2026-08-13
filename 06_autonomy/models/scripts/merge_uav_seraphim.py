@@ -148,8 +148,11 @@ def merge(
             pool_val = pool_train[:cut]
             pool_train = pool_train[cut:]
     else:
-        # time-budget mode: split test/ into train+val
         rng.shuffle(test_pairs)
+        budget = max(max_train, int(max_train / max(0.2, 1.0 - val_ratio)))
+        if len(test_pairs) > budget:
+            test_pairs = test_pairs[:budget]
+            print(f"seraphim test cap={budget}")
         cut = max(1, int(len(test_pairs) * val_ratio))
         pool_val = test_pairs[:cut]
         pool_train = test_pairs[cut:]

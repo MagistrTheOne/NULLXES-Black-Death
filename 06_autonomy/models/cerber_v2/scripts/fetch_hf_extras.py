@@ -78,6 +78,7 @@ def merge_into_root(
     mode: str,
     val_ratio: float,
     seed: int,
+    max_n: int | None = None,
 ) -> tuple[int, int]:
     import random
 
@@ -87,6 +88,9 @@ def merge_into_root(
         return 0, 0
     rng = random.Random(seed)
     rng.shuffle(pairs)
+    if max_n is not None and len(pairs) > max_n:
+        pairs = pairs[:max_n]
+        print(f"  cap {prefix} pairs={max_n}")
     cut = max(1, int(len(pairs) * val_ratio))
     val_p, train_p = pairs[:cut], pairs[cut:]
     tr = va = 0
@@ -121,7 +125,14 @@ def main() -> int:
     p.add_argument("--root", type=Path, required=True)
     p.add_argument("--hf-token", default=None)
     p.add_argument("--skip-download", action="store_true")
-    p.add_argument("--sets", nargs="*", default=list(HF_SETS.keys()))
+    p.add_argument(
+        "--sets",
+        nargs="*",
+        default=[
+            "matisdsp/drone-bird-detection-dataset",
+        ],
+    )
+    p.add_argument("--max-per-set", type=int, default=3000)
     p.add_argument("--val-ratio", type=float, default=0.12)
     p.add_argument("--seed", type=int, default=0)
     args = p.parse_args()
@@ -145,8 +156,15 @@ def main() -> int:
                 continue
         if not dest.is_dir():
             continue
+        cap = None if meta["mode"] == "hardneg" else args.max_per_set
         tr, va = merge_into_root(
-            root, dest, meta["prefix"], meta["mode"], args.val_ratio, args.seed
+            root,
+            dest,
+            meta["prefix"],
+            meta["mode"],
+            args.val_ratio,
+            args.seed,
+            max_n=cap,
         )
         total_tr += tr
         total_va += va

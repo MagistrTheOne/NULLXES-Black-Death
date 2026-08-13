@@ -62,7 +62,7 @@ def run_visdrone(root: Path) -> None:
 def run_seraphim(root: Path, full: bool, token: str | None) -> None:
     merge = REPO / "06_autonomy" / "models" / "scripts" / "merge_uav_seraphim.py"
     src = root / "sources" / "seraphim_uav"
-    cmd = [sys.executable, str(merge), "--root", str(root), "--max-train", "20000"]
+    cmd = [sys.executable, str(merge), "--root", str(root), "--max-train", "4000"]
     if full:
         cmd.append("--full")
     if (src / "train").is_dir() or (src / "test").is_dir():
@@ -89,6 +89,7 @@ def run_hf_extras(root: Path, token: str | None, skip_dl: bool) -> None:
         os.environ.setdefault("HUGGING_FACE_HUB_TOKEN", token)
     if skip_dl:
         cmd.append("--skip-download")
+    cmd.extend(["--max-per-set", "3000"])
     print(" ", " ".join(cmd))
     rc = subprocess.call(cmd, cwd=str(SCRIPTS))
     if rc != 0:
