@@ -8,6 +8,7 @@ datasets>=2.19
 gdown>=5.0
 tqdm>=4.66
 numpy>=1.26
+pillow>=10,<12
 opencv-python-headless>=4.8,<5
 onnx>=1.15
 onnxruntime-gpu>=1.17; platform_system != "Darwin"

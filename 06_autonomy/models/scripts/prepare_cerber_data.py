@@ -15,11 +15,16 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import sys
 from pathlib import Path
 
 import yaml
+
+os.environ.setdefault("YOLO_AUTOINSTALL", "false")
+_REPO = Path(__file__).resolve().parents[3]
+_ASSETS = "https://github.com/ultralytics/assets/releases/download/v0.0.0"
 
 # VisDrone class id → CERBER id (human=0, vehicle=1)
 _VISDRONE_TO_CERBER = {
@@ -72,38 +77,131 @@ def _remap_label_file(src: Path, dst: Path, mapping: dict[int, int]) -> None:
     dst.write_text("\n".join(lines_out) + ("\n" if lines_out else ""), encoding="utf-8")
 
 
-def fetch_visdrone(root: Path) -> Path:
-    """Trigger Ultralytics VisDrone download+convert, then remap into CERBER tree."""
-    try:
-        from ultralytics.data.utils import check_det_dataset
-    except ImportError as exc:
-        raise RuntimeError(
-            "BLOCKED: ultralytics required. pip install -U ultralytics"
-        ) from exc
+def _count_jpg(d: Path) -> int:
+    if not d.is_dir():
+        return 0
+    return sum(1 for _ in d.glob("*.jpg"))
 
+
+def _visdrone_dir() -> Path:
+    env = os.environ.get("VISDRONE_DIR")
+    if env:
+        p = Path(env)
+        if _count_jpg(p / "images" / "train") >= 1000 or (p / "VisDrone2019-DET-train").is_dir():
+            return p
+    for c in (
+        _REPO / "datasets" / "VisDrone",
+        Path("/workspace/datasets/VisDrone"),
+    ):
+        if _count_jpg(c / "images" / "train") >= 1000 or (c / "VisDrone2019-DET-train").is_dir():
+            return c
+    if Path("/workspace/datasets").is_dir():
+        return Path("/workspace/datasets/VisDrone")
+    return _REPO / "datasets" / "VisDrone"
+
+
+def _visdrone2yolo(vd: Path, split: str, source_name: str) -> int:
+    """VisDrone CSV → YOLO. Skip annotation files whose jpg is missing (upstream zip holes)."""
+    from PIL import Image
+
+    source_dir = vd / source_name
+    images_dir = vd / "images" / split
+    labels_dir = vd / "labels" / split
+    labels_dir.mkdir(parents=True, exist_ok=True)
+    src_images = source_dir / "images"
+    if src_images.is_dir():
+        images_dir.mkdir(parents=True, exist_ok=True)
+        for img in src_images.glob("*.jpg"):
+            dest = images_dir / img.name
+            if not dest.exists():
+                img.rename(dest)
+    ann_dir = source_dir / "annotations"
+    if not ann_dir.is_dir():
+        n_lbl = sum(1 for _ in labels_dir.glob("*.txt")) if labels_dir.is_dir() else 0
+        print(f"VisDrone {split}: annotations gone, labels already={n_lbl}")
+        return 0
+    skipped = 0
+    converted = 0
+    for f in sorted(ann_dir.glob("*.txt")):
+        img_path = images_dir / f.with_suffix(".jpg").name
+        if not img_path.is_file():
+            skipped += 1
+            continue
+        with Image.open(img_path) as im:
+            w, h = im.size
+        dw, dh = 1.0 / float(w), 1.0 / float(h)
+        lines: list[str] = []
+        for raw in f.read_text(encoding="utf-8", errors="ignore").strip().splitlines():
+            row = raw.split(",")
+            if len(row) < 6 or row[4] == "0":
+                continue
+            x, y, bw, bh = map(int, row[:4])
+            cls = int(row[5]) - 1
+            lines.append(
+                f"{cls} {(x + bw / 2) * dw:.6f} {(y + bh / 2) * dh:.6f} {bw * dw:.6f} {bh * dh:.6f}"
+            )
+        (labels_dir / f.name).write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+        converted += 1
+    print(f"VisDrone {split}: yolo={converted} skipped_missing_jpg={skipped}")
+    return skipped
+
+
+def fetch_visdrone(root: Path) -> Path:
+    """Download VisDrone zips, convert (skip missing jpg), remap into CERBER tree."""
+    vd_root = _visdrone_dir()
+    vd_root.mkdir(parents=True, exist_ok=True)
     print(f"VisDrone docs: {VISDRONE_DOCS}")
-    print("Downloading / converting VisDrone via Ultralytics (first run ~2GB)...")
-    data = check_det_dataset("VisDrone.yaml")
-    vd_root = Path(data["path"])
     print(f"VisDrone at {vd_root}")
+
+    n_train = _count_jpg(vd_root / "images" / "train")
+    src_train = vd_root / "VisDrone2019-DET-train" / "images"
+    need_dl = n_train < 1000 and _count_jpg(src_train) < 1000
+    if need_dl:
+        try:
+            from ultralytics.utils.downloads import download
+        except ImportError as exc:
+            raise RuntimeError("BLOCKED: ultralytics required. pip install -U ultralytics") from exc
+        urls = [
+            f"{_ASSETS}/VisDrone2019-DET-train.zip",
+            f"{_ASSETS}/VisDrone2019-DET-val.zip",
+        ]
+        print("Downloading VisDrone zips (~2GB)...")
+        download(urls, dir=vd_root, threads=2)
+    else:
+        print(f"VisDrone images already present train_jpg={n_train}")
+
+    splits = {
+        "VisDrone2019-DET-train": "train",
+        "VisDrone2019-DET-val": "val",
+    }
+    for folder, split in splits.items():
+        _visdrone2yolo(vd_root, split, folder)
+        leftover = vd_root / folder
+        if leftover.is_dir() and _count_jpg(leftover / "images") == 0:
+            shutil.rmtree(leftover, ignore_errors=True)
 
     for split in ("train", "val"):
         img_src = vd_root / "images" / split
         lbl_src = vd_root / "labels" / split
-        if not img_src.is_dir() or not lbl_src.is_dir():
+        if not img_src.is_dir():
             print(f"BLOCKED: VisDrone split missing {split} under {vd_root}")
             continue
         img_dst = root / "images" / split
         lbl_dst = root / "labels" / split
         img_dst.mkdir(parents=True, exist_ok=True)
         lbl_dst.mkdir(parents=True, exist_ok=True)
+        n = 0
         for img in img_src.glob("*.*"):
+            if img.suffix.lower() not in {".jpg", ".jpeg", ".png"}:
+                continue
             target = img_dst / f"vd_{img.name}"
             if not target.exists():
                 shutil.copy2(img, target)
             lab = lbl_src / f"{img.stem}.txt"
             if lab.is_file():
                 _remap_label_file(lab, lbl_dst / f"vd_{img.stem}.txt", _VISDRONE_TO_CERBER)
+            n += 1
+        print(f"CERBER merge VisDrone {split}={n}")
     return vd_root
 
 
