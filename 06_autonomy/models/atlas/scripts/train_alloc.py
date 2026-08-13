@@ -88,7 +88,6 @@ def main() -> None:
     agents, sectors, scores = agents.to(device), sectors.to(device), scores.to(device)
     va_a, va_s, va_y = va_a.to(device), va_s.to(device), va_y.to(device)
     opt = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
-    mse = torch.nn.MSELoss()
     ce = torch.nn.CrossEntropyLoss()
     bs = int(cfg["batch_size"])
     gate = float(cfg.get("val_match_gate", 0.90))
@@ -102,10 +101,9 @@ def main() -> None:
         for i in range(0, agents.shape[0], bs):
             idx = perm[i : i + bs]
             pred = model(agents[idx], sectors[idx])
-            tgt = scores[idx]
-            loss_mse = mse(pred, tgt)
-            loss_ce = ce(pred.reshape(-1, pred.shape[-1]), tgt.argmax(-1).reshape(-1))
-            loss = loss_mse + loss_ce
+            # CE only: MSE on 0–1 teacher scores pins logits → softmax ≈ uniform → log(32).
+            labels = scores[idx].argmax(-1).reshape(-1)
+            loss = ce(pred.reshape(-1, pred.shape[-1]), labels)
             opt.zero_grad()
             loss.backward()
             opt.step()

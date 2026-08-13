@@ -5,9 +5,9 @@ agent_dim: 9
 sector_dim: 8
 hidden: 64
 max_distance_m: 500.0
-epochs: 80
-lr: 0.002
+epochs: 40
+lr: 0.003
 batch_size: 64
-samples: 8192
+samples: 4096
 val_samples: 512
 val_match_gate: 0.90
