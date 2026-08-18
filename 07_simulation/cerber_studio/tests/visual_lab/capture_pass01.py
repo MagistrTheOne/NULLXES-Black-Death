@@ -34,7 +34,7 @@ def main() -> None:
         eng.apply_definition(items[0])
     eng.set_scene_mode("hangar")
     _step(eng, 12)
-    eng.screenshot_to(out / "03_hangar_58drun.png")
+    eng.screenshot_to(out / "03_hangar_animated_drone.png")
     if len(items) > 1:
         eng.apply_definition(items[1])
         _step(eng, 8)

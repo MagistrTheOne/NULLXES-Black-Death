@@ -25,6 +25,7 @@ from .definition import (
 log = logging.getLogger("cerber_studio.aircraft")
 
 _ID_RE = re.compile(r"[^a-z0-9_]+")
+_SUPERSEDED_RAW = frozenset({"58drun", "basedrone"})
 
 
 def _slug(name: str) -> str:
@@ -259,12 +260,12 @@ class AircraftRegistry:
                 if d.visual.path is not None and d.visual.path.is_file()
             }
             for glb in sorted(MODELS_DIR.glob("*.glb")):
-                if glb.resolve() in claimed:
+                if glb.resolve() in claimed or _slug(glb.stem) in _SUPERSEDED_RAW:
                     continue
                 defn = from_raw_glb(glb)
                 found[defn.id] = defn
             for gltf in sorted(MODELS_DIR.glob("*.gltf")):
-                if gltf.resolve() in claimed:
+                if gltf.resolve() in claimed or _slug(gltf.stem) in _SUPERSEDED_RAW:
                     continue
                 defn = from_raw_glb(gltf)
                 found[defn.id] = defn

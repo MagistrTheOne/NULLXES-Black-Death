@@ -12,7 +12,7 @@ BLACK DEATH     airframe + SoftBus stack
     L0          ArduPlane inner loop — swarm-blind, weapon-blind
 ```
 
-One airframe. Two envelopes: **CIVIL** (boot) | **DEFENSE** (`operator_ack`). Same L0.
+One airframe family, two bodies. Two envelopes: **CIVIL** (boot) | **DEFENSE** (`operator_ack`). Same L0 contract (swarm-blind). Infra = BLACK DEATH. Speed = [BLACK YOMI](BLACK_YOMI.md) ([delta](YOMI_STACK_DELTA.md)).
 
 ---
 
@@ -33,6 +33,8 @@ GSC (ATLAS + COP + voice TTS)
 ```
 
 Python never PWM. RC > DMI. Companion UART drop → FC RTL/LOITER.
+
+YOMI in air: same cam→CERBER→DMI→Guidance chain; L0 = customer C++ (Pixhawk 6C pad-only on GATE). Orders: `08_prototypes/yomi/`.
 
 ---
 
@@ -106,7 +108,7 @@ Train (after pod up): [CERBER_V3_ATLAS_RUNPOD.md](CERBER_V3_ATLAS_RUNPOD.md).
 | `05_avionics/` | C++ L0 lib (not Flight-1 path) |
 | `06_autonomy/` | CERBER / POSEIDON / DMI / ATLAS / SoftBus |
 | `07_simulation/` | cerber_studio (vision IDE) · **bd_sim S1 arcade** |
-| `08_prototypes/` | practice / X8 test plan |
+| `08_prototypes/` | practice / X8 test plan · **yomi/** GATE–RAIJIN |
 | `arduiplane/` | Plane 4.7.0 kit |
 | `10_tests/` | unit |
 

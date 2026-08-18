@@ -128,8 +128,8 @@ class SimulationSettings:
 
 @dataclass
 class SessionMemory:
-    aircraft_id: str = "58drun"
-    target_id: str = "basedrone"
+    aircraft_id: str = "animated_drone"
+    target_id: str = "animated_drone"
     mission_id: str = "free_flight"
     region_id: str = "forest"
     world_seed: int = 1947

@@ -1,14 +1,16 @@
 # NULLXES — архитектура семейства (для партнёров)
 
-**Класс:** гражданская инфраструктурная авиация (flying wing / BWB)  
-**Запрещено:** вооружение, боевые сценарии, военное применение  
+**Класс:** два тела, один мозг. Infra (BWB) + скорость (YOMI).  
+**Envelope:** CIVIL (boot) \| DEFENSE (`operator_ack`) — [ADR-008](../adr/ADR-008_DUAL_ENVELOPE.md). DEFENSE официален на обеих линиях.  
+**В репозитории нет:** munition bus, fire-control, `/bd/weapon`, камикадзе-ICD, постановщик помех.
 
 | Платформа | Имя | Масштаб | Роль |
 |-----------|-----|---------|------|
-| **Старшая** | **BLACK DEATH** | ~**50 × 50 м** | Целевой продукт инфраструктуры |
-| **Младшая** | **Black Judgment** | **5 × 5 м** (Alpha) | System Architecture Demonstrator |
+| **Старшая infra** | **BLACK DEATH** | ~**50 × 50 м** | Целевой продукт инфраструктуры |
+| **Младшая infra** | **Black Judgment** | **5 × 5 м** (Alpha) | System Architecture Demonstrator |
+| **Скорость** | **BLACK YOMI** | GATE → ONI → TENGU → RAIJIN | Сыновья отца по мозгу, не по геометрии 50×50 |
 
-Канон: [ADR-001](../adr/ADR-001_ALPHA_ARCHITECTURE_DEMONSTRATOR.md) · [ADR-002 DMI](../adr/ADR-002_DMI_V1.md) · [PRODUCT_LINES](../PRODUCT_LINES.md) · [AUTONOMY_ARCHITECTURE](./AUTONOMY_ARCHITECTURE.md) · [BRAIN_SCHEME](./BRAIN_SCHEME.md) · [CERBER](./CERBER.md) · [DMI_V1](./DMI_V1.md)
+Канон: [ADR-001](../adr/ADR-001_ALPHA_ARCHITECTURE_DEMONSTRATOR.md) · [ADR-002 DMI](../adr/ADR-002_DMI_V1.md) · [ADR-008](../adr/ADR-008_DUAL_ENVELOPE.md) · [PRODUCT_LINES](../PRODUCT_LINES.md) · [BLACK_YOMI](./BLACK_YOMI.md) · [AUTONOMY_ARCHITECTURE](./AUTONOMY_ARCHITECTURE.md) · [BRAIN_SCHEME](./BRAIN_SCHEME.md) · [CERBER](./CERBER.md) · [DMI_V1](./DMI_V1.md)
 
 ---
 
@@ -38,6 +40,19 @@ flowchart TB
 | Статус | **LOCKED** до Flight-1 | Видение продукта; железо/аэро — после Alpha |
 
 **Важно для партнёров:** младшая рама **не** «мини-копия 50×50 по аэродинамике». Это стенд архитектуры. Старшая наследует **автономию и отказоустойчивость**, а не пропорции крыла Alpha.
+
+### 1.1 BLACK YOMI — не Beta отца
+
+Скоростная линия — **sibling**, не Beta-Endurance и не Beta-Heavy. Тот же мозг. Другое тело (ТРД, Мах, высота). Канон: [BLACK_YOMI.md](BLACK_YOMI.md).
+
+| Код | Имя | Мах | Высота |
+|-----|-----|-----|--------|
+| NX-YOMI-0 | BLACK YOMI GATE | 1.2 | 11 км |
+| NX-YOMI-A | BLACK YOMI ONI | 2.0–2.2 | 16–18 км |
+| NX-YOMI-B | BLACK YOMI TENGU | 2.8–3.2 | 22–26 км |
+| NX-YOMI-C | BLACK YOMI RAIJIN | 5–7 | 30–35 км |
+
+Заказ порога: [`08_prototypes/yomi/gate/AIRFRAME_ORDER.md`](../../08_prototypes/yomi/gate/AIRFRAME_ORDER.md). Дельта: [YOMI_STACK_DELTA.md](YOMI_STACK_DELTA.md). GATE → ONI → TENGU. RAIJIN не в том же PO.
 
 ---
 

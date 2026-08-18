@@ -16,7 +16,7 @@
 | `05_avionics/` | Авионика: hardware, драйверы, realtime FSW (C++ only), шины, синхронизация времени. |
 | `06_autonomy/` | **Главный блок.** Onboard ИИ: perception → fusion → planning → control + fault management. Без внешних API. |
 | `07_simulation/` | CERBER Studio (vision IDE) + `bd_sim/` S1 arcade. Gazebo/AirSim twin BLOCKED. |
-| `08_prototypes/` | Масштабируемые модели, авионика-стенды, subsystem rigs. |
+| `08_prototypes/` | Масштабируемые модели, авионика-стенды, subsystem rigs. **YOMI:** `08_prototypes/yomi/` (GATE/ONI/TENGU/RAIJIN). Practice X8: `practice_airframes/`. |
 | `arduiplane/` | Local ArduPlane 4.7.0 Pixhawk6C kit (flash/param). Binaries gitignored. |
 | `09_manufacturing/` | Композиты, оснастка, сборка, QA производства. |
 | `10_tests/` | Unit, integration, HIL, лётные/наземные испытания, regression. |

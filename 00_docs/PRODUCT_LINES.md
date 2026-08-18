@@ -19,6 +19,10 @@ BLACK DEATH (civil infrastructure flying platform)
     DMI v1 (L6) — Distributed Mission Intelligence
     N× Judgment-class / practice airframes (not N× 50×50)
     PRACTICE: edu (~Aug 2026) → SonicModell AR Wing Pro (~Sep 2026) → **Skywalker X8 PNP Flight-1** (BOM locked 2026-08-13)
+
+BLACK YOMI (speed / altitude sibling — same brain, not a 50×50 Beta)
+    GATE → ONI → TENGU → RAIJIN
+    Canon: architecture/BLACK_YOMI.md
 ```
 
 | Line | Name | Goal | Touches airframe? | Touches autonomy canon? |
@@ -31,5 +35,7 @@ BLACK DEATH (civil infrastructure flying platform)
 | Product | **BLACK DEATH** (~50×50) | Civil infrastructure platform | After Beta | Port, don't redesign |
 | Beta-Endurance | — | Max endurance / range | Yes (AR, span, energy) | Port, don't redesign |
 | Beta-Heavy | — | Payload, volume, infrastructure work | Yes (thick BWB, hardpoints) | Port, don't redesign |
+| **BLACK YOMI** | GATE / ONI / TENGU / RAIJIN | Speed / altitude sibling. Same brain. Not a DEATH Beta | Yes (jet, not BWB 50×50) | Port, don't redesign. [BLACK_YOMI.md](architecture/BLACK_YOMI.md) |
 
-Full ~50×50 product may **compose** lessons from both Betas; it does not reopen Alpha geometry.
+Full ~50×50 product may **compose** lessons from both Betas; it does not reopen Alpha geometry.  
+YOMI does not reopen Alpha geometry and is **not** Beta-Endurance or Beta-Heavy.
